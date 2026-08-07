@@ -7,3 +7,6 @@ https://github.com/cloudflare/cloudflare-os
 Cloudflare OS is licensed under the Apache License, Version 2.0. Softmatrix OS retains
 the upstream license and attribution. Softmatrix OS is an independent project and is not
 affiliated with, sponsored by, or endorsed by Cloudflare, Inc.
+
+Softmatrix OS contributors have modified the upstream work to establish independent branding,
+centralized product metadata, and compliance controls. The Git history records the detailed changes.

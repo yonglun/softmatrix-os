@@ -1,30 +1,101 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { readdir, readFile } from "node:fs/promises";
+import { relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const ALLOWED = new Set([
-  "NOTICE",
-  "README.md",
-  "docs/upstream-sync.md",
-  "scripts/softmatrix-branding.test.js",
-  // This test verifies that NOTICE retains the upstream project name.
-  "scripts/softmatrix-compliance.test.js",
+const SKIPPED_DIRECTORIES = new Set([
+  ".git",
+  ".superpowers",
+  ".wrangler",
+  "dist",
+  "node_modules",
 ]);
 
-test("Cloudflare OS appears only in factual attribution", () => {
-  const output = execFileSync(
-    "rg",
-    ["-l", "Cloudflare OS", ".", "--glob", "!.git/**", "--glob", "!.superpowers/**"],
-    { cwd: ROOT, encoding: "utf8" },
-  );
-  const unexpected = output
-    .trim()
-    .split("\n")
-    .filter(Boolean)
-    .map((file) => file.replace(/^\.\//, ""))
-    .filter((file) => !ALLOWED.has(file) && !file.startsWith("docs/superpowers/"));
+const EXPECTED_UPSTREAM_REFERENCES = new Map([
+  ["NOTICE", [
+    "This product is derived from Cloudflare OS:",
+    "Cloudflare OS is licensed under the Apache License, Version 2.0. Softmatrix OS retains",
+  ]],
+  ["README.md", [
+    "[Cloudflare OS](https://github.com/cloudflare/cloudflare-os). It retains the upstream",
+    "The upstream Cloudflare OS project is an \"operating system\" for AI productivity originally",
+    "![An upstream Cloudflare OS Q3 planning workspace with an AI-generated slide deck](docs/images/q3-planning-workspace.png)",
+    "The underlying architecture originated in Cloudflare OS and was built by the team that built Workers itself. Dynamic Workers, Facets, and several other runtime features were added specifically to support that upstream project. Softmatrix OS preserves this architecture while maintaining a clear, independent product identity.",
+    "Cloudflare OS project, not this Softmatrix OS fork. Softmatrix-specific production deployment",
+  ]],
+  ["docs/upstream-sync.md", [
+    "# Synchronizing with Cloudflare OS",
+    "Softmatrix OS is derived from [Cloudflare OS](https://github.com/cloudflare/cloudflare-os)",
+  ]],
+]);
+
+const PRODUCTION_SITE_LOGO_FILES = [
+  "packages/workshop-frontend/src/AdminPage.tsx",
+  "packages/workshop-frontend/src/GadgetEditor.tsx",
+  "packages/workshop-frontend/src/GadgetUseView.tsx",
+  "packages/workshop-frontend/src/LoginPage.tsx",
+  "packages/workshop-frontend/src/OnboardingWizard.tsx",
+  "packages/workshop-frontend/src/SignupPage.tsx",
+  "packages/workshop-frontend/src/components/AppShell/Sidebar.tsx",
+  "packages/workshop-frontend/src/components/Header.tsx",
+];
+
+async function repositoryFiles(directory = ROOT) {
+  const files = [];
+  const entries = await readdir(directory, { withFileTypes: true });
+  entries.sort((left, right) => left.name.localeCompare(right.name));
+  for (const entry of entries) {
+    if (entry.isDirectory() && SKIPPED_DIRECTORIES.has(entry.name)) continue;
+    const path = resolve(directory, entry.name);
+    if (entry.isDirectory()) files.push(...await repositoryFiles(path));
+    else if (entry.isFile()) files.push(path);
+  }
+  return files;
+}
+
+function repositoryPath(path) {
+  return relative(ROOT, path).replaceAll("\\", "/");
+}
+
+test("Cloudflare OS appears only in exact factual attribution", async () => {
+  const actual = new Map();
+  for (const path of await repositoryFiles()) {
+    const name = repositoryPath(path);
+    if (name.startsWith("docs/superpowers/") || name.startsWith("scripts/")) continue;
+    const content = await readFile(path, "utf8").catch(() => "");
+    if (content.includes("\0")) continue;
+    const matches = content.split(/\r?\n/).filter(line => line.includes("Cloudflare OS"));
+    if (matches.length > 0) actual.set(name, matches);
+  }
+
+  assert.deepEqual(actual, EXPECTED_UPSTREAM_REFERENCES);
+});
+
+test("runtime product copy consumes centralized metadata", async () => {
+  const unexpected = [];
+  const packagesRoot = resolve(ROOT, "packages");
+  for (const path of await repositoryFiles(packagesRoot)) {
+    const name = repositoryPath(path);
+    if (!/\.(?:ts|tsx)$/.test(name) || /(?:^|\/)product\.ts$/.test(name) || /\.test\./.test(name)) {
+      continue;
+    }
+    const content = await readFile(path, "utf8");
+    if (content.includes("Softmatrix OS")) unexpected.push(name);
+  }
 
   assert.deepEqual(unexpected, []);
+});
+
+test("every production SiteLogo call site supplies the Softmatrix mark", async () => {
+  for (const name of PRODUCTION_SITE_LOGO_FILES) {
+    const source = await readFile(resolve(ROOT, name), "utf8");
+    assert.match(source, /import SoftmatrixMark from /, `${name} must import SoftmatrixMark`);
+    assert.match(
+      source,
+      /<SiteLogo\b[^>]*>[\s\S]*?<SoftmatrixMark\b[\s\S]*?<\/SiteLogo>/,
+      `${name} must use SoftmatrixMark as the SiteLogo fallback`,
+    );
+  }
 });

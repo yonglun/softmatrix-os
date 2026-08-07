@@ -6,6 +6,8 @@ AI has made writing code easy. The hard part, today, is not writing the code, bu
 
 With that said, we are happy to accept small, trivially-verified PRs that fix a problem. However, we ask that you refrain from submitting low-value PRs (e.g. typo fixes) or PRs that are more than a dozen or so lines. Such PRs will be closed with a reference to this guideline.
 
-If you have a big idea you'd like us to consider, feel free to [open a discussion](https://github.com/cloudflare/cloudflare-os/discussions) about it.
+The independent Softmatrix OS discussion venue has not been published yet. Please do not submit
+Softmatrix-specific proposals to the upstream project; repository owners should add
+the project's own issue or discussion URL here when the independent `origin` is established.
 
 This policy may change in the future as the project matures. Until then, thank you for your understanding.

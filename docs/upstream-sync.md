@@ -16,6 +16,20 @@ The repository owner must then add the independently chosen Softmatrix fork URL 
 before the first push. This project deliberately does not prescribe or hard-code a hosting
 organization.
 
+## Ownership and cadence
+
+The repository's release maintainer owns upstream synchronization. Until the independent repository
+publishes a `CODEOWNERS` mapping, the person approving a release is the acting release maintainer.
+That maintainer must fetch and review upstream on the first business day of every month and again
+before every Softmatrix release, recording the reviewed upstream commit in the merge or release
+notes.
+
+Security updates use an expedited path: the acting release maintainer reviews relevant upstream
+security commits within one business day of notification, opens a dedicated sync branch, and runs
+the full verification gate before merging. An applicable fix must not wait for the monthly cadence;
+if it cannot be merged promptly, document the exposure, mitigation, owner, and target date in the
+independent repository's security tracker.
+
 To synchronize an existing Softmatrix fork:
 
 ```sh

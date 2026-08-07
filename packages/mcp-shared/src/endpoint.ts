@@ -1,6 +1,7 @@
 // Validation for user-supplied MCP endpoint URLs, so the SSRF blocklist has one definition. A
 // gatekeeper pointed at an administrator-configured URL has no untrusted input to check.
 
+import { PRODUCT_NAME } from "@gadgets/workshop-shared/product";
 import { fetchOptions, type InsecureEnv } from "./fetch.js";
 
 // Result of validating a user-supplied endpoint.
@@ -79,7 +80,7 @@ export function validateCustomEndpoint(env: InsecureEnv, input: string): Endpoin
     return { ok: false, reason: "The endpoint must use https://." };
   }
   if (!insecureAllowed && isBlockedHost(url.hostname)) {
-    return { ok: false, reason: "That host is not reachable from Softmatrix OS." };
+    return { ok: false, reason: `That host is not reachable from ${PRODUCT_NAME}.` };
   }
 
   // Credentials in the URL would end up in logs and approval prompts.

@@ -6,6 +6,7 @@ import {
   SupportedResource, ResourceConfiguratorFrame, stripTrailingSlashes,
 } from "@gadgets/workshop-shared/gatekeeper";
 import { CloudflareGatekeeperUser } from "@gadgets/workshop-shared/cloudflare-gatekeeper";
+import { PRODUCT_NAME } from "@gadgets/workshop-shared/product";
 import { getOAuthConfig, buildAuthorizeUrl, generatePkce, exchangeCode, refreshTokens, AUTH_SCOPES, FULL_SCOPES } from "./oauth";
 import { fetchIdentity } from "./cloudflare-api";
 import { VENDOR_ID } from "./vendor.js";
@@ -78,14 +79,14 @@ function getBasePath(env: Env) {
 const SELF_CLOSING_HTML = `<!DOCTYPE html>
 <html lang="en"><body>
 <script type="text/javascript">window.close();</script>
-<p>Authorization complete. You may close this tab and return to Softmatrix OS.
+<p>Authorization complete. You may close this tab and return to ${PRODUCT_NAME}.
 </body></html>`;
 
 const INVALID_LINK_HTML = `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><title>Authorization Link Expired</title></head>
 <body style="font-family: system-ui, sans-serif; text-align: center; padding: 3rem;">
 <h1 style="color:#d97706;">Authorization Link Expired</h1>
-<p>This authorization link is invalid or has expired. Please return to Softmatrix OS and try again.</p>
+<p>This authorization link is invalid or has expired. Please return to ${PRODUCT_NAME} and try again.</p>
 <button onclick="window.close()">Close</button></body></html>`;
 
 const NOT_CONFIGURED_HTML = `<!DOCTYPE html>

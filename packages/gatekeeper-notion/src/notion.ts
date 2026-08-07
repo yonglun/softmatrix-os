@@ -15,6 +15,7 @@
 
 import { DurableObject, RpcStub, RpcTarget, WorkerEntrypoint } from "cloudflare:workers";
 import { skipRpcValidation, validateRpc } from "capnweb-validate";
+import { PRODUCT_NAME } from "@gadgets/workshop-shared/product";
 import {
   stripTrailingSlashes,
   type AccountDescription,
@@ -168,7 +169,7 @@ const SELF_CLOSING_HTML = `<!DOCTYPE html>
 <html lang="en">
   <body>
     <script type="text/javascript">window.close();</script>
-    <p>Authorization complete. You may close this tab and return to Softmatrix OS.</p>
+    <p>Authorization complete. You may close this tab and return to ${PRODUCT_NAME}.</p>
   </body>
 </html>`;
 
@@ -178,7 +179,7 @@ const INVALID_LINK_HTML = `<!DOCTYPE html>
   <body style="font-family: system-ui, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f5f5f5;">
     <div style="max-width: 520px; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
       <h1 style="color: #d97706; font-size: 1.5rem;">Authorization Link Expired</h1>
-      <p style="color: #555; line-height: 1.6;">This authorization link is invalid or has expired. Please return to Softmatrix OS and try again.</p>
+      <p style="color: #555; line-height: 1.6;">This authorization link is invalid or has expired. Please return to ${PRODUCT_NAME} and try again.</p>
       <button onclick="window.close()" style="padding: 0.5rem 1.5rem; background: #d97706; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer;">Close</button>
     </div>
   </body>
@@ -296,7 +297,7 @@ export class GatekeeperVendor extends WorkerEntrypoint<Env> implements Gatekeepe
       color: "#f7f6f3",
       tagline: "Read and write your Notion pages and databases",
       description:
-          "Connect your Notion workspace to let Softmatrix OS search, read, and edit the pages and " +
+          `Connect your Notion workspace to let ${PRODUCT_NAME} search, read, and edit the pages and ` +
           "databases you share. Build agents that draft documents, organize notes, or manage " +
           "database records.",
     };

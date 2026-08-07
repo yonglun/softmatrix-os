@@ -1,4 +1,5 @@
 import { Button, Dialog, DropdownMenu, Input, InputArea, useKumoToastManager } from "@cloudflare/kumo";
+import { PRODUCT_NAME } from "@gadgets/workshop-shared/product";
 import {
   BookOpen,
   Buildings,
@@ -687,7 +688,7 @@ const CONTENT_SOURCE_OPTIONS = [
     value: "web" as const,
     Icon: PencilSimple,
     title: "Editable documents",
-    description: "Create, edit, and delete files through the Softmatrix OS UI.",
+    description: `Create, edit, and delete files through the ${PRODUCT_NAME} UI.`,
   },
   {
     value: "git" as const,
