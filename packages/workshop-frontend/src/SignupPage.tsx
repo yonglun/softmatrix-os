@@ -2,13 +2,13 @@ import { useState, FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { RpcStub } from "capnweb";
 import { PublicApi } from "@gadgets/workshop-shared/api";
-import { Hexagon } from "@phosphor-icons/react";
 import { Input, Button, Banner, Loader } from "@cloudflare/kumo";
 import { hashPassword } from "./passwordHash";
 import { useServerConfig, useServerConfigError, useSiteName } from "./ServerConfigContext";
 import { useDocumentTitle } from "./useDocumentTitle";
 import OAuthButtons from "./components/auth/OAuthButtons";
 import SiteLogo from "./components/SiteLogo";
+import SoftmatrixMark from "./components/SoftmatrixMark";
 import { useConnectionLost } from "./RpcContext";
 
 interface SignupPageProps {
@@ -127,7 +127,7 @@ export default function SignupPage({ rpcStub }: SignupPageProps) {
         <div className="flex flex-col items-center mb-8">
           <SiteLogo size={40} className="mb-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-kumo-brand mb-3">
-              <Hexagon size={20} className="text-white" weight="bold" />
+              <SoftmatrixMark size={20} className="text-white" />
             </div>
           </SiteLogo>
           <h1 className="text-xl font-semibold text-kumo-default">

@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ServerConfig } from '@gadgets/workshop-shared/api'
 import { ServerConfigContext } from '../ServerConfigContext'
 import SiteLogo from './SiteLogo'
+import SoftmatrixMark from './SoftmatrixMark'
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
@@ -49,6 +50,20 @@ describe('SiteLogo', () => {
     expect(image.width).toBe(20)
     expect(image.height).toBe(20)
     expect(container!.querySelector('[data-fallback]')).toBeNull()
+  })
+
+  it('renders the Softmatrix mark when no deployment logo exists', () => {
+    container = document.createElement('div')
+    document.body.append(container)
+    root = createRoot(container)
+    act(() => root!.render(
+      <ServerConfigContext.Provider value={{} as ServerConfig}>
+        <SiteLogo size={20}><SoftmatrixMark size={20} /></SiteLogo>
+      </ServerConfigContext.Provider>,
+    ))
+
+    expect(container!.querySelector('[data-softmatrix-mark]')).not.toBeNull()
+    expect(container!.querySelector('img')).toBeNull()
   })
 
   it('uses the supplied fallback when no logo is configured or loading fails', () => {
