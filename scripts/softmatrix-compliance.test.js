@@ -19,11 +19,12 @@ centralized product metadata, and compliance controls. The Git history records t
 `;
 
 test("Softmatrix distribution retains the exact Apache-2.0 license and attribution", async () => {
-  const [license, notice, readme, contributing, compliance, upstreamSync, releasePlan] =
+  const [license, notice, readme, readmeZh, contributing, compliance, upstreamSync, releasePlan] =
     await Promise.all([
       readFile(new URL("../LICENSE", import.meta.url)),
       readFile(new URL("../NOTICE", import.meta.url), "utf8"),
       readFile(new URL("../README.md", import.meta.url), "utf8"),
+      readFile(new URL("../README.zh-CN.md", import.meta.url), "utf8"),
       readFile(new URL("../CONTRIBUTING.md", import.meta.url), "utf8"),
       readFile(new URL("../docs/compliance.md", import.meta.url), "utf8"),
       readFile(new URL("../docs/upstream-sync.md", import.meta.url), "utf8"),
@@ -37,6 +38,9 @@ test("Softmatrix distribution retains the exact Apache-2.0 license and attributi
   assert.equal(notice, EXPECTED_NOTICE);
   assert.match(readme, /^# Softmatrix OS/m);
   assert.match(readme, /Apache License 2\.0/);
+  assert.match(readmeZh, /^# Softmatrix OS：AI 生产力环境/m);
+  assert.match(readmeZh, /README\.md/);
+  assert.match(readmeZh, /Apache License 2\.0/);
   assert.doesNotMatch(readme, /cloudflare\/cloudflare-os\/discussions/);
   assert.doesNotMatch(contributing, /cloudflare\/cloudflare-os\/discussions/);
   assert.match(compliance, /THIRD_PARTY_NOTICES\.md/);

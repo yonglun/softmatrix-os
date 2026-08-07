@@ -1,5 +1,7 @@
 # Softmatrix OS: An AI productivity environment
 
+[简体中文](README.zh-CN.md)
+
 Softmatrix OS is an independent distribution derived from
 [Cloudflare OS](https://github.com/cloudflare/cloudflare-os). It retains the upstream
 [Apache License 2.0](LICENSE) and attribution described in [NOTICE](NOTICE). Softmatrix OS

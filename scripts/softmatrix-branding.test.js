@@ -25,6 +25,13 @@ const EXPECTED_UPSTREAM_REFERENCES = new Map([
     "The underlying architecture originated in Cloudflare OS and was built by the team that built Workers itself. Dynamic Workers, Facets, and several other runtime features were added specifically to support that upstream project. Softmatrix OS preserves this architecture while maintaining a clear, independent product identity.",
     "Cloudflare OS project, not this Softmatrix OS fork. Softmatrix-specific production deployment",
   ]],
+  ["README.zh-CN.md", [
+    "Softmatrix OS 是基于 [Cloudflare OS](https://github.com/cloudflare/cloudflare-os) 派生的独立发行版。它保留上游的 [Apache License 2.0](LICENSE) 许可证及 [NOTICE](NOTICE) 中记录的归属信息。Softmatrix OS 不隶属于 Cloudflare，也未获得 Cloudflare 的赞助或背书。",
+    "上游 Cloudflare OS 项目是一个最初为 Cloudflare 内部开发的 AI 生产力“操作系统”。Softmatrix OS 延续这一架构，作为独立 fork，面向希望自行部署和定制平台的组织。",
+    "![上游 Cloudflare OS Q3 规划工作区及 AI 生成的演示文稿](docs/images/q3-planning-workspace.png)",
+    "底层架构源自 Cloudflare OS，由构建 Workers 的团队设计。Dynamic Workers、Facets 和其他运行时能力，都是为了支持上游项目而加入的。Softmatrix OS 保留了这套架构，同时维护清晰、独立的产品身份。",
+    "Cloudflare 的[托管部署流程](https://os.cloudflare.app/deploy)和[部署启动模板](https://github.com/cloudflare/cloudflare-os-starter)面向上游 Cloudflare OS 项目，而不是本 Softmatrix OS fork。Softmatrix 专属的生产部署说明会在首个正式版本发布前提供。请不要误以为这些上游流程会部署本仓库中的修改。",
+  ]],
   ["docs/upstream-sync.md", [
     "# Synchronizing with Cloudflare OS",
     "Softmatrix OS is derived from [Cloudflare OS](https://github.com/cloudflare/cloudflare-os)",
