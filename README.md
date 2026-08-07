@@ -9,7 +9,9 @@ The upstream Cloudflare OS project is an "operating system" for AI productivity 
 developed for use inside Cloudflare. Softmatrix OS carries that architecture forward as an
 independent fork for organizations that want to deploy and customize the platform themselves.
 
-![A Q3 planning workspace in Softmatrix OS, with an AI-generated slide deck](docs/images/q3-planning-workspace.png)
+![An upstream Cloudflare OS Q3 planning workspace with an AI-generated slide deck](docs/images/q3-planning-workspace.png)
+
+*Upstream interface shown for architecture reference; Softmatrix OS replaces its default product mark.*
 
 This is not a traditional computer operating system. We use the term "operating system" in two senses:
 
