@@ -19,14 +19,19 @@ centralized product metadata, and compliance controls. The Git history records t
 `;
 
 test("Softmatrix distribution retains the exact Apache-2.0 license and attribution", async () => {
-  const [license, notice, readme, contributing, compliance, upstreamSync] = await Promise.all([
-    readFile(new URL("../LICENSE", import.meta.url)),
-    readFile(new URL("../NOTICE", import.meta.url), "utf8"),
-    readFile(new URL("../README.md", import.meta.url), "utf8"),
-    readFile(new URL("../CONTRIBUTING.md", import.meta.url), "utf8"),
-    readFile(new URL("../docs/compliance.md", import.meta.url), "utf8"),
-    readFile(new URL("../docs/upstream-sync.md", import.meta.url), "utf8"),
-  ]);
+  const [license, notice, readme, contributing, compliance, upstreamSync, releasePlan] =
+    await Promise.all([
+      readFile(new URL("../LICENSE", import.meta.url)),
+      readFile(new URL("../NOTICE", import.meta.url), "utf8"),
+      readFile(new URL("../README.md", import.meta.url), "utf8"),
+      readFile(new URL("../CONTRIBUTING.md", import.meta.url), "utf8"),
+      readFile(new URL("../docs/compliance.md", import.meta.url), "utf8"),
+      readFile(new URL("../docs/upstream-sync.md", import.meta.url), "utf8"),
+      readFile(
+        new URL("../docs/superpowers/plans/2026-08-07-softmatrix-release-hardening.md", import.meta.url),
+        "utf8",
+      ),
+    ]);
 
   assert.equal(createHash("sha256").update(license).digest("hex"), APACHE_2_LICENSE_SHA256);
   assert.equal(notice, EXPECTED_NOTICE);
@@ -38,4 +43,8 @@ test("Softmatrix distribution retains the exact Apache-2.0 license and attributi
   assert.match(compliance, /release-blocking/i);
   assert.match(upstreamSync, /first business day of every month/i);
   assert.match(upstreamSync, /one business day/i);
+  assert.match(releasePlan, /scripts\/release\/build-release\.mjs/);
+  assert.match(releasePlan, /scripts\/release\/upload-release\.mjs/);
+  assert.match(releasePlan, /scripts\/release\/promote-release\.mjs/);
+  assert.match(releasePlan, /scripts\/release-legal-artifacts\.test\.js/);
 });

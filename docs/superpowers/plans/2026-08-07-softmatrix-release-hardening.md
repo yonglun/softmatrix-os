@@ -220,7 +220,7 @@ git add scripts/secret-surface.test.js packages/workshop-backend/__tests__
 git commit -m "test: guard identity and model secret surfaces"
 ```
 
-### Task 4: Produce Bilingual Operator and Upgrade Documentation
+### Task 4: Produce Bilingual Documentation and Complete Release Compliance Artifacts
 
 **Files:**
 - Create: `docs/softmatrix/deployment.en.md`
@@ -230,10 +230,17 @@ git commit -m "test: guard identity and model secret surfaces"
 - Create: `docs/softmatrix/upgrade.en.md`
 - Create: `docs/softmatrix/upgrade.zh-CN.md`
 - Create: `THIRD_PARTY_NOTICES.md`
+- Create: `scripts/release/legal-artifacts.mjs`
+- Create: `scripts/release-legal-artifacts.test.js`
 - Modify: `README.md`
+- Modify: `scripts/release/build-release.mjs`
+- Modify: `scripts/release/upload-release.mjs`
+- Modify: `scripts/release/promote-release.mjs`
 
 **Interfaces:**
-- Produces: mirrored English/Chinese install, SSO, model, operation, rollback, and upstream-sync runbooks.
+- Produces: mirrored English/Chinese install, SSO, model, operation, rollback, and upstream-sync
+  runbooks, plus immutable release artifacts that always carry `LICENSE`, `NOTICE`, and
+  `THIRD_PARTY_NOTICES.md`.
 
 - [ ] **Step 1: Generate and review the dependency license inventory**
 
@@ -245,22 +252,50 @@ Expected: valid JSON inventory. Capture it as a CI artifact through the CI runne
 
 List production dependency name, installed version, license identifier, copyright/notice text when required, and source URL. Retain upstream NOTICE entries. Do not claim that all dependencies are Apache-2.0.
 
-- [ ] **Step 3: Write paired documentation with identical heading IDs**
+- [ ] **Step 3: Add legal files to build, upload, and promotion atomically**
+
+Extract legal-artifact hashing and validation into `scripts/release/legal-artifacts.mjs`.
+`build-release.mjs` must copy the exact root `LICENSE`, `NOTICE`, and
+`THIRD_PARTY_NOTICES.md` into `release-out/legal/` and write `legal-manifest.json` with each
+filename, SHA-256, and byte size. A missing or empty file is a hard build failure.
+
+`upload-release.mjs` must upload the legal files and `legal-manifest.json` under the candidate or
+release ID before uploading `manifest.json`. `promote-release.mjs` must validate the candidate legal
+manifest, copy all three legal files plus the legal manifest to the published release prefix, and
+only then copy the release `manifest.json`. This preserves the existing manifest-last visibility
+contract and ensures rollback to any release ID also restores its matching legal material. Do not
+add unknown fields to the deploy-service manifest schema; keep compliance metadata in the validated
+sidecar.
+
+- [ ] **Step 4: Test legal artifact completeness and publication order**
+
+Add `scripts/release-legal-artifacts.test.js` with temporary fixtures that prove: all three exact
+filenames are required; hashes and sizes detect tampering; direct and candidate uploads publish
+legal objects before `manifest.json`; promotion refuses an incomplete candidate and publishes its
+legal objects before the release manifest. Refactor upload entry points to be importable with mocked
+fetch/storage while keeping their CLI behavior unchanged.
+
+Run: `node --test scripts/release-legal-artifacts.test.js`
+
+Expected: PASS, including the ordering and missing-file cases.
+
+- [ ] **Step 5: Write paired documentation with identical heading IDs**
 
 Each language must include prerequisites, install, environment/Secrets table, Cloudflare Access, OIDC, model catalog/BYOK, backup, monitoring, secret rotation, common failures, upgrade, rollback, and support boundaries. Commands must be executable and identical between language versions.
 
-- [ ] **Step 4: Add a documentation parity test to the existing compliance test**
+- [ ] **Step 6: Add a documentation parity test to the existing compliance test**
 
 Parse Markdown headings and assert English/Chinese files have the same ordered heading anchors. Assert every documented environment variable occurs in `env.d.ts` or release manifest code.
 
-- [ ] **Step 5: Run compliance tests and commit**
+- [ ] **Step 7: Run compliance and release-artifact tests, then commit**
 
-Run: `node --test scripts/softmatrix-compliance.test.js`
+Run: `node --test scripts/softmatrix-compliance.test.js scripts/release-legal-artifacts.test.js`
 
 Expected: PASS.
 
 ```sh
-git add README.md THIRD_PARTY_NOTICES.md docs/softmatrix scripts/softmatrix-compliance.test.js
+git add README.md THIRD_PARTY_NOTICES.md docs/softmatrix scripts/softmatrix-compliance.test.js \
+  scripts/release scripts/release-legal-artifacts.test.js
 git commit -m "docs: add bilingual Softmatrix operations guides"
 ```
 
@@ -315,8 +350,9 @@ git commit -m "docs: record upstream synchronization rehearsal"
 - Runtime artifact: `release-out/` (gitignored and not committed).
 
 **Interfaces:**
-- Consumes: existing `build-release.mjs`, `upload-release.mjs`, and `promote-release.mjs` pipeline.
-- Produces: verified candidate manifest and recorded rollback point.
+- Consumes: the compliance-aware `build-release.mjs`, `upload-release.mjs`, and
+  `promote-release.mjs` pipeline from Task 4.
+- Produces: verified candidate manifest, matching legal sidecar and files, and recorded rollback point.
 
 - [ ] **Step 1: Run the complete local gate**
 
@@ -328,15 +364,19 @@ Expected: all commands exit 0 from a clean checkout.
 
 Run: `node scripts/release/build-release.mjs --out release-out --release-id softmatrix-v1-rc1`
 
-Expected: release manifest and content-addressed worker/frontend artifacts; `git status --short` remains clean except ignored output.
+Expected: release manifest, content-addressed worker/frontend artifacts, `legal-manifest.json`, and
+`legal/LICENSE`, `legal/NOTICE`, and `legal/THIRD_PARTY_NOTICES.md`; `git status --short` remains clean
+except ignored output. Verify the three legal-file hashes against `legal-manifest.json` before upload.
 
 - [ ] **Step 3: Scan artifacts and upload as candidate only**
 
-Run: `node --test scripts/secret-surface.test.js`
+Run: `node --test scripts/secret-surface.test.js scripts/release-legal-artifacts.test.js`
 
 Expected: PASS. With approved test R2 credentials, run `node scripts/release/upload-release.mjs --release release-out --candidate`.
 
-Expected: candidate stored under `candidates/softmatrix-v1-rc1/`; no production release pointer changes.
+Expected: candidate legal objects and both manifests are stored under
+`candidates/softmatrix-v1-rc1/`, with `manifest.json` written last; no production release pointer
+changes.
 
 - [ ] **Step 4: Run acceptance against an isolated staging deployment**
 
