@@ -1,0 +1,9 @@
+Softmatrix OS
+Copyright 2026 Softmatrix OS contributors
+
+This product is derived from Cloudflare OS:
+https://github.com/cloudflare/cloudflare-os
+
+Cloudflare OS is licensed under the Apache License, Version 2.0. Softmatrix OS retains
+the upstream license and attribution. Softmatrix OS is an independent project and is not
+affiliated with, sponsored by, or endorsed by Cloudflare, Inc.
