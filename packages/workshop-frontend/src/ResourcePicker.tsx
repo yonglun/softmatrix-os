@@ -296,7 +296,7 @@ export default function ResourcePicker({
       ? httpAccounts.some(([_, { description }]) => {
           const corpus = [description.displayName, description.uniqueName]
             .filter(Boolean).join(' ').toLowerCase()
-          return lowerSearch.split(/\s+/).every(t => corpus.includes(t))
+          return lowerSearch.split(/\s+/).every(token => corpus.includes(token))
         })
       : httpAccounts.length > 0
 
@@ -330,7 +330,7 @@ export default function ResourcePicker({
         vendorAccounts = vendorAccounts.filter(account => {
           const corpus = [account.description.displayName, account.description.uniqueName]
             .filter(Boolean).join(' ').toLowerCase()
-          return lowerSearch.split(/\s+/).every(t => corpus.includes(t))
+          return lowerSearch.split(/\s+/).every(token => corpus.includes(token))
         })
       }
       if (accountsOnly && vendorAccounts.length === 0) continue
@@ -533,7 +533,7 @@ export default function ResourcePicker({
               vendorAccounts = vendorAccounts.filter(account => {
                 const corpus = [account.description.displayName, account.description.uniqueName]
                   .filter(Boolean).join(' ').toLowerCase()
-                return lowerSearch.split(/\s+/).every(t => corpus.includes(t))
+                return lowerSearch.split(/\s+/).every(token => corpus.includes(token))
               })
             }
 

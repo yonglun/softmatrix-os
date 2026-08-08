@@ -7514,7 +7514,7 @@ function ChatInterface({
                             const expansionKey = `group-${first.toolCallId}`;
                             const isExpanded = expandedToolCalls.has(expansionKey);
                             const detailCalls = provisionalToolCalls.filter(
-                              (t) => t.code || t.output,
+                              (toolCall) => toolCall.code || toolCall.output,
                             );
                             return (
                               <div className="space-y-1">
