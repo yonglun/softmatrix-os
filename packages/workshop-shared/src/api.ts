@@ -294,6 +294,13 @@ export interface AuthenticatedApi extends RpcTarget {
   // Get profile info for the user who is logged in.
   whoami(): Promise<AiChatAuthorInfo>;
 
+  // Get the user's persisted locale preference. Returns null for legacy users or users who have
+  // not selected a locale while authenticated.
+  getLocale(): Promise<SupportedLocale | null>;
+
+  // Persist the user's locale preference. The server accepts only the SupportedLocale values.
+  setLocale(locale: SupportedLocale): Promise<void>;
+
   // Set the user's own display name, seen in chats, etc.
   setOwnDisplayName(name: string): Promise<void>;
 

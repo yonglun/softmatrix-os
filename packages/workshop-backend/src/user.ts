@@ -1,5 +1,5 @@
 import { RpcStub } from "capnweb";
-import { GadgetMetadataWithTimestamps, AiChatAuthorInfo, AiModelConfig, SUGGESTED_MODELS, CollaboratorRole, ConnectedAccountsSubscriber, ConnectedAccountsFilter, GatekeeperVendorFilter, GadgetMetadata, BlueprintMetadata, BlueprintLibrarySummary, BlueprintSource, BlueprintUserSummary, BLUEPRINT_SCREENSHOT_R2_PREFIX, GatekeeperVendorInfo, BlueprintOutput, OutputSummary, WorkpieceId, ListOutputsResult } from '@gadgets/workshop-shared/api';
+import { GadgetMetadataWithTimestamps, AiChatAuthorInfo, AiModelConfig, SUGGESTED_MODELS, CollaboratorRole, ConnectedAccountsSubscriber, ConnectedAccountsFilter, GatekeeperVendorFilter, GadgetMetadata, BlueprintMetadata, BlueprintLibrarySummary, BlueprintSource, BlueprintUserSummary, BLUEPRINT_SCREENSHOT_R2_PREFIX, GatekeeperVendorInfo, BlueprintOutput, OutputSummary, WorkpieceId, ListOutputsResult, SupportedLocale } from '@gadgets/workshop-shared/api';
 import { Gatekeeper, GatekeeperUser, GatekeeperUserVerifier, GatekeeperVendor, AccountDescription, VendorDescription, GatekeeperConnectCallback, SupportedResource, ResourceConfiguratorFrame, AppUiContext, GatekeeperUiFrame } from "@gadgets/workshop-shared/gatekeeper";
 import { shouldAutoProvisionAccount, ambientGatekeeperMode } from "./provisioning-policy.js";
 import { CloudflareGatekeeperUser } from "@gadgets/workshop-shared/cloudflare-gatekeeper";
@@ -193,6 +193,9 @@ function makeUserStorage(storage: DurableObjectStorage) {
       },
       quickModel: <string | null>null,
       preferredModel: <string | null>null,
+      // Authenticated locale preference. This singleton was added after some User DOs already
+      // existed; typed-storage returns the declared default for those legacy records.
+      locale: <SupportedLocale | null>null,
       onboardingCompleted: false,
 
       // Set once the user's pre-existing workspaces have been asked to populate the outputs index
@@ -431,6 +434,18 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
 
   async whoami(): Promise<AiChatAuthorInfo> {
     return this.storage.profile.get();
+  }
+
+  async getLocale(): Promise<SupportedLocale | null> {
+    const locale = this.storage.locale.get();
+    return locale === "en" || locale === "zh-CN" ? locale : null;
+  }
+
+  async setLocale(locale: SupportedLocale): Promise<void> {
+    if (locale !== "en" && locale !== "zh-CN") {
+      throw new Error(`Unsupported locale: ${locale}`);
+    }
+    this.storage.locale.put(locale);
   }
 
   // Like whoami(), but returns null if the account was never initialized.
