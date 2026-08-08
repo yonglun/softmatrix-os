@@ -96,8 +96,40 @@ const en = {
     connectionFailed: "Failed to start connection",
     completeFailed: "Something went wrong. Please try again.",
   },
+  home: {
+    exampleTasks: "Example tasks",
+    getStarted: "Get started",
+    suggestions: {
+      oneOnOne: {
+        label: "Write a 1:1 pre-read",
+        description: "A doc with a snapshot, things to inspect, and one ask",
+        prompt: "Create a document to prepare for my next 1:1 with a direct report: a current snapshot, a coaching frame, things to inspect, carryover items from last time, and one clear ask.",
+      },
+      teamMeeting: {
+        label: "Build a team meeting deck",
+        description: "Slides with progress, risks, and what needs a decision",
+        prompt: "Create a slide deck for my next team meeting: where things stand, what shipped, risks and blockers, and the decisions I need from the room. Ask me what the team is working on first.",
+      },
+      insights: {
+        label: "Find insights in my data",
+        description: "Turn a spreadsheet or CSV into trends and recommendations",
+        prompt: "Turn a dataset I will share (a spreadsheet, CSV, or pasted table) into a narrative analysis: key trends, anomalies, the \"so what\", and concrete recommendations.",
+      },
+      workflow: {
+        label: "Automate a workflow",
+        description: "Trigger an agent when a new email arrives",
+        prompt: "Create an agent workflow that runs automatically when a new email arrives: read the message, decide what to do, and take action or draft a reply. Ask me which inbox to watch and what it should handle.",
+      },
+      app: {
+        label: "Build a quick tool",
+        description: "A small interactive app, calculator, or dashboard",
+        prompt: "Build a small interactive tool I can use right here — a calculator, dashboard, or explorer. Ask me what it should do, then create it.",
+      },
+    },
+  },
   profile: {
     title: "Profile",
+    loading: "Loading profile…",
     description: "Manage your account details, avatar, and security.",
     accountSection: "Account",
     preferencesSection: "Preferences",
@@ -158,8 +190,11 @@ const en = {
     noWorkspaces: "No workspaces yet.",
     showAll: "Show all",
     showAllCount: "Show all ({{count}})",
-    themeSystem: "Theme: system ({{resolved}})",
+    themeSystem: "Theme: System ({{resolved}})",
     themeMode: "Theme: {{mode}}",
+    themeSystemName: "System",
+    themeLightName: "Light",
+    themeDarkName: "Dark",
     switchTheme: "{{label}}. Switch to {{next}}.",
     profileMenu: "Open profile menu",
     providers: "Providers",

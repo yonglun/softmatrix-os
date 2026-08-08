@@ -97,8 +97,40 @@ const zhCN = {
     connectionFailed: "启动连接失败",
     completeFailed: "出了点问题，请重试。",
   },
+  home: {
+    exampleTasks: "示例任务",
+    getStarted: "开始使用",
+    suggestions: {
+      oneOnOne: {
+        label: "写一份 1:1 会前材料",
+        description: "包含现状、待检查事项和一个议题的文档",
+        prompt: "创建一份文档，准备我与直属下属的下一次 1:1：包括当前概况、辅导框架、待检查事项、上次遗留事项，以及一个明确的议题。",
+      },
+      teamMeeting: {
+        label: "制作团队会议演示文稿",
+        description: "包含进展、风险和待决策事项的幻灯片",
+        prompt: "为下一次团队会议制作演示文稿：介绍当前进展、已交付内容、风险和阻碍，以及需要团队现场决策的事项。先询问团队目前正在做什么。",
+      },
+      insights: {
+        label: "从数据中发现洞察",
+        description: "将电子表格或 CSV 转化为趋势和建议",
+        prompt: "将我提供的数据集（电子表格、CSV 或粘贴的表格）转化为叙事分析：关键趋势、异常、“所以呢”以及具体建议。",
+      },
+      workflow: {
+        label: "自动化工作流",
+        description: "在收到新邮件时触发智能体",
+        prompt: "创建一个在收到新邮件时自动运行的智能体工作流：阅读邮件、判断下一步，并执行操作或起草回复。询问我要监控哪个收件箱以及需要处理什么。",
+      },
+      app: {
+        label: "构建一个快捷工具",
+        description: "小型交互式应用、计算器或仪表盘",
+        prompt: "创建一个我可以直接在这里使用的小型交互式工具——计算器、仪表盘或探索器。先询问它应该做什么，然后创建它。",
+      },
+    },
+  },
   profile: {
     title: "个人资料",
+    loading: "正在加载个人资料…",
     description: "管理你的账户信息、头像和安全设置。",
     accountSection: "账户",
     preferencesSection: "偏好设置",
@@ -161,6 +193,9 @@ const zhCN = {
     showAllCount: "查看全部（{{count}}）",
     themeSystem: "主题：系统（{{resolved}}）",
     themeMode: "主题：{{mode}}",
+    themeSystemName: "系统",
+    themeLightName: "浅色",
+    themeDarkName: "深色",
     switchTheme: "{{label}}。切换到{{next}}。",
     profileMenu: "打开个人资料菜单",
     providers: "服务商",

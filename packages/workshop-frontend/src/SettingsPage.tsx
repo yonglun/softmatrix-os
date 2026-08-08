@@ -282,7 +282,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex min-h-[60vh] flex-1 items-center justify-center">
-        <p className="text-[13px] tracking-[-0.25px] text-kumo-subtle">{t('common.loading')} {t('profile.title').toLowerCase()}…</p>
+        <p className="text-[13px] tracking-[-0.25px] text-kumo-subtle">{t('profile.loading')}</p>
       </div>
     )
   }

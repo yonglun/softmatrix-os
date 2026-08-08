@@ -12,21 +12,27 @@ function nextThemeMode(mode: ThemeMode): ThemeMode {
   return THEME_SEQUENCE[(THEME_SEQUENCE.indexOf(mode) + 1) % THEME_SEQUENCE.length]
 }
 
+function themeModeName(mode: ThemeMode, t: (key: string) => string): string {
+  if (mode === 'system') return t('shell.themeSystemName')
+  if (mode === 'light') return t('shell.themeLightName')
+  return t('shell.themeDarkName')
+}
+
 function ThemeModeButton() {
   const { t } = useTranslation()
   const { themeMode, resolvedThemeMode, setThemeMode } = useTheme()
   const label = themeMode === 'system'
-    ? t('shell.themeSystem', { resolved: resolvedThemeMode })
-    : t('shell.themeMode', { mode: themeMode })
+    ? t('shell.themeSystem', { resolved: themeModeName(resolvedThemeMode, t) })
+    : t('shell.themeMode', { mode: themeModeName(themeMode, t) })
   const nextMode = nextThemeMode(themeMode)
 
   return (
     <Tooltip
-      content={t('shell.switchTheme', { label, next: nextMode })}
+      content={t('shell.switchTheme', { label, next: themeModeName(nextMode, t) })}
       render={(
         <button
           type="button"
-          aria-label={t('shell.switchTheme', { label, next: nextMode })}
+          aria-label={t('shell.switchTheme', { label, next: themeModeName(nextMode, t) })}
           onClick={() => setThemeMode(nextMode)}
           className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-kumo-inactive transition-colors hover:bg-kumo-tint hover:text-kumo-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kumo-ring focus-visible:ring-offset-2 focus-visible:ring-offset-kumo-elevated"
         >
