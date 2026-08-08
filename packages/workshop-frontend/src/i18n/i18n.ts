@@ -3,6 +3,8 @@ import { initReactI18next } from "react-i18next";
 import en from "./resources/en";
 import zhCN from "./resources/zh-CN";
 
+// i18next exposes `use` on its default singleton; the named export is a different API.
+// oxlint-disable-next-line import/no-named-as-default-member
 void i18n.use(initReactI18next).init({
   fallbackLng: "en",
   initAsync: false,

@@ -49,6 +49,6 @@ describe("locale contract", () => {
   });
 
   it("keeps Chinese keys identical to English", () => {
-    expect(resourcePaths(zhCN).sort()).toEqual(resourcePaths(en).sort());
+    expect(resourcePaths(zhCN).toSorted()).toEqual(resourcePaths(en).toSorted());
   });
 });
