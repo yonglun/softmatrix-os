@@ -13,6 +13,7 @@ import './styles.css'
 import FrontendErrorBoundary from './FrontendErrorBoundary'
 import { installWorkshopErrorReporting, reportIssue } from './errorReporting'
 import { applySiteFavicon, cacheBustSiteLogoUrl } from './siteLogoUtils'
+import { LocaleProvider } from './i18n/LocaleProvider'
 
 // ---------------------------------------------------------------------------
 // Dev auto-login: if VITE_DEV_AUTO_LOGIN=true, automatically create/login
@@ -191,7 +192,9 @@ devAutoLogin(currentStub).catch(() => {})
 root.render(
   <StrictMode>
     <FrontendErrorBoundary>
-      <AppWithConnection />
+      <LocaleProvider>
+        <AppWithConnection />
+      </LocaleProvider>
     </FrontendErrorBoundary>
   </StrictMode>
 )
