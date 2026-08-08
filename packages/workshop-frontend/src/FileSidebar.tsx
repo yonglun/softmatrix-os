@@ -3,6 +3,7 @@ import { Dialog, DropdownMenu, useKumoToastManager } from '@cloudflare/kumo'
 import { DotsThree, DownloadSimple, Pencil, Plus, Trash, X } from '@phosphor-icons/react'
 import DeleteConfirmationDialog from './components/DeleteConfirmationDialog'
 import { WorkshopButton, WorkshopIconButton, WorkshopInput } from './components/WorkshopControls'
+import { useTranslation } from 'react-i18next'
 
 interface FileSidebarProps {
   files: string[]
@@ -43,6 +44,7 @@ export default function FileSidebar({
   onFileDownload,
   ref,
 }: FileSidebarProps) {
+  const { t } = useTranslation()
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [deletingFile, setDeletingFile] = useState<string | null>(null)
@@ -58,12 +60,12 @@ export default function FileSidebar({
 
   const handleCreateFile = () => {
     if (!newFileName.trim()) {
-      toasts.add({ title: 'Filename cannot be empty', variant: 'error' })
+      toasts.add({ title: t('filesSurface.filenameEmpty'), variant: 'error' })
       return
     }
 
     if (files.includes(newFileName.trim())) {
-      toasts.add({ title: 'A file with this name already exists', variant: 'error' })
+      toasts.add({ title: t('filesSurface.filenameExists'), variant: 'error' })
       return
     }
 
@@ -88,7 +90,7 @@ export default function FileSidebar({
     }
 
     if (files.includes(trimmed)) {
-      toasts.add({ title: 'A file with this name already exists', variant: 'error' })
+      toasts.add({ title: t('filesSurface.filenameExists'), variant: 'error' })
       return
     }
 
@@ -98,7 +100,7 @@ export default function FileSidebar({
 
   const startDelete = (filename: string) => {
     if (files.length <= 1) {
-      toasts.add({ title: 'Cannot delete the last remaining file', variant: 'error' })
+      toasts.add({ title: t('filesSurface.lastFile'), variant: 'error' })
       return
     }
     setDeletingFile(filename)
@@ -117,13 +119,13 @@ export default function FileSidebar({
     <div className="flex h-full w-[244px] flex-col border-r border-kumo-line bg-kumo-base">
       <div className="flex h-9 shrink-0 items-center justify-between gap-2 px-3 pt-3 pb-2">
         <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-kumo-inactive">
-          Files
+          {t('filesSurface.files')}
         </span>
         <WorkshopIconButton
           onClick={() => setIsCreateModalOpen(true)}
           disabled={editLocked}
-          aria-label="New file"
-          title="New file"
+          aria-label={t('filesSurface.newFile')}
+          title={t('filesSurface.newFile')}
           className="!h-6 !w-6 text-kumo-subtle hover:bg-kumo-tint hover:text-kumo-default"
         >
           <Plus size={14} weight="bold" />
@@ -185,10 +187,10 @@ export default function FileSidebar({
           <div className="flex items-start justify-between gap-4 border-b border-kumo-line px-5 py-4">
             <div className="min-w-0">
               <Dialog.Title className="text-[15px] leading-5 font-medium tracking-[-0.3px] text-kumo-default">
-                New file
+                {t('filesSurface.newFile')}
               </Dialog.Title>
               <Dialog.Description className="mt-1 text-[12px] leading-4 font-normal tracking-[-0.2px] text-kumo-subtle">
-                Create a new file in this gadget.
+                {t('filesSurface.newFileDescription')}
               </Dialog.Description>
             </div>
             <Dialog.Close
@@ -196,7 +198,7 @@ export default function FileSidebar({
                 <WorkshopIconButton
                   {...props}
                   className="!h-7 !w-7"
-                  aria-label="Close"
+                  aria-label={t('common.close')}
                 >
                   <X size={16} />
                 </WorkshopIconButton>
@@ -209,7 +211,7 @@ export default function FileSidebar({
               ref={createInputRef}
               autoFocus
               placeholder="filename.ts"
-              aria-label="Filename"
+              aria-label={t('filesSurface.filename')}
               value={newFileName}
               onChange={(e) => setNewFileName(e.target.value)}
               onKeyDown={(e) => {
@@ -232,7 +234,7 @@ export default function FileSidebar({
                   {...props}
                   className="!h-9"
                 >
-                  Cancel
+                  {t('filesSurface.cancel')}
                 </WorkshopButton>
               )}
             />
@@ -241,7 +243,7 @@ export default function FileSidebar({
               onClick={handleCreateFile}
               disabled={!newFileName.trim()}
             >
-              Create file
+              {t('filesSurface.createFile')}
             </WorkshopButton>
           </div>
         </Dialog>
@@ -255,8 +257,8 @@ export default function FileSidebar({
             setDeletingFile(null)
           }
         }}
-        title="Delete file?"
-        description={<>This removes <span className="font-mono text-kumo-default">{deletingFile}</span> from the gadget. You can&apos;t undo this.</>}
+        title={t('filesSurface.deleteFile')}
+        description={<>{t('filesSurface.deleteFileDescription')} <span className="font-mono text-kumo-default">{deletingFile}</span></>}
         onConfirm={confirmDelete}
       />
     </div>
@@ -298,6 +300,7 @@ function FileRow({
   onRenameSubmit,
   onRenameCancel,
 }: FileRowProps) {
+  const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement | null>(null)
   const [renameValue, setRenameValue] = useState(filename)
   const isDeleted = changeStatus === 'deleted'
@@ -365,7 +368,7 @@ function FileRow({
           spellCheck={false}
           autoCapitalize="off"
           autoCorrect="off"
-          aria-label={`Rename ${filename}`}
+          aria-label={t('filesSurface.renameFile', { filename })}
           className="min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] tracking-[-0.2px] text-kumo-default outline-none placeholder:text-kumo-inactive"
         />
       ) : (
@@ -382,8 +385,8 @@ function FileRow({
           {isStreamingActive && (
             <span
               className="h-1.5 w-1.5 shrink-0 rounded-full bg-kumo-success"
-              aria-label={`${filename} is being edited`}
-              title="Agent is editing this file"
+              aria-label={t('filesSurface.beingEdited', { filename })}
+              title={t('filesSurface.agentEditing')}
             />
           )}
         </button>
@@ -394,7 +397,7 @@ function FileRow({
           <DropdownMenu.Trigger
             render={(
               <WorkshopIconButton
-                aria-label={`Actions for ${filename}`}
+                aria-label={t('filesSurface.actionsFor', { filename })}
                 onClick={(event) => event.stopPropagation()}
                 className="!h-5 !w-5 text-kumo-inactive opacity-0 hover:bg-kumo-tint hover:text-kumo-default focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100 data-[popup-open]:opacity-100"
               >
@@ -411,7 +414,7 @@ function FileRow({
               onClick={onDownload}
               className="!h-auto rounded-md !px-2.5 !py-1.5 text-[12px] leading-4 tracking-[-0.2px] text-kumo-default transition-colors data-highlighted:bg-kumo-tint"
             >
-              Download
+              {t('filesSurface.download')}
             </DropdownMenu.Item>
             {!editLocked && (
               <>
@@ -420,7 +423,7 @@ function FileRow({
                   onClick={onRename}
                   className="!h-auto rounded-md !px-2.5 !py-1.5 text-[12px] leading-4 tracking-[-0.2px] text-kumo-default transition-colors data-highlighted:bg-kumo-tint"
                 >
-                  Rename
+                  {t('filesSurface.rename')}
                 </DropdownMenu.Item>
                 <DropdownMenu.Item
                   icon={<Trash size={12} className="mr-2" />}
@@ -428,7 +431,7 @@ function FileRow({
                   onClick={onDelete}
                   className="!h-auto rounded-md !px-2.5 !py-1.5 text-[12px] leading-4 tracking-[-0.2px] transition-colors data-highlighted:bg-kumo-danger-tint"
                 >
-                  Delete
+                  {t('filesSurface.delete')}
                 </DropdownMenu.Item>
               </>
             )}

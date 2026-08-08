@@ -4,6 +4,7 @@ import { ArrowsClockwise, Check, Copy, ImageSquare, Pencil, Plus, Trash, Warning
 import { RpcStub } from 'capnweb'
 import { BlueprintGadgetSummary, GadgetClient, GadgetMetadata, Overseer, BlueprintBindingAnnotation, BlueprintScreenshotUpload } from '@gadgets/workshop-shared/api'
 import { WorkshopButton, WorkshopIconButton, WorkshopInput, WorkshopInputArea } from './components/WorkshopControls'
+import { useTranslation } from 'react-i18next'
 import { useLocale } from './i18n/LocaleProvider'
 import { formatDate } from './i18n/format'
 import { copyToClipboard } from './clipboard'
@@ -73,6 +74,7 @@ type Props = {
 }
 
 export default function BlueprintModal({ open, onClose, overseer, gadget, metadata }: Props) {
+  const { t } = useTranslation()
   const toasts = useKumoToastManager()
 
   const [blueprints, setBlueprints] = useState<BlueprintGadgetSummary[]>([])
@@ -101,7 +103,7 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
       setBlueprints(await overseer.listBlueprints())
     } catch (err) {
       console.error('Failed to load blueprints:', err)
-      toasts.add({ title: 'Failed to load blueprints', variant: 'error' })
+      toasts.add({ title: t('blueprintsSurface.loadError'), variant: 'error' })
     } finally {
       setLoading(false)
     }
@@ -159,7 +161,7 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
     if (!file) return
 
     if (!file.type.startsWith('image/')) {
-      toasts.add({ title: 'Please select an image file.', variant: 'error' })
+      toasts.add({ title: t('errors.generic'), variant: 'error' })
       return
     }
 
@@ -174,7 +176,7 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
       setClearScreenshot(false)
     } catch (err) {
       console.error('Failed to process blueprint screenshot:', err)
-      toasts.add({ title: 'Failed to process screenshot', variant: 'error' })
+      toasts.add({ title: t('blueprintsSurface.processing'), variant: 'error' })
     } finally {
       setProcessingScreenshot(false)
     }
@@ -207,7 +209,7 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
         newDescription.trim() || undefined,
         screenshot,
       )
-      toasts.add({ title: 'Blueprint created.', variant: 'success' })
+      toasts.add({ title: t('blueprintsSurface.createdSuccess'), variant: 'success' })
       setFormMode('list')
       setNewTitle(metadata.title)
       setNewDescription('')
@@ -246,7 +248,7 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
         updateBindings: true,
         screenshot,
       })
-      toasts.add({ title: 'Blueprint updated.', variant: 'success' })
+      toasts.add({ title: t('blueprintsSurface.updatedSuccess'), variant: 'success' })
       setFormMode('list')
       setEditingBlueprint(null)
       setNewScreenshotBlob(null)
@@ -264,11 +266,11 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
     setDeletingId(id)
     try {
       await overseer.deleteBlueprint(id)
-      toasts.add({ title: 'Blueprint deleted.', variant: 'success' })
+      toasts.add({ title: t('blueprintsSurface.deletedSuccess'), variant: 'success' })
       setConfirmingDeleteId(null)
       await loadBlueprints()
     } catch (err: any) {
-      toasts.add({ title: err.message || 'Failed to delete blueprint.', variant: 'error' })
+      toasts.add({ title: err.message || t('blueprintsSurface.deleteFailed'), variant: 'error' })
     } finally {
       setDeletingId(null)
     }
@@ -286,14 +288,14 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
             <div className="flex min-w-0 items-start gap-3">
               <div className="min-w-0">
               <Dialog.Title className="text-[17px] leading-6 font-medium tracking-[-0.35px] text-kumo-default">
-                {formMode === 'create' ? 'Create blueprint' : formMode === 'edit' ? 'Edit blueprint' : 'Blueprints'}
+                {formMode === 'create' ? t('blueprintsSurface.create') : formMode === 'edit' ? t('blueprintsSurface.edit') : t('blueprintsSurface.title')}
               </Dialog.Title>
               <Dialog.Description className="mt-1 text-[13px] leading-[18px] font-normal tracking-[-0.25px] text-kumo-subtle">
                 {formMode === 'create'
-                  ? 'Describe what people get when they start from this blueprint.'
+                  ? t('blueprintsSurface.createDescription')
                   : formMode === 'edit'
-                    ? 'Update the details, screenshot, and connection guidance for this blueprint.'
-                    : 'Turn this gadget into a reusable starting point.'}
+                    ? t('blueprintsSurface.connectionsDescription')
+                    : t('blueprintsSurface.detailDescription')}
               </Dialog.Description>
               </div>
             </div>
@@ -301,7 +303,7 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
               render={(props) => (
                 <WorkshopIconButton
                   {...props}
-                  aria-label="Close"
+                  aria-label={t('common.close')}
                 >
                   <X size={18} />
                 </WorkshopIconButton>
@@ -318,15 +320,15 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
                 <div className="flex-1 overflow-y-auto chat-panel space-y-5 px-4 py-5 sm:px-6">
                   <div className="space-y-3">
                     <WorkshopInput
-                      placeholder="Title"
-                      aria-label="Blueprint title"
+                      placeholder={t('blueprintsSurface.titleLabel')}
+                      aria-label={t('blueprintsSurface.titleLabel')}
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
                       className="w-full"
                     />
                     <WorkshopInputArea
-                      placeholder="Description (optional)"
-                      aria-label="Blueprint description"
+                      placeholder={t('blueprintsSurface.descriptionOptional')}
+                      aria-label={t('blueprintsSurface.descriptionLabel')}
                       value={newDescription}
                       onChange={(e) => setNewDescription(e.target.value)}
                       rows={3}
@@ -343,10 +345,10 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
                           <p className="m-0 text-[13px] leading-[18px] font-medium tracking-[-0.25px] text-kumo-default">
-                            Screenshot
+                            {t('blueprintsSurface.screenshot')}
                           </p>
                           <p className="m-0 mt-0.5 text-[12px] leading-4 font-normal tracking-[-0.2px] text-kumo-subtle">
-                            Optional image shown on Explore and the blueprint detail page.
+                            {t('blueprintsSurface.screenshotDescription')}
                             {formMode === 'edit' && !newScreenshotUrl && editingBlueprint?.screenshotUrl && !clearScreenshot ? ' The current screenshot will stay unless you upload a new one.' : ''}
                           </p>
                         </div>
@@ -364,7 +366,7 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
                               }}
                               disabled={processingScreenshot || creating}
                             >
-                              Clear
+                              {t('blueprintsSurface.clear')}
                             </WorkshopButton>
                           )}
                           <WorkshopButton
@@ -373,7 +375,7 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
                             disabled={processingScreenshot || creating}
                           >
                             <ImageSquare size={13} weight="bold" />
-                            {processingScreenshot ? 'Processing...' : newScreenshotUrl || (formMode === 'edit' && editingBlueprint?.screenshotUrl && !clearScreenshot) ? 'Change' : 'Upload'}
+                            {processingScreenshot ? t('blueprintsSurface.processing') : newScreenshotUrl || (formMode === 'edit' && editingBlueprint?.screenshotUrl && !clearScreenshot) ? t('blueprintsSurface.change') : t('blueprintsSurface.upload')}
                           </WorkshopButton>
                         </div>
                       </div>
@@ -388,7 +390,7 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
                       )}
                       {clearScreenshot && !newScreenshotUrl && (
                         <div className="mt-3 rounded-lg border border-dashed border-kumo-line bg-kumo-tint px-3 py-2 text-[12px] leading-4 text-kumo-subtle">
-                          Screenshot will be removed when you save.
+                          {t('blueprintsSurface.screenshotWillBeRemoved')}
                         </div>
                       )}
                     </div>
@@ -396,7 +398,7 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
 
                   {bindingsLoading ? (
                     <div className="rounded-xl border border-kumo-line bg-kumo-base px-4 py-6 text-center text-[13px] text-kumo-subtle">
-                      Loading connections...
+                      {t('blueprintsSurface.loadingConnections')}
                     </div>
                   ) : bindingsError ? (
                     <div className="rounded-xl border border-kumo-line bg-kumo-base px-4 py-3 text-[13px] text-kumo-subtle">
@@ -405,10 +407,10 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
                   ) : bindings.length > 0 ? (
                     <section>
                       <h3 className="m-0 mb-1 text-[13px] leading-[18px] font-medium tracking-[-0.25px] text-kumo-default">
-                        Connections
+                        {t('blueprintsSurface.connections')}
                       </h3>
                       <p className="m-0 mb-3 text-[12px] leading-4 font-normal tracking-[-0.2px] text-kumo-subtle">
-                        Name each connection and add guidance for people using this blueprint.
+                        {t('blueprintsSurface.connectionsDescription')}
                       </p>
                       <div className="space-y-2">
                         {bindings.map((b) => (
@@ -439,7 +441,7 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
                       }}
                       disabled={creating}
                     >
-                      Back
+                      {t('blueprintsSurface.back')}
                     </WorkshopButton>
                     <WorkshopButton
                       tone="primary"
@@ -448,10 +450,10 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
                       disabled={creating || bindingsLoading || processingScreenshot}
                     >
                       {creating
-                        ? formMode === 'create' ? 'Creating...' : 'Saving...'
-                        : processingScreenshot ? 'Processing...'
-                          : bindingsLoading ? 'Loading...'
-                            : formMode === 'create' ? 'Create' : 'Save'}
+                        ? formMode === 'create' ? t('blueprintsSurface.creating') : t('blueprintsSurface.saving')
+                        : processingScreenshot ? t('blueprintsSurface.processing')
+                          : bindingsLoading ? t('common.loading')
+                            : formMode === 'create' ? t('common.create') : t('blueprintsSurface.save')}
                     </WorkshopButton>
                   </div>
                 </div>
@@ -473,10 +475,10 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
               >
                 <span>
                   <span className="block text-[13px] leading-[18px] font-medium tracking-[-0.25px] text-kumo-default">
-                    Create blueprint
+                    {t('blueprintsSurface.create')}
                   </span>
                   <span className="mt-0.5 block text-[13px] leading-[18px] font-normal tracking-[-0.25px] text-kumo-subtle">
-                    Publish this gadget as a reusable template.
+                    {t('blueprintsSurface.createDescription')}
                   </span>
                 </span>
                 <Plus size={16} className="text-kumo-subtle" />
@@ -484,17 +486,17 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
 
             <section>
               <h3 className="mb-2 text-[13px] leading-[18px] font-medium tracking-[-0.25px] text-kumo-default">
-                Existing blueprints
+                {t('blueprintsSurface.existing')}
               </h3>
 
               {loading ? (
                 <div className="rounded-xl border border-kumo-line bg-kumo-base px-4 py-6 text-center text-[13px] text-kumo-subtle">
-                  Loading blueprints...
+                  {t('blueprintsSurface.loading')}
                 </div>
               ) : blueprints.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-kumo-line bg-kumo-base px-4 py-6 text-center">
                   <p className="text-[13px] leading-[18px] font-normal tracking-[-0.25px] text-kumo-subtle">
-                    No blueprints yet.
+                    {t('blueprintsSurface.empty')}
                   </p>
                 </div>
               ) : (
@@ -516,19 +518,19 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
                       onUpdateCode={async () => {
                         try {
                           await overseer.updateBlueprint(bp.id, { updateCode: true })
-                          toasts.add({ title: 'Blueprint updated to current code.', variant: 'success' })
+                          toasts.add({ title: t('blueprintsSurface.updatedSuccess'), variant: 'success' })
                           loadBlueprints()
                         } catch (err: any) {
-                          toasts.add({ title: err.message || 'Failed to update blueprint.', variant: 'error' })
+                          toasts.add({ title: err.message || t('blueprintsSurface.updateFailed'), variant: 'error' })
                         }
                       }}
                       onRetryPublish={async () => {
                         try {
                           await overseer.retryBlueprintPublish(bp.id)
-                          toasts.add({ title: 'Blueprint published successfully.', variant: 'success' })
+                          toasts.add({ title: t('blueprintsSurface.publishSuccess'), variant: 'success' })
                           loadBlueprints()
                         } catch (err: any) {
-                          toasts.add({ title: err.message || 'Retry failed.', variant: 'error' })
+                          toasts.add({ title: err.message || t('blueprintsSurface.retryFailed'), variant: 'error' })
                         }
                       }}
                       onCopyLink={async () => {
@@ -578,6 +580,7 @@ function BlueprintRow({
   onConfirmDelete: () => void
   onCancelDelete: () => void
 }) {
+  const { t } = useTranslation()
   const { locale } = useLocale()
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
   useEffect(() => {
@@ -637,7 +640,7 @@ function BlueprintRow({
               ? 'border-kumo-brand/25 bg-kumo-brand/10 text-kumo-brand'
               : 'border-kumo-line bg-kumo-tint text-kumo-subtle'
           }`}
-          title={bp.dirty ? 'Last publish failed' : undefined}
+              title={bp.dirty ? t('blueprintsSurface.lastPublishFailed') : undefined}
         >
           {bp.dirty && (
             <span
@@ -668,7 +671,7 @@ function BlueprintRow({
           </GhostButton>
           {bp.dirty && (
             <GhostButton onClick={onRetryPublish} icon={<ArrowsClockwise size={13} />}>
-              Retry publish
+              {t('blueprintsSurface.retryPublish')}
             </GhostButton>
           )}
           <GhostButton
@@ -683,7 +686,7 @@ function BlueprintRow({
               )
             }
           >
-            {copyState === 'copied' ? 'Copied' : copyState === 'failed' ? 'Copy failed' : 'Copy link'}
+            {copyState === 'copied' ? t('blueprintsSurface.copied') : copyState === 'failed' ? t('blueprintsSurface.copyFailed') : t('blueprintsSurface.copyLink')}
           </GhostButton>
         </div>
         <div className="-mr-1.5 ml-auto flex items-center gap-0.5 opacity-60 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100">
@@ -691,7 +694,7 @@ function BlueprintRow({
             type="button"
             onClick={onStartEdit}
             className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md bg-transparent text-kumo-subtle transition-colors hover:bg-kumo-tint hover:text-kumo-default"
-            aria-label="Edit blueprint"
+            aria-label={t('blueprintsSurface.editAria')}
           >
             <Pencil size={13} />
           </button>
@@ -699,7 +702,7 @@ function BlueprintRow({
             type="button"
             onClick={onStartDelete}
             className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-md bg-transparent text-kumo-subtle transition-colors hover:bg-kumo-danger-tint hover:text-kumo-danger"
-            aria-label="Delete blueprint"
+            aria-label={t('blueprintsSurface.deleteAria')}
           >
             <Trash size={13} />
           </button>

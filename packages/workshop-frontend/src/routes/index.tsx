@@ -20,6 +20,7 @@ import {
 } from "../modelSelection";
 import { useDocumentTitle } from "../useDocumentTitle";
 import { homePromptFromSearch } from "../homePrompt";
+import { useTranslation } from 'react-i18next';
 
 type HomeSearch = { prompt?: string };
 
@@ -38,7 +39,8 @@ function HomePage() {
 }
 
 export function HomePageContent({ prompt }: HomeSearch) {
-  useDocumentTitle("Home");
+  const { t } = useTranslation();
+  useDocumentTitle(t("shell.home"));
 
   const { authenticatedApi } = useAuthenticatedApi();
   const navigate = useNavigate();
@@ -66,7 +68,7 @@ export function HomePageContent({ prompt }: HomeSearch) {
       })
       .catch((err) => {
         console.error("Failed to fetch models:", err);
-        toasts.add({ title: "Couldn't load AI models", variant: "error" });
+        toasts.add({ title: t("home.modelsLoadFailed"), variant: "error" });
       });
     return () => {
       cancelled = true;
@@ -123,7 +125,7 @@ export function HomePageContent({ prompt }: HomeSearch) {
           provisionalOverseerRef.current?.stub[Symbol.dispose]();
           provisionalOverseerRef.current = null;
         }
-        toasts.add({ title: "Failed to create workspace", variant: "error" });
+        toasts.add({ title: t("home.createWorkspaceFailed"), variant: "error" });
         throw err;
       }
     },
@@ -165,10 +167,10 @@ export function HomePageContent({ prompt }: HomeSearch) {
         {/* Hero */}
         <header className="text-center">
           <h1 className="text-3xl font-semibold tracking-tight leading-tight text-kumo-default sm:text-4xl">
-            What are we working on?
+            {t("home.heroTitle")}
           </h1>
           <p className="mx-auto mt-3 max-w-md text-[14px] leading-5 tracking-[-0.25px] text-kumo-subtle">
-            Ask a question, create an output, or create an app that works with your tools and data.
+            {t("home.heroDescription")}
           </p>
         </header>
 
