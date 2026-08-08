@@ -11,7 +11,7 @@ import { MENU_CONTENT, MENU_ITEM, MENU_ITEM_DANGER } from './menuStyles'
 import { BlueprintPreviewImage } from './BlueprintPreviewImage'
 import DeleteConfirmationDialog from './DeleteConfirmationDialog'
 import { useLocale } from '../i18n/LocaleProvider'
-import { formatCurrency, formatDateTime } from '../i18n/format'
+import { formatCurrency, formatDateTime, formatNumber } from '../i18n/format'
 import { useTranslation } from 'react-i18next'
 
 // Neutral monogram for a workspace — matches the sidebar treatment (no per-item color noise).
@@ -26,11 +26,11 @@ function formatRelativeTime(date: Date, locale: 'en' | 'zh-CN', t: (key: string,
   const diff = Date.now() - date.getTime()
   const minutes = Math.floor(diff / 60000)
   if (minutes < 1) return t('workspacesSurface.justNow')
-  if (minutes < 60) return t('workspacesSurface.minutesAgo', { count: new Intl.NumberFormat(locale).format(minutes) })
+  if (minutes < 60) return t('workspacesSurface.minutesAgo', { count: formatNumber(minutes, locale) })
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return t('workspacesSurface.hoursAgo', { count: new Intl.NumberFormat(locale).format(hours) })
+  if (hours < 24) return t('workspacesSurface.hoursAgo', { count: formatNumber(hours, locale) })
   const days = Math.floor(hours / 24)
-  return t('workspacesSurface.daysAgo', { count: new Intl.NumberFormat(locale).format(days) })
+  return t('workspacesSurface.daysAgo', { count: formatNumber(days, locale) })
 }
 
 function formatCost(cost: number, locale: Parameters<typeof formatCurrency>[1]): string {

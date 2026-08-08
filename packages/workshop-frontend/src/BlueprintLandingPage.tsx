@@ -826,9 +826,9 @@ export default function BlueprintLandingPage({ rpcStub }: Props) {
             <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] leading-[18px] font-normal tracking-[-0.25px] text-kumo-subtle">
               <span>{t('editorSurface.by', { name: meta.author.name })}</span>
               <span className="text-kumo-inactive">•</span>
-              <span>v{meta.version}</span>
+              <span>{t('blueprintsSurface.version')}{meta.version}</span>
               <span className="text-kumo-inactive">•</span>
-              <span>{formatDate(meta.lastUpdated, locale)}</span>
+              <span>{t('blueprintsSurface.updated')} {formatDate(meta.lastUpdated, locale)}</span>
             </div>
           </div>
 
@@ -883,7 +883,7 @@ export default function BlueprintLandingPage({ rpcStub }: Props) {
                   disabled={downloading}
                   className={MENU_ITEM}
                 >
-                  {downloading ? t('codeSurface.loading') : t('blueprintsSurface.downloadArchive')}
+                  {downloading ? t('blueprintsSurface.downloading') : t('blueprintsSurface.downloadArchive')}
                 </DropdownMenu.Item>
 
                 <DropdownMenu.Item
@@ -929,7 +929,7 @@ export default function BlueprintLandingPage({ rpcStub }: Props) {
                         onClick={() => setShowDeleteConfirm(true)}
                         className={MENU_ITEM_DANGER}
                       >
-                        {t('blueprintsSurface.deleteFailed')}
+                        {t('blueprintsSurface.delete')}
                       </DropdownMenu.Item>
                     ) : (
                       <DropdownMenu.Item
@@ -954,7 +954,7 @@ export default function BlueprintLandingPage({ rpcStub }: Props) {
                       disabled={updatingFeatured}
                       className={MENU_ITEM}
                     >
-                      {updatingFeatured ? t('blueprintsSurface.processing') : t('blueprintsSurface.featured')}
+                      {updatingFeatured ? t('blueprintsSurface.processing') : (isFeatured ? t('blueprintsSurface.unfeature') : t('blueprintsSurface.feature'))}
                     </DropdownMenu.Item>
                   </>
                 )}
@@ -976,7 +976,9 @@ export default function BlueprintLandingPage({ rpcStub }: Props) {
                 </span>
               </div>
               <div className="mb-3 px-1 text-[13px] leading-[18px] font-normal tracking-[-0.25px] text-kumo-subtle">
-                {readyCount === bindingEntries.length ? t('blueprintsSurface.connectionsDescription') : `${readyCount} / ${bindingEntries.length}`}
+                {readyCount === bindingEntries.length
+                  ? t('blueprintsSurface.readyAll')
+                  : t('blueprintsSurface.readySummary', { ready: readyCount, total: bindingEntries.length })}
               </div>
               <div className="overflow-hidden rounded-2xl border border-kumo-line bg-kumo-base">
                 {bindingEntries.map(([name, binding]) => (
@@ -995,10 +997,10 @@ export default function BlueprintLandingPage({ rpcStub }: Props) {
           ) : (
             <section className="rounded-2xl border border-kumo-line bg-kumo-base px-5 py-5">
               <p className="m-0 text-[15px] leading-5 font-medium tracking-[-0.25px] text-kumo-default">
-                {t('blueprintsSurface.connections')}
+                {t('blueprintsSurface.noConnections')}
               </p>
               <p className="mt-1 text-[13px] leading-[18px] font-normal tracking-[-0.25px] text-kumo-subtle">
-                {t('blueprintsSurface.detailDescription')}
+                {t('blueprintsSurface.noConnectionsDescription')}
               </p>
             </section>
           )}
@@ -1031,7 +1033,7 @@ export default function BlueprintLandingPage({ rpcStub }: Props) {
                   <Dialog.Description className="mt-1 text-[13px] leading-[18px] font-normal tracking-[-0.25px] text-kumo-subtle">
                     {activeBinding.type === 'gatekeeper' && activeBinding.description
                       ? activeBinding.description
-                      : t('blueprintsSurface.connectionsDescription')}
+                      : t('blueprintsSurface.configureDescription')}
                   </Dialog.Description>
                 </div>
                 <Dialog.Close
@@ -1092,12 +1094,13 @@ export default function BlueprintLandingPage({ rpcStub }: Props) {
       >
         <Dialog className="p-8" size="sm">
           <Dialog.Title className="text-lg font-semibold">
-            {t('blueprintsSurface.deleteFailed')}
+            {t('blueprintsSurface.delete')}
           </Dialog.Title>
           <Dialog.Description className="mt-2 text-kumo-subtle">
-            Delete "{blueprint?.metadata.title}"? {canDeleteOwnedBlueprint
-              ? 'This blueprint link will stop working, but gadgets already created from it won’t be affected.'
-              : 'This blueprint was uploaded manually and cannot be recovered.'}
+            {canDeleteOwnedBlueprint
+              ? t('blueprintsSurface.deleteConfirmOwned')
+              : t('blueprintsSurface.deleteConfirmUploaded')}
+            {' "'}{blueprint?.metadata.title}{'"?'}
           </Dialog.Description>
           <div className="mt-6 flex justify-end gap-2">
             <Dialog.Close
