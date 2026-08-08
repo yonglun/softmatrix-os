@@ -121,6 +121,7 @@ import OutOfCreditsModal from "./components/billing/OutOfCreditsModal";
 import { useSlashCommandPicker } from "./components/chat/SlashCommandPicker";
 import { formatFullTimestamp } from "./utils/formatTimestamp";
 import { useLocale } from "./i18n/LocaleProvider";
+import { useTranslation } from 'react-i18next';
 import { formatCurrency, formatDate, formatNumber, formatTime } from "./i18n/format";
 import { copyToClipboard } from "./clipboard";
 
@@ -1261,6 +1262,7 @@ const AttachmentPreviewModal = memo(function AttachmentPreviewModal(
   }: AttachmentPreviewModalProps,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
   const isImage = (attachment?.mimeType ?? "").startsWith("image/");
   const objectUrl = useAttachmentObjectUrl(
     isImage ? attachment?.content : undefined, attachment?.mimeType ?? "");
@@ -1304,7 +1306,7 @@ const AttachmentPreviewModal = memo(function AttachmentPreviewModal(
   if (!attachment) return null;
 
   const sizeLabel = formatAttachmentSize(attachment.size);
-  const title = attachment.name ?? "Attached file";
+  const title = attachment.name ?? t('management.chat.attachedFile');
   const modalWidthClass = isImage
     ? "w-[min(1120px,calc(100vw-32px))]"
     : "w-[min(520px,calc(100vw-32px))]";
@@ -1316,7 +1318,7 @@ const AttachmentPreviewModal = memo(function AttachmentPreviewModal(
       className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[1px]"
       role="dialog"
       aria-modal="true"
-      aria-label={`Preview ${title}`}
+      aria-label={t('management.chat.preview', { title })}
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -1326,7 +1328,7 @@ const AttachmentPreviewModal = memo(function AttachmentPreviewModal(
           type="button"
           onClick={onClose}
           className="absolute right-3 top-3 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-kumo-line bg-kumo-base/90 text-kumo-subtle shadow-[0_1px_2px_rgba(0,0,0,0.05)] backdrop-blur-sm transition-[background-color,color,transform] duration-150 ease-out hover:bg-kumo-base hover:text-kumo-default active:scale-[0.96]"
-          aria-label="Close preview"
+          aria-label={t('management.chat.closePreview')}
         >
           <X size={18} />
         </button>
@@ -1346,16 +1348,16 @@ const AttachmentPreviewModal = memo(function AttachmentPreviewModal(
                 </div>
                 <div className="text-[14px] font-medium text-kumo-default">{title}</div>
                 <div className="text-[12px] leading-5 text-kumo-subtle">
-                  {attachment.mimeType || "Unknown file type"}{sizeLabel ? ` · ${sizeLabel}` : ""}
+                  {attachment.mimeType || t('management.chat.unknownFileType')}{sizeLabel ? ` · ${sizeLabel}` : ""}
                 </div>
-                <div className="text-[12px] leading-5 text-kumo-inactive">This file can’t be previewed here.</div>
+                <div className="text-[12px] leading-5 text-kumo-inactive">{t('management.chat.previewUnavailable')}</div>
                 {onDownload && (
                   <button
                     type="button"
                     onClick={() => onDownload(attachment)}
                     className="mt-1 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-kumo-line/70 bg-kumo-base px-3 py-1.5 text-[12px] font-medium text-kumo-default transition-colors hover:bg-kumo-tint/40"
                   >
-                    Download
+                    {t('management.chat.download')}
                   </button>
                 )}
               </div>
@@ -1378,6 +1380,7 @@ const ChatAttachmentThumbnail = memo(function ChatAttachmentThumbnail(
     onPreview,
   }: ChatAttachmentThumbnailProps,
 ) {
+  const { t } = useTranslation();
   const isImage = attachment.mimeType.startsWith("image/");
   const objectUrl = useAttachmentObjectUrl(isImage ? attachment.content : undefined, attachment.mimeType);
   const [imageState, setImageState] = useState<"loading" | "loaded" | "error">("loading");
@@ -1387,27 +1390,27 @@ const ChatAttachmentThumbnail = memo(function ChatAttachmentThumbnail(
       type="button"
       onClick={() => onPreview(attachment.id)}
       className="relative h-28 w-36 shrink-0 cursor-pointer overflow-hidden rounded-xl border border-kumo-line/70 bg-kumo-elevated text-left transition-[border-color,background-color,transform] duration-150 ease-out hover:border-kumo-line hover:bg-kumo-tint/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kumo-brand/40 active:scale-[0.98]"
-      aria-label={`Preview ${attachment.name ?? "attached file"}`}
+      aria-label={t('management.chat.preview', { title: attachment.name ?? t('management.chat.attachedFile') })}
     >
       {isImage && objectUrl && imageState !== "error" ? (
         <>
           {/* Kept in layout (not display:none) so lazy-loading actually triggers. */}
           <img
             src={objectUrl}
-            alt={attachment.name ?? "Attached image"}
+            alt={attachment.name ?? t('management.chat.attachedImage')}
             loading="lazy"
             className="block h-full w-full object-cover"
             onLoad={() => setImageState("loaded")}
             onError={() => setImageState("error")}
           />
           {imageState !== "loaded" && (
-            <div className="absolute inset-0 grid place-items-center bg-kumo-elevated text-[11px] text-kumo-inactive">Loading image…</div>
+            <div className="absolute inset-0 grid place-items-center bg-kumo-elevated text-[11px] text-kumo-inactive">{t('management.chat.loadingImage')}</div>
           )}
         </>
       ) : (
         <div className="flex h-full w-full min-w-0 items-center justify-center gap-2 p-3 text-[12px] leading-4 text-kumo-subtle">
           <FileIcon size={20} className="shrink-0 text-kumo-inactive" />
-          <span className="min-w-0 truncate">{attachment.name ?? "Attached file"}</span>
+          <span className="min-w-0 truncate">{attachment.name ?? t('management.chat.attachedFile')}</span>
         </div>
       )}
     </button>
@@ -1837,6 +1840,7 @@ export const ChatInput = ({
    * pre-approval catalog and proactively offer to pre-approve its actions. */
 }) => {
   const toasts = useKumoToastManager();
+  const { t } = useTranslation();
   const [inputValue, setInputValue] = useState("");
   const [capsules, setCapsules] = useState<InputCapsule[]>([]);
   const [pendingAttachments, setPendingAttachments] = useState<PendingAttachment[]>([]);
@@ -2056,7 +2060,7 @@ export const ChatInput = ({
         uploadState: "error",
         error: err?.message || "Upload failed",
       } : attachment));
-      toasts.add({ title: err?.message || "Failed to upload attachment", variant: "error" });
+      toasts.add({ title: err?.message || t('management.chat.uploadFailed'), variant: "error" });
     }
   };
 
@@ -2085,7 +2089,7 @@ export const ChatInput = ({
     for (const result of prepared) {
       if (result.status === "rejected") {
         console.error("Failed to process chat attachment:", result.reason);
-        toasts.add({ title: result.reason?.message || "Failed to process attachment", variant: "error" });
+        toasts.add({ title: result.reason?.message || t('management.chat.processFailed'), variant: "error" });
         continue;
       }
 
@@ -2288,11 +2292,11 @@ export const ChatInput = ({
 
     if (!inputValue.trim() && !selectedSlashCommand && readyAttachments.length === 0) return;
     if (hasUploadingAttachment) {
-      toasts.add({ title: "Please wait for attachment uploads to finish", variant: "error" });
+      toasts.add({ title: t('management.chat.waitUploads'), variant: "error" });
       return;
     }
     if (hasFailedAttachment) {
-      toasts.add({ title: "Remove failed attachment uploads before sending", variant: "error" });
+      toasts.add({ title: t('management.chat.removeFailedUploads'), variant: "error" });
       return;
     }
 
@@ -2356,7 +2360,7 @@ export const ChatInput = ({
           match = await slashCommandPicker.resolveExact(parsed);
         } catch (error) {
           console.error("Failed to resolve slash command:", error);
-          toasts.add({ title: "Couldn't load slash commands", variant: "error" });
+          toasts.add({ title: t('management.chat.slashCommandsFailed'), variant: "error" });
           return;
         }
         if (!match) {
@@ -3023,7 +3027,7 @@ export const ChatInput = ({
               type="button"
               onClick={onDiscardConsoleLogs}
               className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full opacity-60 transition-opacity hover:bg-kumo-tint hover:opacity-100"
-              aria-label="Discard captured logs"
+              aria-label={t('management.chat.discardLogs')}
             >
               <X size={10} />
             </button>
@@ -3048,7 +3052,7 @@ export const ChatInput = ({
               <span className={`grid h-7 w-7 place-items-center rounded-full ${canAttachMore ? "bg-kumo-brand/12 text-kumo-brand" : "bg-kumo-warning/15 text-kumo-warning"}`}>
                 <FileIcon size={16} weight="duotone" />
               </span>
-              {canAttachMore ? "Drop files to attach" : "Messages are limited to 5 attachments"}
+              {canAttachMore ? t('management.chat.dropFiles') : t('management.chat.attachmentLimit')}
             </div>
           </div>
         )}
@@ -3131,10 +3135,10 @@ export const ChatInput = ({
                 isBlocked
                   ? blockedReason
                   : isAgentActive
-                    ? "Waiting for agent…"
+                    ? t('management.chat.waitingForAgent')
                     : newChat
-                      ? "Start a new conversation…"
-                      : "Ask a follow-up…"
+                      ? t('management.chat.startConversation')
+                      : t('management.chat.followUp')
               }
               autoFocus={autoFocus}
               rows={minRows}
@@ -3243,14 +3247,14 @@ export const ChatInput = ({
                   <FileIcon size={22} className="text-kumo-inactive" />
                 )}
                 {attachment.uploadState === "uploading" && (
-                  <div className="absolute inset-0 grid place-items-center rounded-lg bg-black/35 text-[10px] text-white">Uploading</div>
+                  <div className="absolute inset-0 grid place-items-center rounded-lg bg-black/35 text-[10px] text-white">{t('management.chat.uploading')}</div>
                 )}
                 {attachment.uploadState === "error" && (
-                  <div className="absolute inset-0 grid place-items-center rounded-lg bg-kumo-danger/80 px-1 text-center text-[9px] leading-3 text-white">Failed</div>
+                  <div className="absolute inset-0 grid place-items-center rounded-lg bg-kumo-danger/80 px-1 text-center text-[9px] leading-3 text-white">{t('management.chat.failed')}</div>
                 )}
                 <button
                   type="button"
-                  aria-label="Remove attachment"
+                  aria-label={t('management.chat.removeAttachment')}
                   onClick={() => removeAttachment(attachment.id)}
                   className="absolute right-0.5 top-0.5 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-black/55 text-white hover:bg-black/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
                 >
@@ -3270,7 +3274,7 @@ export const ChatInput = ({
                   <button
                     type="button"
                     className="group flex h-8 w-8 flex-shrink-0 cursor-pointer items-center justify-center rounded-lg text-kumo-inactive transition-[background-color,color,transform] duration-150 ease-out hover:bg-kumo-tint hover:text-kumo-subtle focus-visible:bg-kumo-tint focus-visible:text-kumo-subtle focus-visible:outline-none active:scale-[0.96] data-[popup-open]:bg-kumo-tint data-[popup-open]:text-kumo-subtle"
-                    aria-label="Open chat options"
+                    aria-label={t('management.chat.openOptions')}
                   >
                     <Plus size={18} />
                   </button>
@@ -3302,7 +3306,7 @@ export const ChatInput = ({
                   <span className="mr-2 inline-flex h-4 w-4 items-center justify-center text-kumo-inactive">
                     <FileIcon size={14} />
                   </span>
-                  <span className="flex-1">Upload file</span>
+                  <span className="flex-1">{t('management.chat.uploadFile')}</span>
                 </DropdownMenu.Item>
               </DropdownMenu.Content>
             </DropdownMenu>
@@ -3312,7 +3316,7 @@ export const ChatInput = ({
               className="inline-flex h-8 flex-shrink-0 cursor-pointer items-center gap-1.5 rounded-lg px-2 text-[13px] leading-none tracking-[-0.25px] text-kumo-inactive transition-[background-color,color,transform] duration-150 ease-out hover:bg-kumo-tint hover:text-kumo-subtle focus-visible:bg-kumo-tint focus-visible:text-kumo-subtle focus-visible:outline-none active:scale-[0.97]"
             >
               <Plug size={15} className="flex-shrink-0" />
-              <span className={`leading-none ${styles.attachLabelText}`}>{attachLabel ?? "Add resource"}</span>
+              <span className={`leading-none ${styles.attachLabelText}`}>{attachLabel ?? t('management.chat.addResource')}</span>
             </button>
           </div>
 
@@ -3324,7 +3328,7 @@ export const ChatInput = ({
                     <button
                       type="button"
                       className="group inline-flex h-8 min-w-0 max-w-[180px] cursor-pointer items-center gap-1.5 rounded-lg px-2 text-[13px] leading-5 tracking-[-0.25px] text-kumo-subtle transition-[background-color,color,transform] duration-150 ease-out hover:bg-kumo-tint hover:text-kumo-default focus-visible:bg-kumo-tint focus-visible:text-kumo-default focus-visible:outline-none active:scale-[0.97] data-[popup-open]:bg-kumo-tint data-[popup-open]:text-kumo-default"
-                      aria-label="Select model"
+                      aria-label={t('management.chat.selectModel')}
                     >
                       <span className="min-w-0 truncate">{selectedModelLabel}</span>
                       <CaretDown
@@ -3356,7 +3360,7 @@ export const ChatInput = ({
                     onClick={() => onModelChange(null)}
                     className="!h-auto rounded-xl !px-2 !py-1.5 text-[12px] leading-4 font-normal tracking-[-0.15px] text-kumo-subtle transition-colors data-highlighted:bg-kumo-tint/70 data-highlighted:text-kumo-default"
                   >
-                    <span className="min-w-0 flex-1 truncate">No agent</span>
+                    <span className="min-w-0 flex-1 truncate">{t('management.chat.noAgent')}</span>
                     {selectedModel == null && (
                       <Check size={12} weight="bold" className="ml-3 flex-shrink-0 text-kumo-inactive" />
                     )}
@@ -3368,7 +3372,7 @@ export const ChatInput = ({
                   onClick={onStop}
                   tone="primary"
                   className="!h-8 !w-8"
-                  aria-label="Stop agent"
+                  aria-label={t('management.chat.stopAgent')}
                 >
                   <svg
                     width="14"
@@ -3385,7 +3389,7 @@ export const ChatInput = ({
                   disabled={!canSend}
                   tone="primary"
                   className="!h-8 !w-8 disabled:cursor-not-allowed disabled:opacity-30"
-                  aria-label="Send message"
+                  aria-label={t('management.chat.sendMessage')}
                 >
                   {/* Arrow-up icon */}
                   <svg
@@ -3585,6 +3589,7 @@ function DiscardPendingChangesPopover({
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <Popover.Trigger
@@ -3607,14 +3612,13 @@ function DiscardPendingChangesPopover({
       >
         <div className="px-3.5 pb-2.5 pt-3">
           <Popover.Title className="text-[13px] font-medium leading-[18px] tracking-[-0.25px] text-kumo-default">
-            Discard all pending changes?
+            {t('management.chat.discardAllPending')}
           </Popover.Title>
           <p className="mt-0.5 text-[11.5px] leading-4 tracking-[-0.15px] text-kumo-subtle">
-            Return to the last accepted version. Any gadgets created by these changes will be
-            permanently deleted. Pending changes can&apos;t be restored.
+            {t('management.chat.discardPendingDescription')}
           </p>
           <p className="mt-2 border-t border-kumo-line pt-2 text-[11px] leading-[15px] tracking-[-0.1px] text-kumo-inactive">
-            Use the <ArrowUUpLeft size={12} className="mx-0.5 inline-block align-[-2px]" aria-hidden="true" /><span className="sr-only">undo arrow</span> under any agent response to discard from that turn onward.
+            {t('management.chat.discardUndoHint')}
           </p>
         </div>
         <div className="flex items-center justify-end gap-0.5 border-t border-kumo-line px-2 py-1.5">
@@ -3624,7 +3628,7 @@ function DiscardPendingChangesPopover({
             onClick={() => onOpenChange(false)}
             className="flex h-6 cursor-pointer items-center rounded-md px-2 text-[12px] font-medium tracking-[-0.15px] text-kumo-inactive transition-colors enabled:hover:bg-kumo-tint enabled:hover:text-kumo-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kumo-ring disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Cancel
+            {t('management.chat.cancel')}
           </button>
           <button
             type="button"
@@ -3632,7 +3636,7 @@ function DiscardPendingChangesPopover({
             onClick={onConfirm}
             className="flex h-6 cursor-pointer items-center rounded-md px-2 text-[12px] font-medium tracking-[-0.15px] text-kumo-default transition-colors enabled:hover:bg-kumo-tint enabled:hover:text-kumo-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kumo-ring disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {isDiscarding ? "Discarding..." : "Discard changes"}
+            {isDiscarding ? t('management.chat.discarding') : t('management.chat.discardChanges')}
           </button>
         </div>
       </Popover.Content>
@@ -4244,6 +4248,7 @@ function ChatInterface({
 }: ChatInterfaceProps) {
   // Persistent cache that survives reconnects
   const toasts = useKumoToastManager();
+  const { t } = useTranslation();
   const { locale } = useLocale();
   const { currentUser } = useAuthenticatedApi();
   const getOverseer = useCallback(() => overseer, [overseer]);
@@ -4676,7 +4681,7 @@ function ChatInterface({
       }
     } catch (err: any) {
       console.error("Failed to download chat attachment:", err);
-      toasts.add({ title: err?.message || "Failed to download attachment", variant: "error" });
+      toasts.add({ title: err?.message || t('management.chat.downloadFailed'), variant: "error" });
     }
   }, [overseer, toasts]);
 
@@ -5220,7 +5225,7 @@ function ChatInterface({
       } catch (err) {
         console.error("Failed to subscribe to chats:", err);
         reportIssue('chat.subscription-load', err)
-        toasts.add({ title: "Unable to load conversations", variant: "error" });
+        toasts.add({ title: t('management.chat.conversationsLoadFailed'), variant: "error" });
       }
     };
 
@@ -5331,7 +5336,7 @@ function ChatInterface({
       forceUpdate();
     } catch (err) {
       console.error("Failed to load earlier messages:", err);
-      toasts.add({ title: "Failed to load earlier messages", variant: "error" });
+      toasts.add({ title: t('management.chat.earlierLoadFailed'), variant: "error" });
     } finally {
       setIsLoadingEarlier(false);
     }
@@ -5372,7 +5377,7 @@ function ChatInterface({
       }
     } catch (err) {
       console.error("Failed to send message:", err);
-      toasts.add({ title: "Failed to send message", variant: "error" });
+      toasts.add({ title: t('management.chat.sendFailed'), variant: "error" });
       throw err;
     }
   };
@@ -5394,7 +5399,7 @@ function ChatInterface({
       onNavigateToChatRef.current(newChatId);
     } catch (err) {
       console.error("Failed to create new chat:", err);
-      toasts.add({ title: "Failed to start conversation", variant: "error" });
+      toasts.add({ title: t('management.chat.startFailed'), variant: "error" });
       throw err;
     }
   };
@@ -5413,7 +5418,7 @@ function ChatInterface({
       await overseer.stopAgent(selectedChatId);
     } catch (err) {
       console.error("Failed to stop agent:", err);
-      toasts.add({ title: "Failed to stop agent", variant: "error" });
+      toasts.add({ title: t('management.chat.stopFailed'), variant: "error" });
     }
   };
 
@@ -5437,10 +5442,10 @@ function ChatInterface({
       }
 
       setIsEditingTitle(false);
-      toasts.add({ title: "Chat title updated successfully", variant: "success" });
+      toasts.add({ title: t('management.chat.titleUpdated'), variant: "success" });
     } catch (err) {
       console.error("Failed to update chat title:", err);
-      toasts.add({ title: "Failed to update chat title", variant: "error" });
+      toasts.add({ title: t('management.chat.titleUpdateFailed'), variant: "error" });
     }
   };
 
@@ -5464,10 +5469,10 @@ function ChatInterface({
     setIsDeleting(true);
     try {
       await overseer.deleteChat(deleteTarget.id);
-      toasts.add({ title: "Chat deleted successfully", variant: "success" });
+      toasts.add({ title: t('management.chat.deleted'), variant: "success" });
     } catch (err) {
       console.error("Failed to delete chat:", err);
-      toasts.add({ title: "Failed to delete chat", variant: "error" });
+      toasts.add({ title: t('management.chat.deleteFailed'), variant: "error" });
     }
     setIsDeleting(false);
     setDeleteTarget(null);
@@ -5522,10 +5527,10 @@ function ChatInterface({
 
     try {
       await overseer.mergeChanges(selectedChatId, mergeThrough, options);
-      toasts.add({ title: "Changes accepted", variant: "success" });
+      toasts.add({ title: t('management.chat.changesAccepted'), variant: "success" });
     } catch (err) {
       console.error("Failed to accept changes:", err);
-      toasts.add({ title: "Failed to accept changes", variant: "error" });
+      toasts.add({ title: t('management.chat.acceptFailed'), variant: "error" });
     }
   };
 
@@ -5534,10 +5539,10 @@ function ChatInterface({
 
     try {
       await overseer.finalizeChatDraft(selectedChatId);
-      toasts.add({ title: "Changes saved", variant: "success" });
+      toasts.add({ title: t('management.chat.changesSaved'), variant: "success" });
     } catch (err) {
       console.error("Failed to save changes:", err);
-      toasts.add({ title: "Failed to save changes", variant: "error" });
+      toasts.add({ title: t('management.chat.saveFailed'), variant: "error" });
     }
   };
 
@@ -5548,10 +5553,10 @@ function ChatInterface({
       await overseer.discardChatDraftChanges(selectedChatId);
       draftRef.current.delete(selectedChatId);
       forceUpdate();
-      toasts.add({ title: "Changes discarded", variant: "success" });
+      toasts.add({ title: t('management.chat.changesDiscarded'), variant: "success" });
     } catch (err) {
       console.error("Failed to discard changes:", err);
-      toasts.add({ title: "Failed to discard changes", variant: "error" });
+      toasts.add({ title: t('management.chat.discardFailed'), variant: "error" });
     }
   };
 
@@ -5575,7 +5580,7 @@ function ChatInterface({
       toasts.add({ title: "Pending changes discarded", variant: "success" });
     } catch (err) {
       console.error("Failed to discard pending changes:", err);
-      toasts.add({ title: "Failed to discard pending changes", variant: "error" });
+      toasts.add({ title: t('management.chat.discardPendingFailed'), variant: "error" });
     } finally {
       setDiscardingChangesChatIds((chatIds) => {
         const next = new Set(chatIds);
@@ -5669,7 +5674,7 @@ function ChatInterface({
       toasts.add({ title: "Draft rewound", variant: "success" });
     } catch (err) {
       console.error("Failed to rewind draft:", err);
-      toasts.add({ title: "Failed to rewind draft", variant: "error" });
+      toasts.add({ title: t('management.chat.rewindFailed'), variant: "error" });
     }
   }, [overseer, selectedChatId, toasts]);
 
@@ -5701,7 +5706,7 @@ function ChatInterface({
       }
     } catch (err) {
       console.error("Failed to toggle hook:", err);
-      toasts.add({ title: `Failed to ${enabled ? "enable" : "disable"} hook`, variant: "error" });
+      toasts.add({ title: enabled ? t('management.chat.hookEnableFailed') : t('management.chat.hookDisableFailed'), variant: "error" });
       // Revert the optimistic update.
       if (applyOptimisticHookEnabled(actionId, !enabled)) forceUpdate();
     } finally {
@@ -5742,7 +5747,7 @@ function ChatInterface({
       setConnectionAccept(null);
     } catch (err) {
       console.error("Failed to finalize connection:", err);
-      toasts.add({ title: "Failed to add connection", variant: "error" });
+      toasts.add({ title: t('management.chat.addConnectionFailed'), variant: "error" });
     } finally {
       gk[Symbol.dispose]();
       setProcessingConnections((prev) => {
@@ -5763,7 +5768,7 @@ function ChatInterface({
       }
     } catch (err) {
       console.error("Failed to deny connection:", err);
-      toasts.add({ title: "Failed to deny connection", variant: "error" });
+      toasts.add({ title: t('management.chat.denyConnectionFailed'), variant: "error" });
     } finally {
       setProcessingConnections((prev) => {
         const next = new Set(prev);
@@ -5843,14 +5848,14 @@ function ChatInterface({
       await overseer.retryAgent(selectedChatId, selectedModel);
     } catch (err) {
       console.error("Failed to retry agent:", err);
-      toasts.add({ title: "Failed to retry agent", variant: "error" });
+      toasts.add({ title: t('management.chat.retryFailed'), variant: "error" });
     }
   };
 
   const handleCopyMessage = useCallback(async (message: string) => {
     const ok = await copyToClipboard(message);
     toasts.add({
-      title: ok ? "Copied message" : "Unable to copy message",
+      title: ok ? t('management.chat.copied') : t('management.chat.copyFailed'),
       variant: ok ? "success" : "error",
     });
   }, [toasts]);
@@ -6423,7 +6428,7 @@ function ChatInterface({
               <button
                 type="button"
                 className="group flex h-8 -ml-1.5 cursor-pointer items-center gap-1.5 rounded-md px-1.5 text-left transition-colors duration-150 ease-out hover:bg-kumo-tint/60 focus-visible:bg-kumo-tint/60 focus-visible:outline-none data-[popup-open]:bg-kumo-tint/60"
-                aria-label="Filter conversations"
+                aria-label={t('management.chat.filterConversations')}
               >
                 <span className="text-[13px] leading-[18px] font-medium tracking-[-0.25px] text-kumo-default">
                   {CHAT_LIST_SCOPE_LABELS[chatListScope]}
@@ -6722,8 +6727,8 @@ function ChatInterface({
                   <WorkshopIconButton
                     onClick={() => onNavigateToChat(null)}
                     className="!h-8 !w-8 flex-shrink-0"
-                    title="Back to conversations"
-                    aria-label="Back to conversations"
+                    title={t('management.chat.backToConversations')}
+                    aria-label={t('management.chat.backToConversations')}
                   >
                     <CaretLeft size={14} />
                   </WorkshopIconButton>
@@ -6745,14 +6750,14 @@ function ChatInterface({
                         onClick={handleSaveChatTitle}
                         disabled={!titleInput.trim()}
                         className="!h-8 !w-8 hover:text-kumo-brand disabled:opacity-30"
-                        aria-label="Save chat title"
+                        aria-label={t('management.chat.saveTitle')}
                       >
                         <Check size={13} />
                       </WorkshopIconButton>
                       <WorkshopIconButton
                         onClick={handleCancelTitleEdit}
                         className="!h-8 !w-8"
-                        aria-label="Cancel title edit"
+                        aria-label={t('management.chat.cancelTitleEdit')}
                       >
                         <X size={13} />
                       </WorkshopIconButton>
@@ -6765,8 +6770,8 @@ function ChatInterface({
                       <WorkshopIconButton
                         onClick={() => setIsEditingTitle(true)}
                         className="!h-8 !w-8 flex-shrink-0 text-kumo-inactive hover:text-kumo-subtle"
-                        title="Rename chat"
-                        aria-label="Rename chat"
+                        title={t('management.chat.renameChat')}
+                        aria-label={t('management.chat.renameChat')}
                       >
                         <Pencil size={11} />
                       </WorkshopIconButton>
@@ -6777,8 +6782,8 @@ function ChatInterface({
                     onClick={() => handleDeleteChat()}
                     danger
                     className="!h-8 !w-8 flex-shrink-0 text-kumo-inactive"
-                    title="Delete chat"
-                    aria-label="Delete chat"
+                    title={t('management.chat.deleteChat')}
+                    aria-label={t('management.chat.deleteChat')}
                   >
                     <Trash size={14} />
                   </WorkshopIconButton>
@@ -6876,7 +6881,7 @@ function ChatInterface({
 
                         return (
                           <div key={entry.key} className={`${entryTopClass} mb-4 max-w-[860px]`}>
-                            <div className="flex items-center gap-3" role="separator" aria-label="Context compacted">
+                            <div className="flex items-center gap-3" role="separator" aria-label={t('management.chat.contextCompacted')}>
                               <span className="h-px flex-1 bg-kumo-line" aria-hidden="true" />
                               <button
                                 type="button"
@@ -7144,12 +7149,12 @@ function ChatInterface({
                                     : "opacity-0 group-hover/agentMessage:opacity-100 group-focus-within/agentMessage:opacity-100"
                                 }`}>
                                   {hasMessageText && (
-                                    <Tooltip content="Copy message" asChild>
+                                    <Tooltip content={t('management.chat.copyMessage')} asChild>
                                       <button
                                         type="button"
                                         onClick={() => handleCopyMessage(msg.message)}
                                         className="flex cursor-pointer items-center rounded-md p-1 text-kumo-inactive transition-[color,transform] duration-150 ease-out hover:text-kumo-default focus-visible:text-kumo-default focus-visible:outline-none active:scale-[0.96]"
-                                        aria-label="Copy message"
+                                        aria-label={t('management.chat.copyMessage')}
                                       >
                                         <Copy size={15} />
                                       </button>
@@ -7273,12 +7278,12 @@ function ChatInterface({
 
                         {msg.type === "useGadget" && (
                           <div className="max-w-[860px] text-[14px] leading-5 tracking-[-0.25px] text-kumo-subtle">
-                            <Tooltip content={`Used the gadget at ${formatFullTimestamp(msg.timestamp, locale)}`} asChild>
+                            <Tooltip content={`${t('management.chat.usedGadget')} ${formatFullTimestamp(msg.timestamp, locale)}`} asChild>
                               <span className="inline-flex items-center gap-3 px-1.5 py-1">
                                 <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center text-kumo-inactive" aria-hidden="true">
                                   <Plug size={16} />
                                 </span>
-                                <span>Used the gadget</span>
+                                <span>{t('management.chat.usedGadget')}</span>
                               </span>
                             </Tooltip>
                           </div>
@@ -7307,7 +7312,7 @@ function ChatInterface({
                                         </span>
                                         <span className="flex min-w-0 flex-1 items-center gap-1">
                                           <span className="min-w-0 truncate">
-                                            <span className="font-medium text-kumo-danger">Error: </span>
+                                            <span className="font-medium text-kumo-danger">{t('management.chat.errorPrefix')}: </span>
                                             <span className="text-kumo-subtle">{msg.message}</span>
                                           </span>
                                           <CaretRight
@@ -7548,7 +7553,7 @@ function ChatInterface({
                                         >
                                           {toolCall.code && (
                                             <>
-                                              <span className="font-mono text-[11px] leading-4 text-kumo-inactive uppercase tracking-[0.08em]">Code</span>
+                                              <span className="font-mono text-[11px] leading-4 text-kumo-inactive uppercase tracking-[0.08em]">{t('management.chat.code')}</span>
                                               <pre className="max-h-56 overflow-auto rounded-xl border border-kumo-line/70 bg-kumo-base p-3 font-mono text-[12px] leading-[18px] text-kumo-subtle whitespace-pre-wrap">
                                                 {toolCall.code}
                                               </pre>
@@ -7556,7 +7561,7 @@ function ChatInterface({
                                           )}
                                           {toolCall.output && (
                                             <>
-                                              <span className="font-mono text-[11px] leading-4 text-kumo-inactive uppercase tracking-[0.08em]">Output</span>
+                                              <span className="font-mono text-[11px] leading-4 text-kumo-inactive uppercase tracking-[0.08em]">{t('management.chat.output')}</span>
                                               <pre className="max-h-56 overflow-auto rounded-xl border border-kumo-line/70 bg-kumo-base p-3 font-mono text-[12px] leading-[18px] text-kumo-subtle whitespace-pre-wrap">
                                                 {toolCall.output}
                                               </pre>
@@ -7688,8 +7693,8 @@ function ChatInterface({
 
       <DeleteConfirmationDialog
         open={deleteTarget !== null}
-        title="Delete conversation?"
-        description={<>This removes <span className="font-medium text-kumo-default">{deleteTarget?.title}</span>. You can&apos;t undo this.</>}
+        title={t('management.chat.deleteConversation')}
+        description={<>{t('management.chat.deleteConversationDescriptionPrefix')} <span className="font-medium text-kumo-default">{deleteTarget?.title}</span>{t('management.chat.deleteConversationDescriptionSuffix')}</>}
         isDeleting={isDeleting}
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null);
