@@ -2,6 +2,39 @@ import type { SupportedLocale } from "@gadgets/workshop-shared/api";
 
 type DateInput = Date | number | string | null | undefined;
 
+const dateTimeFormatterCache = new Map<string, Intl.DateTimeFormat>();
+const numberFormatterCache = new Map<string, Intl.NumberFormat>();
+
+function stableOptionsKey(options: object): string {
+  return JSON.stringify(
+    Object.entries(options).toSorted(([left], [right]) => left.localeCompare(right)),
+  );
+}
+
+function getDateTimeFormatter(
+  locale: SupportedLocale,
+  options: Intl.DateTimeFormatOptions,
+): Intl.DateTimeFormat {
+  const key = `${locale}|${stableOptionsKey(options)}`;
+  const cached = dateTimeFormatterCache.get(key);
+  if (cached) return cached;
+  const formatter = new Intl.DateTimeFormat(locale, options);
+  dateTimeFormatterCache.set(key, formatter);
+  return formatter;
+}
+
+function getNumberFormatter(
+  locale: SupportedLocale,
+  options: Intl.NumberFormatOptions,
+): Intl.NumberFormat {
+  const key = `${locale}|${stableOptionsKey(options)}`;
+  const cached = numberFormatterCache.get(key);
+  if (cached) return cached;
+  const formatter = new Intl.NumberFormat(locale, options);
+  numberFormatterCache.set(key, formatter);
+  return formatter;
+}
+
 function toDate(value: DateInput): Date | null {
   if (value == null) return null;
   const date = value instanceof Date ? value : new Date(value);
@@ -16,7 +49,7 @@ function formatDateValue(
   if (value == null) return "";
   const date = toDate(value);
   if (!date) return "Invalid Date";
-  return new Intl.DateTimeFormat(locale, options).format(date);
+  return getDateTimeFormatter(locale, options).format(date);
 }
 
 const DATE_COMPONENT_KEYS = [
@@ -84,7 +117,7 @@ export function formatNumber(
   options: Intl.NumberFormatOptions = {},
 ): string {
   if (value == null) return "";
-  return new Intl.NumberFormat(locale, options).format(value);
+  return getNumberFormatter(locale, options).format(value);
 }
 
 /** Format a currency amount using the selected locale and currency code. */
@@ -95,5 +128,5 @@ export function formatCurrency(
   options: Intl.NumberFormatOptions = {},
 ): string {
   if (value == null) return "";
-  return new Intl.NumberFormat(locale, { style: "currency", currency, ...options }).format(value);
+  return getNumberFormatter(locale, { ...options, style: "currency", currency }).format(value);
 }
