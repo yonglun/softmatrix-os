@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useRouterState } from '@tanstack/react-router'
 import { List, X } from '@phosphor-icons/react'
 import TopBarNotice from '../../TopBarNotice'
@@ -25,6 +26,7 @@ function readCollapsed(): boolean {
 // minimal top bar. We don't try to gracefully shrink the rail at narrow widths; the overlay model
 // is simpler and matches how the rest of the app handles small screens.
 export default function AppShell({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation()
   const [collapsed, setCollapsed] = useState<boolean>(readCollapsed)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
@@ -103,7 +105,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             onClick={() => setMobileOpen((o) => !o)}
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-label={mobileOpen ? t('shell.closeMenu') : t('shell.openMenu')}
             className="flex h-7 w-7 items-center justify-center rounded-md text-kumo-default transition-colors hover:bg-kumo-tint md:hidden"
           >
             {mobileOpen ? <X size={16} /> : <List size={16} />}
