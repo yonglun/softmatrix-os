@@ -19,6 +19,8 @@ import ResourceConfiguratorHost from './ResourceConfiguratorHost'
 import { WorkshopButton, WorkshopIconButton } from './components/WorkshopControls'
 import { MENU_CONTENT, MENU_ITEM, MENU_ITEM_DANGER } from './components/menuStyles'
 import { useDocumentTitle } from './useDocumentTitle'
+import { useLocale } from './i18n/LocaleProvider'
+import { formatDate } from './i18n/format'
 
 interface Props {
   rpcStub: RpcStub<PublicApi>
@@ -34,6 +36,7 @@ export default function BlueprintLandingPage({ rpcStub }: Props) {
   const navigate = useNavigate()
   const router = useRouter()
   const { isAuthenticated, authenticatedApi, isLoading: authLoading, login } = useAuth(rpcStub)
+  const { locale } = useLocale()
   const toasts = useKumoToastManager()
 
   const [blueprint, setBlueprint] = useState<BlueprintPublicInfo | null>(null)
@@ -823,7 +826,7 @@ export default function BlueprintLandingPage({ rpcStub }: Props) {
               <span className="text-kumo-inactive">•</span>
               <span>v{meta.version}</span>
               <span className="text-kumo-inactive">•</span>
-              <span>Updated {new Date(meta.lastUpdated).toLocaleDateString()}</span>
+              <span>Updated {formatDate(meta.lastUpdated, locale)}</span>
             </div>
           </div>
 

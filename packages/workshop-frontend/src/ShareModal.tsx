@@ -17,6 +17,8 @@ import {
 import { WorkshopButton, WorkshopIconButton } from './components/WorkshopControls'
 import { PersonAvatar } from './components/PersonAvatar'
 import { copyToClipboard } from './clipboard'
+import { useLocale } from './i18n/LocaleProvider'
+import { formatDate } from './i18n/format'
 
 type CollaboratorRow =
   | { kind: 'owner'; profile: AiChatAuthorInfo }
@@ -35,7 +37,7 @@ type Props = {
   authenticatedApi: RpcStub<AuthenticatedApi>
 }
 
-function formatRelativeTime(date: Date): string {
+function formatRelativeTime(date: Date, locale: Parameters<typeof formatDate>[1]): string {
   const now = new Date()
   const diffMs = now.getTime() - date.getTime()
   const diffSeconds = Math.floor(diffMs / 1000)
@@ -47,7 +49,7 @@ function formatRelativeTime(date: Date): string {
   if (diffMinutes < 60) return `${diffMinutes}m ago`
   if (diffHours < 24) return `${diffHours}h ago`
   if (diffDays < 7) return `${diffDays}d ago`
-  return date.toLocaleDateString()
+  return formatDate(date, locale)
 }
 
 const ROLE_LABELS: Record<CollaboratorRole, string> = {
@@ -294,6 +296,7 @@ function sameRequirements(
 }
 
 export default function ShareModal({ open, onClose, overseer, metadata, currentUser, authenticatedApi }: Props) {
+  const { locale } = useLocale()
   const toasts = useKumoToastManager()
   const [collaborators, setCollaborators] = useState<CollaboratorInfo[]>([])
   const [shareLinks, setShareLinks] = useState<ShareLinkInfo[]>([])
@@ -1051,7 +1054,7 @@ export default function ShareModal({ open, onClose, overseer, metadata, currentU
                           ) : (
                             <p className="truncate text-[13px] leading-[17px] font-medium tracking-[-0.25px] text-kumo-default">{sk.note || 'Untitled link'}</p>
                           )}
-                          <p className="truncate text-[12px] leading-[15px] tracking-[-0.15px] text-kumo-subtle">Created by {sk.createdBy.name} · {formatRelativeTime(sk.created)}</p>
+                          <p className="truncate text-[12px] leading-[15px] tracking-[-0.15px] text-kumo-subtle">Created by {sk.createdBy.name} · {formatRelativeTime(sk.created, locale)}</p>
                         </div>
                         {isRenaming ? (
                           <InlineConfirm

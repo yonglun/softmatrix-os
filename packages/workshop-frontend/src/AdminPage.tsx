@@ -10,6 +10,8 @@ import SiteLogo from './components/SiteLogo'
 import SoftmatrixMark from './components/SoftmatrixMark'
 import { useDocumentTitle } from './useDocumentTitle'
 import AdminFormatsPanel from './components/format/AdminFormatsPanel'
+import { useLocale } from './i18n/LocaleProvider'
+import { formatNumber } from './i18n/format'
 
 // Preset accent colors offered in the Theme section ('' = default brand).
 const ACCENT_PRESETS: { label: string; value: string }[] = [
@@ -33,6 +35,7 @@ const BANNER_SWATCH: Record<BannerColor, string> = {
 
 export default function AdminPage() {
   const { authenticatedApi, isAdmin } = useAuthenticatedApi()
+  const { locale } = useLocale()
   const toasts = useKumoToastManager()
   useDocumentTitle('Admin')
 
@@ -706,7 +709,7 @@ export default function AdminPage() {
 
           <div className="flex items-center justify-between mt-3">
             <span className="text-xs text-kumo-subtle">
-              {announcementDraft.length.toLocaleString()} / {MAX_ANNOUNCEMENT_LENGTH.toLocaleString()} characters
+              {formatNumber(announcementDraft.length, locale)} / {formatNumber(MAX_ANNOUNCEMENT_LENGTH, locale)} characters
             </span>
             <div className="flex items-center gap-2">
               {announcementDraft !== savedAnnouncement && (
@@ -761,7 +764,7 @@ export default function AdminPage() {
 
         <div className="flex items-center justify-between mt-3">
           <span className="text-xs text-kumo-subtle">
-            {instructionsDraft.length.toLocaleString()} / {MAX_INSTANCE_INSTRUCTIONS_LENGTH.toLocaleString()} characters
+            {formatNumber(instructionsDraft.length, locale)} / {formatNumber(MAX_INSTANCE_INSTRUCTIONS_LENGTH, locale)} characters
           </span>
           <div className="flex items-center gap-2">
             {instructionsDraft !== savedInstructions && (

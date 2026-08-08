@@ -9,6 +9,8 @@ import { useAvatar, invalidateAvatarCache } from './useAvatar'
 import { compressAvatar, avatarBlobUrl } from './avatarUtils'
 import UsageSettings from './components/billing/UsageSettings'
 import { useDocumentTitle } from './useDocumentTitle'
+import { useLocale } from './i18n/LocaleProvider'
+import { SUPPORTED_LOCALES, isSupportedLocale } from './i18n/locales'
 
 // Shared, on-language control classes (match the rest of the app: Workspaces/Blueprints headers,
 // the gatekeepers toolbar, the command palette). Kept here so the profile page reads as part of the
@@ -80,6 +82,41 @@ function PasswordField({
       ) : description ? (
         <p className="mt-1 text-[12px] tracking-[-0.1px] text-kumo-subtle">{description}</p>
       ) : null}
+    </div>
+  )
+}
+
+/** Render the account language control and report authenticated persistence failures. */
+export function LanguageControl({
+  onPersistenceError,
+}: {
+  onPersistenceError?: () => void
+}) {
+  const { locale, setLocale } = useLocale()
+
+  const handleChange = (value: string) => {
+    if (!isSupportedLocale(value)) return
+    void setLocale(value).catch(() => onPersistenceError?.())
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <div>
+        <FieldLabel>Language / 语言</FieldLabel>
+        <p className="mt-1 text-[12px] text-kumo-subtle">Choose the language used by Softmatrix.</p>
+      </div>
+      <select
+        aria-label="Language / 语言"
+        value={locale}
+        onChange={(event) => handleChange(event.target.value)}
+        className={`${INPUT} max-w-[10rem] cursor-pointer`}
+      >
+        {SUPPORTED_LOCALES.map((supportedLocale) => (
+          <option key={supportedLocale} value={supportedLocale}>
+            {supportedLocale === 'en' ? 'English' : '简体中文'}
+          </option>
+        ))}
+      </select>
     </div>
   )
 }
@@ -374,6 +411,17 @@ export default function SettingsPage() {
                 <Copy size={14} />
               </button>
             </div>
+          </div>
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <SectionLabel>Preferences</SectionLabel>
+          <div className="rounded-xl border border-kumo-line bg-kumo-base p-5">
+            <LanguageControl
+              onPersistenceError={() => {
+                toasts.add({ title: 'Failed to save language preference', variant: 'error' })
+              }}
+            />
           </div>
         </section>
 

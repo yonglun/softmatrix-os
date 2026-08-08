@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Switch, useKumoToastManager } from '@cloudflare/kumo'
 import { CaretRight, Check, Eye, Lightning, ShieldCheck } from '@phosphor-icons/react'
 import { RpcStub } from 'capnweb'
-import { ActionLogEntry, Overseer } from '@gadgets/workshop-shared/api'
+import { ActionLogEntry, Overseer, SupportedLocale } from '@gadgets/workshop-shared/api'
 import { ActionKind } from '@gadgets/workshop-shared/gatekeeper'
 import { GatekeeperIcon } from './components/GatekeeperIcon'
 import { HookToggle } from './components/HookToggle'
@@ -17,6 +17,8 @@ import { useVendorBranding } from './useVendorBranding'
 import { useResolveAction } from './useResolveAction'
 import { safeExternalUrl } from './utils/safeExternalUrl'
 import AutoApproveConfirmDialog from './components/AutoApproveConfirmDialog'
+import { useLocale } from './i18n/LocaleProvider'
+import { formatDate, formatDateTime, formatTime } from './i18n/format'
 
 export type ActivityView = 'review' | 'history' | 'auto'
 
@@ -45,12 +47,12 @@ function timeValue(date: Date | undefined): number {
   return date ? new Date(date).getTime() : 0
 }
 
-function formatClockTime(date: Date): string {
-  return new Date(date).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+function formatClockTime(date: Date, locale: SupportedLocale): string {
+  return formatTime(date, locale, { hour: 'numeric', minute: '2-digit' })
 }
 
-function formatFullDate(date: Date): string {
-  return new Date(date).toLocaleString([], {
+function formatFullDate(date: Date, locale: SupportedLocale): string {
+  return formatDateTime(date, locale, {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
@@ -71,12 +73,12 @@ function startOfDay(date: Date): number {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
 }
 
-function dayLabel(date: Date): string {
+function dayLabel(date: Date, locale: SupportedLocale): string {
   const value = new Date(date)
   const days = Math.round((startOfDay(new Date()) - startOfDay(value)) / 86_400_000)
   if (days === 0) return 'Today'
   if (days === 1) return 'Yesterday'
-  return value.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })
+  return formatDate(value, locale, { month: 'long', day: 'numeric', year: 'numeric' })
 }
 
 function activityStatus(
@@ -116,6 +118,7 @@ export default function Activity({
   onAutoApproveChange,
   autoApproveReloadTrigger,
 }: ActivityProps) {
+  const { locale } = useLocale()
   const { actionsById, isReady } = useActions(overseer)
   const [historyFilter, setHistoryFilter] = useState<HistoryFilter>('all')
   const [processingActions, setProcessingActions] = useState<Set<number>>(new Set())
@@ -142,7 +145,7 @@ export default function Activity({
         timeValue(b.appliedAt ?? b.createdAt) - timeValue(a.appliedAt ?? a.createdAt) || b.id - a.id)
     const groups: { label: string; records: ActionLogEntry[] }[] = []
     for (const record of filtered) {
-      const label = dayLabel(record.appliedAt ?? record.createdAt)
+      const label = dayLabel(record.appliedAt ?? record.createdAt, locale)
       const last = groups.at(-1)
       if (last?.label === label) last.records.push(record)
       else groups.push({ label, records: [record] })
@@ -153,7 +156,7 @@ export default function Activity({
       historyTotal: resolved.length,
       historyShown: filtered.length,
     }
-  }, [actionsById, historyFilter])
+  }, [actionsById, historyFilter, locale])
 
   const resolveAction = useResolveAction(overseer, setProcessingActions)
 
@@ -569,6 +572,7 @@ function HistoryRow({
   togglingHook: boolean
   onToggleHook: (hookId: number, enabled: boolean) => void
 }) {
+  const { locale } = useLocale()
   const resourceUrl = safeExternalUrl(record.resourceUrl)
   const resolvedBy = record.type === 'action' ? record.resolvedBy : undefined
   const autoApproved = record.type === 'action' && record.autoApproved === true
@@ -584,7 +588,7 @@ function HistoryRow({
         className="group grid w-full cursor-pointer grid-cols-[54px_minmax(0,1fr)_auto_16px] items-center gap-3 border-b border-kumo-line/70 px-5 py-[7px] text-left transition-colors hover:bg-kumo-elevated/50"
       >
         <time className="text-[11.5px] tabular-nums leading-4 text-kumo-inactive">
-          {formatClockTime(at)}
+          {formatClockTime(at, locale)}
         </time>
         <span className="flex min-w-0 items-center gap-2">
           <TypeIcon record={record} className="flex-shrink-0 text-kumo-inactive" />
@@ -613,7 +617,7 @@ function HistoryRow({
             </p>
           )}
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11.5px] text-kumo-inactive">
-            <span>{formatFullDate(at)}</span>
+            <span>{formatFullDate(at, locale)}</span>
             <span className="text-kumo-subtle">{record.resourceTitle}</span>
             {resolvedBy && (
               <ResolverBadge profileId={resolvedBy.id}>

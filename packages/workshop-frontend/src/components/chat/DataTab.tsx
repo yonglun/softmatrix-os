@@ -3,8 +3,11 @@ import { Table } from '@cloudflare/kumo'
 import { Badge } from '@cloudflare/kumo'
 import { Button } from '@cloudflare/kumo'
 import { sampleDataRows } from '../../data/chat'
+import { useLocale } from '../../i18n/LocaleProvider'
+import { formatNumber } from '../../i18n/format'
 
 export default function DataTab() {
+  const { locale } = useLocale()
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   function toggleRow(id: string) {
@@ -73,7 +76,7 @@ export default function DataTab() {
                 </Table.Cell>
                 <Table.Cell>
                   <span className="text-sm text-kumo-subtle tabular-nums">
-                    {row.messages.toLocaleString()}
+                    {formatNumber(row.messages, locale)}
                   </span>
                 </Table.Cell>
                 <Table.Cell>
@@ -98,7 +101,7 @@ export default function DataTab() {
           {sampleDataRows.length} rows in channels
         </span>
         <span className="font-mono text-xs text-kumo-subtle">
-          {sampleDataRows.reduce((sum, r) => sum + r.messages, 0).toLocaleString()} total messages
+          {formatNumber(sampleDataRows.reduce((sum, r) => sum + r.messages, 0), locale)} total messages
         </span>
       </div>
     </div>

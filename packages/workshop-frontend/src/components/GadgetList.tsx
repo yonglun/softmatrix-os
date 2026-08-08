@@ -10,6 +10,8 @@ import { BindingBadge, getGradient as getBlueprintGradient, uniqueBindingBadges 
 import { MENU_CONTENT, MENU_ITEM, MENU_ITEM_DANGER } from './menuStyles'
 import { BlueprintPreviewImage } from './BlueprintPreviewImage'
 import DeleteConfirmationDialog from './DeleteConfirmationDialog'
+import { useLocale } from '../i18n/LocaleProvider'
+import { formatCurrency, formatDateTime } from '../i18n/format'
 
 // Neutral monogram for a workspace — matches the sidebar treatment (no per-item color noise).
 function initials(title: string | undefined): string {
@@ -30,8 +32,8 @@ function formatRelativeTime(date: Date): string {
   return `${days}d ago`
 }
 
-function formatCost(cost: number): string {
-  return `$${cost.toFixed(4)}`
+function formatCost(cost: number, locale: Parameters<typeof formatCurrency>[1]): string {
+  return formatCurrency(cost, locale, 'USD', { minimumFractionDigits: 4, maximumFractionDigits: 4 })
 }
 
 function AppRow({
@@ -167,6 +169,7 @@ function AppRow({
 }
 
 export default function GadgetList({ showHeader = true }: { showHeader?: boolean } = {}) {
+  const { locale } = useLocale()
   const { authenticatedApi } = useAuthenticatedApi()
   const toasts = useKumoToastManager()
   const [gadgets, setGadgets] = useState<GadgetMetadataWithTimestamps[]>([])
@@ -434,19 +437,19 @@ export default function GadgetList({ showHeader = true }: { showHeader?: boolean
             <div className="flex justify-between">
               <span className="text-kumo-subtle">Total cost</span>
               <span className="text-kumo-default">
-                {formatCost(infoTarget?.totalCost ?? 0)}
+                {formatCost(infoTarget?.totalCost ?? 0, locale)}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-kumo-subtle">Created</span>
               <span className="text-kumo-default">
-                {infoTarget?.created?.toLocaleString()}
+                {formatDateTime(infoTarget?.created, locale)}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-kumo-subtle">Last active</span>
               <span className="text-kumo-default">
-                {infoTarget?.lastActive?.toLocaleString()}
+                {formatDateTime(infoTarget?.lastActive, locale)}
               </span>
             </div>
           </div>

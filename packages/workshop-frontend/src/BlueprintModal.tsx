@@ -4,6 +4,8 @@ import { ArrowsClockwise, Check, Copy, ImageSquare, Pencil, Plus, Trash, Warning
 import { RpcStub } from 'capnweb'
 import { BlueprintGadgetSummary, GadgetClient, GadgetMetadata, Overseer, BlueprintBindingAnnotation, BlueprintScreenshotUpload } from '@gadgets/workshop-shared/api'
 import { WorkshopButton, WorkshopIconButton, WorkshopInput, WorkshopInputArea } from './components/WorkshopControls'
+import { useLocale } from './i18n/LocaleProvider'
+import { formatDate } from './i18n/format'
 import { copyToClipboard } from './clipboard'
 import {
   BindingCardData,
@@ -576,6 +578,7 @@ function BlueprintRow({
   onConfirmDelete: () => void
   onCancelDelete: () => void
 }) {
+  const { locale } = useLocale()
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
   useEffect(() => {
     if (copyState === 'idle') return
@@ -642,7 +645,7 @@ function BlueprintRow({
               aria-hidden="true"
             />
           )}
-          v{bp.version} · {new Date(bp.codeVersionDate).toLocaleDateString()}
+          v{bp.version} · {formatDate(bp.codeVersionDate, locale)}
         </span>
       </div>
 

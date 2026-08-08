@@ -52,7 +52,7 @@ export function AuthProvider({ children, authenticatedApi, onLogout }: AuthProvi
       // A null preference means legacy storage: retain the local selection and persist it as the
       // authenticated preference so subsequent sessions do not need to migrate again.
       if (serverLocale === null) {
-        setLocale(currentLocaleRef.current)
+        void setLocale(currentLocaleRef.current).catch(() => {})
       } else {
         setLocaleLocally(serverLocale)
       }
