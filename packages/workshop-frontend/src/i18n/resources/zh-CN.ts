@@ -1,8 +1,9 @@
+import { PRODUCT_NAME } from "@gadgets/workshop-shared/product";
 import type en from "./en";
 
 const zhCN = {
   app: {
-    name: "Softmatrix OS",
+    name: PRODUCT_NAME,
     tagline: "安全地构建个人应用和智能体。",
   },
   common: {

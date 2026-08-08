@@ -8,6 +8,10 @@ void i18n.use(initReactI18next).init({
   initAsync: false,
   interpolation: { escapeValue: false },
   lng: "en",
+  parseMissingKeyHandler: (key) => {
+    const fallback = i18n.getResource("en", "translation", key);
+    return typeof fallback === "string" ? fallback : "";
+  },
   resources: {
     en: { translation: en },
     "zh-CN": { translation: zhCN },

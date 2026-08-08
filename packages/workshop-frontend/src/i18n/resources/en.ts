@@ -1,6 +1,8 @@
+import { PRODUCT_NAME } from "@gadgets/workshop-shared/product";
+
 const en = {
   app: {
-    name: "Softmatrix OS",
+    name: PRODUCT_NAME,
     tagline: "Build personal apps and agents safely.",
   },
   common: {

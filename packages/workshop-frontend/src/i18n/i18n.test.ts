@@ -19,6 +19,21 @@ describe("locale contract", () => {
     expect(i18n.t("common.save")).toBe("Save");
   });
 
+  it("never renders a missing translation key", () => {
+    expect(i18n.t("missing.translation.key")).toBe("");
+  });
+
+  it("uses Chinese resources and falls back to English", () => {
+    expect(i18n.t("common.save", { lng: "zh-CN" })).toBe("保存");
+
+    i18n.removeResourceBundle("zh-CN", "translation");
+    try {
+      expect(i18n.t("common.save", { lng: "zh-CN" })).toBe("Save");
+    } finally {
+      i18n.addResourceBundle("zh-CN", "translation", zhCN, true, true);
+    }
+  });
+
   it.each([
     ["zh-CN", "zh-CN"],
     ["zh-Hans", "zh-CN"],
