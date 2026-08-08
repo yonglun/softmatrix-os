@@ -19,6 +19,8 @@ export const LOCALE_STORAGE_KEY = "softmatrix.locale";
 export type LocaleContextValue = {
   locale: SupportedLocale;
   setLocale: (locale: SupportedLocale) => void;
+  /** Internal bridge for applying a server preference without writing it back. */
+  setLocaleLocally: (locale: SupportedLocale) => void;
   /** Internal bridge used by AuthProvider to attach the current authenticated RPC stub. */
   registerAuthenticatedApi: (api: RpcStub<AuthenticatedApi> | null) => void;
 };
@@ -75,18 +77,22 @@ export function LocaleProvider({
     authenticatedApiRef.current = api;
   }, []);
 
-  const setLocale = useCallback((nextLocale: SupportedLocale) => {
+  const setLocaleLocally = useCallback((nextLocale: SupportedLocale) => {
     if (!isSupportedLocale(nextLocale)) return;
     syncLocale(nextLocale);
     persistLocale(nextLocale);
+    setLocaleState(nextLocale);
+  }, []);
+
+  const setLocale = useCallback((nextLocale: SupportedLocale) => {
+    setLocaleLocally(nextLocale);
     const authenticatedApi = authenticatedApiRef.current;
     if (authenticatedApi) {
       void authenticatedApi.setLocale(nextLocale).catch(() => {
         // Local persistence remains the fallback when the authenticated RPC fails.
       });
     }
-    setLocaleState(nextLocale);
-  }, []);
+  }, [setLocaleLocally]);
 
   useEffect(() => {
     syncLocale(locale);
@@ -94,8 +100,8 @@ export function LocaleProvider({
   }, [locale]);
 
   const value = useMemo(
-    () => ({ locale, setLocale, registerAuthenticatedApi }),
-    [locale, setLocale, registerAuthenticatedApi],
+    () => ({ locale, setLocale, setLocaleLocally, registerAuthenticatedApi }),
+    [locale, setLocale, setLocaleLocally, registerAuthenticatedApi],
   );
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }

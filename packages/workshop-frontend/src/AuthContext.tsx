@@ -27,7 +27,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children, authenticatedApi, onLogout }: AuthProviderProps) {
   const [currentUser, setCurrentUser] = useState<AiChatAuthorInfo | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
-  const { locale: currentLocale, setLocale, registerAuthenticatedApi } = useLocale()
+  const { locale: currentLocale, setLocale, setLocaleLocally, registerAuthenticatedApi } = useLocale()
   const currentLocaleRef = useRef(currentLocale)
   currentLocaleRef.current = currentLocale
   const [localeReady, setLocaleReady] = useState(false)
@@ -42,12 +42,20 @@ export function AuthProvider({ children, authenticatedApi, onLogout }: AuthProvi
         locale === 'en' || locale === 'zh-CN' ? locale : null,
       )
       authenticatedLocaleReads.set(authenticatedApi, pending)
+      pending.then(
+        () => { if (authenticatedLocaleReads.get(authenticatedApi) === pending) authenticatedLocaleReads.delete(authenticatedApi) },
+        () => { if (authenticatedLocaleReads.get(authenticatedApi) === pending) authenticatedLocaleReads.delete(authenticatedApi) },
+      )
     }
     pending.then((serverLocale) => {
       if (cancelled) return
       // A null preference means legacy storage: retain the local selection and persist it as the
       // authenticated preference so subsequent sessions do not need to migrate again.
-      setLocale(serverLocale ?? currentLocaleRef.current)
+      if (serverLocale === null) {
+        setLocale(currentLocaleRef.current)
+      } else {
+        setLocaleLocally(serverLocale)
+      }
       setLocaleReady(true)
     }).catch(() => {
       if (!cancelled) setLocaleReady(true)
@@ -56,7 +64,7 @@ export function AuthProvider({ children, authenticatedApi, onLogout }: AuthProvi
       cancelled = true
       registerAuthenticatedApi(null)
     }
-  }, [authenticatedApi, registerAuthenticatedApi, setLocale])
+  }, [authenticatedApi, registerAuthenticatedApi, setLocale, setLocaleLocally])
 
   useEffect(() => {
     let cancelled = false
