@@ -836,7 +836,9 @@ export async function handleOidcCallback(req: Request, _env: Env, ctx: Execution
   const url = new URL(req.url);
   const state = url.searchParams.getAll("state");
   const code = url.searchParams.getAll("code");
-  if (state.length !== 1 || code.length !== 1 || !state[0] || !code[0]) {
+  const errors = url.searchParams.getAll("error");
+  if (state.length !== 1 || (!((code.length === 1 && errors.length === 0)
+      || (code.length === 0 && errors.length === 1))) || !state[0]) {
     return oidcCallbackResponse(400);
   }
 

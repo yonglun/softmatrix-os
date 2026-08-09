@@ -117,6 +117,18 @@ describe("OIDC authorization-code protocol", () => {
       .rejects.toMatchObject({ code: "OIDC_STATE_INVALID" });
   });
 
+  it("turns a provider cancellation into a stable provider error", async () => {
+    const { fetchImpl, setExpectedNonce } = await fixtureFetch();
+    const { stored } = await createAuthorizationRequest(config, "state-123", { fetch: fetchImpl });
+    setExpectedNonce(stored.nonce);
+    await expect(exchangeAuthorizationCode(
+      config,
+      stored,
+      `${config.redirectUri}?error=access_denied&state=state-123`,
+      { fetch: fetchImpl },
+    )).rejects.toMatchObject({ code: "OIDC_PROVIDER_UNAVAILABLE" });
+  });
+
   it.each(["issuer", "audience", "nonce", "expired"])(
     "rejects an invalid %s ID Token claim",
     async (invalid) => {

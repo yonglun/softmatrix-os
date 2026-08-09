@@ -46,6 +46,17 @@ describe("OIDC callback endpoint", () => {
     expect(fixture.complete).not.toHaveBeenCalled();
   });
 
+  it("forwards a provider cancellation with state to the attempt", async () => {
+    const fixture = callbackContext();
+    const response = await handleOidcCallback(
+      new Request("https://softmatrix.example/api/auth/oidc/callback?error=access_denied&state=attempt-id"),
+      {} as never,
+      fixture.ctx as never,
+    );
+    expect(response.status).toBe(200);
+    expect(fixture.complete).toHaveBeenCalled();
+  });
+
   it("accepts only GET callbacks", async () => {
     const fixture = callbackContext();
     const response = await handleOidcCallback(

@@ -114,9 +114,12 @@ function validateAttemptState(config: OidcConfig, stored: StoredOidcRequest, cal
     throw protocolError("OIDC_STATE_INVALID", "OIDC callback URL is invalid.");
   }
   const expectedRedirect = new URL(config.redirectUri);
+  const codeCount = callback.searchParams.getAll("code").length;
+  const errorCount = callback.searchParams.getAll("error").length;
   if (callback.origin !== expectedRedirect.origin || callback.pathname !== expectedRedirect.pathname
       || callback.searchParams.getAll("state").length !== 1
-      || callback.searchParams.getAll("code").length !== 1
+      || (codeCount !== 1 && errorCount !== 1)
+      || (codeCount === 1 && errorCount === 1)
       || callback.searchParams.get("state") !== stored.state) {
     throw protocolError("OIDC_STATE_INVALID", "OIDC login state is invalid or expired.");
   }
@@ -160,6 +163,9 @@ export async function exchangeAuthorizationCode(
 ): Promise<VerifiedOidcIdentity> {
   const now = options?.now?.() ?? Date.now();
   const callback = validateAttemptState(config, stored, callbackUrl, now);
+  if (callback.searchParams.has("error")) {
+    throw protocolError("OIDC_PROVIDER_UNAVAILABLE", "The OIDC provider did not complete sign-in.");
+  }
   const entry = await discover(config, options);
   const client = clientFor(config);
   const fetcher = fetchFor(options);
