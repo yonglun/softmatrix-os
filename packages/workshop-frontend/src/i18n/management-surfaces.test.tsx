@@ -3,8 +3,12 @@
 
 import { act } from "react";
 import { afterEach, describe, expect, it } from "vitest";
+import { Toasty } from "@cloudflare/kumo";
 import { renderWithLocale } from "../test/renderWithLocale";
 import { useTranslation } from "react-i18next";
+import ConnectAccountModal from "../ConnectAccountModal";
+import type { AuthenticatedApi } from "@gadgets/workshop-shared/api";
+import type { RpcStub } from "capnweb";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -29,6 +33,25 @@ afterEach(() => {
 });
 
 describe("chat and management surface localization", () => {
+  it("renders a real management modal in Chinese with an empty typed API", async () => {
+    const authenticatedApi = {
+      listGatekeeperVendors: async () => [],
+    } as unknown as RpcStub<AuthenticatedApi>;
+    const rendered = renderWithLocale(
+      <Toasty><ConnectAccountModal
+        visible
+        onCancel={() => {}}
+        onInitiated={() => {}}
+        authenticatedApi={authenticatedApi}
+      /></Toasty>,
+      "zh-CN",
+    );
+    await act(async () => {});
+    expect(document.body.textContent).toContain("暂无可连接的服务");
+    expect(document.body.textContent).not.toContain("management.");
+    rendered.unmount();
+  });
+
   it("renders English interpolation and plural boundaries while preserving provider/vendor text", async () => {
     const rendered = renderWithLocale(
       <ManagementProbe providerName="Provider Δ" vendorDescription="Vendor supplied description — keep verbatim" />,

@@ -538,9 +538,7 @@ export default function AdminPage() {
         <div className="bg-kumo-elevated border border-kumo-line rounded-xl p-6">
           <h2 className="text-lg font-semibold text-kumo-strong mb-1">{t('management.admin.theme')}</h2>
           <p className="text-sm text-kumo-subtle mb-5">
-            Accent color used for buttons, links, and highlights. Changes preview live here; click
-            Save to apply for everyone (on their next connection). Backgrounds keep the default
-            warm theme.
+            {t('management.admin.themeDescription')}
           </p>
 
           <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -579,7 +577,7 @@ export default function AdminPage() {
               {t('management.admin.custom')}
             </label>
             <span className="text-xs font-mono text-kumo-subtle">
-              {accentDraft || `${DEFAULT_ACCENT_COLOR} (default)`}
+              {accentDraft || t('management.admin.defaultColorValue', { value: DEFAULT_ACCENT_COLOR })}
             </span>
             <div className="flex-1" />
             {accentDirty && (
@@ -620,11 +618,11 @@ export default function AdminPage() {
             value={bannerTextDraft}
             onValueChange={setBannerTextDraft}
             rows={1}
-            placeholder={'e.g. \uD83C\uDF89 New: blueprints now support imports \u2014 [learn more](https://example.com).'}
+            placeholder={t('management.admin.bannerPlaceholder')}
             maxLength={MAX_ANNOUNCEMENT_LENGTH}
             error={
               bannerTextDraft.length > MAX_ANNOUNCEMENT_LENGTH
-                ? `Too long by ${bannerTextDraft.length - MAX_ANNOUNCEMENT_LENGTH} characters`
+                ? t('management.admin.tooLong', { count: bannerTextDraft.length - MAX_ANNOUNCEMENT_LENGTH })
                 : undefined
             }
           />
@@ -650,7 +648,7 @@ export default function AdminPage() {
                         className="w-4 h-4 rounded-full border border-kumo-line"
                         style={{ background: BANNER_SWATCH[c] }}
                       />
-                      {c.charAt(0).toUpperCase() + c.slice(1)}
+                      {t(`management.admin.color${c.charAt(0).toUpperCase() + c.slice(1)}` as const)}
                     </button>
                   )
                 })}
@@ -690,9 +688,7 @@ export default function AdminPage() {
         <div className="bg-kumo-elevated border border-kumo-line rounded-xl p-6">
           <h2 className="text-lg font-semibold text-kumo-strong mb-1">{t('management.admin.announcement')}</h2>
           <p className="text-sm text-kumo-subtle mb-5">
-            Shown centered in the top navigation bar. Markdown is supported, so you can include
-            links. Keep it short — it renders on a single line. Leave empty to show nothing. Applies
-            on each user&rsquo;s next connection.
+            {t('management.admin.announcementDescription')}
           </p>
 
           <Textarea
@@ -700,18 +696,18 @@ export default function AdminPage() {
             value={announcementDraft}
             onValueChange={setAnnouncementDraft}
             rows={1}
-            placeholder={'e.g. Heads up: scheduled maintenance Saturday \u2014 see [status](https://status.example.com).'}
+            placeholder={t('management.admin.announcementPlaceholder')}
             maxLength={MAX_ANNOUNCEMENT_LENGTH}
             error={
               announcementDraft.length > MAX_ANNOUNCEMENT_LENGTH
-                ? `Too long by ${announcementDraft.length - MAX_ANNOUNCEMENT_LENGTH} characters`
+                ? t('management.admin.tooLong', { count: announcementDraft.length - MAX_ANNOUNCEMENT_LENGTH })
                 : undefined
             }
           />
 
           <div className="flex items-center justify-between mt-3">
             <span className="text-xs text-kumo-subtle">
-              {formatNumber(announcementDraft.length, locale)} / {formatNumber(MAX_ANNOUNCEMENT_LENGTH, locale)} characters
+              {t('management.admin.characterCount', { current: formatNumber(announcementDraft.length, locale), max: formatNumber(MAX_ANNOUNCEMENT_LENGTH, locale) })}
             </span>
             <div className="flex items-center gap-2">
               {announcementDraft !== savedAnnouncement && (
@@ -746,8 +742,7 @@ export default function AdminPage() {
       <div className="bg-kumo-elevated border border-kumo-line rounded-xl p-6">
         <h2 className="text-lg font-semibold text-kumo-strong mb-1">{t('management.admin.instructions')}</h2>
         <p className="text-sm text-kumo-subtle mb-5">
-          Extra instructions added to every agent&rsquo;s system prompt on this deployment. Use this
-          for instance-specific context, conventions, or guardrails.
+          {t('management.admin.instructionsDescription')}
         </p>
 
         <Textarea
@@ -755,18 +750,18 @@ export default function AdminPage() {
           value={instructionsDraft}
           onValueChange={setInstructionsDraft}
           rows={6}
-          placeholder={'e.g. ACME Corp is a logistics company that helps small businesses ship\ninternationally. Our team builds internal tools and dashboards to track shipments.'}
+          placeholder={t('management.admin.instructionsPlaceholder')}
           maxLength={MAX_INSTANCE_INSTRUCTIONS_LENGTH}
           error={
             instructionsDraft.length > MAX_INSTANCE_INSTRUCTIONS_LENGTH
-              ? `Too long by ${instructionsDraft.length - MAX_INSTANCE_INSTRUCTIONS_LENGTH} characters`
+              ? t('management.admin.tooLong', { count: instructionsDraft.length - MAX_INSTANCE_INSTRUCTIONS_LENGTH })
               : undefined
           }
         />
 
         <div className="flex items-center justify-between mt-3">
           <span className="text-xs text-kumo-subtle">
-            {formatNumber(instructionsDraft.length, locale)} / {formatNumber(MAX_INSTANCE_INSTRUCTIONS_LENGTH, locale)} characters
+            {t('management.admin.characterCount', { current: formatNumber(instructionsDraft.length, locale), max: formatNumber(MAX_INSTANCE_INSTRUCTIONS_LENGTH, locale) })}
           </span>
           <div className="flex items-center gap-2">
             {instructionsDraft !== savedInstructions && (

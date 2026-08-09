@@ -447,7 +447,7 @@ export default function ResourcePicker({
     } finally {
       setGrantingAccount(current => current === accountId ? null : current)
     }
-  }, [authenticatedApi, toasts])
+  }, [authenticatedApi, t, toasts])
 
   // --- Reconnect expired account handler ---
 
@@ -463,7 +463,7 @@ export default function ResourcePicker({
       toasts.add({ title: t('management.resources.reauthFailed'), variant: 'error' })
       setReconnectingAccount(null)
     }
-  }, [authenticatedApi])
+  }, [authenticatedApi, t, toasts])
 
   // --- Render ---
 

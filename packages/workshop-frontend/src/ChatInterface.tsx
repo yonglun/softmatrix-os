@@ -122,6 +122,7 @@ import { useSlashCommandPicker } from "./components/chat/SlashCommandPicker";
 import { formatFullTimestamp } from "./utils/formatTimestamp";
 import { useLocale } from "./i18n/LocaleProvider";
 import { useTranslation } from 'react-i18next';
+import i18n from './i18n/i18n';
 import { formatCurrency, formatDate, formatNumber, formatTime } from "./i18n/format";
 import { copyToClipboard } from "./clipboard";
 
@@ -171,13 +172,13 @@ function CreatedGadgetChatCard({
             <span className="mt-0.5 flex items-center gap-1.5 text-[12px] text-kumo-subtle">
               {gadget.isPending && (
                 <span className="rounded-full bg-kumo-fill px-1.5 py-0.5 text-[10px] font-medium leading-none">
-                  Draft
+                  {chatText("draft")}
                 </span>
               )}
               <span>
                 {gadget.isPending
-                    ? `New ${formatOf(gadget.output).noun.toLowerCase()} · Click to preview`
-                    : `${formatOf(gadget.output).noun} · Click to open`}
+                    ? chatText("newOutputPreview", { output: formatOf(gadget.output).noun.toLowerCase() })
+                    : chatText("outputOpen", { output: formatOf(gadget.output).noun })}
               </span>
             </span>
           </span>
@@ -211,9 +212,9 @@ type DraftChatState = {
 type ChatListScope = "direct" | "agents" | "all";
 
 const CHAT_LIST_SCOPE_LABELS: Record<ChatListScope, string> = {
-  all: "All",
-  direct: "Started by people",
-  agents: "Started by agents",
+  all: "all",
+  direct: "direct",
+  agents: "agents",
 };
 
 const SHOW_THINKING_TRACES_KEY = "showThinkingTraces";
@@ -611,6 +612,10 @@ function formatGadgetBindingTarget(
   return gadget ? `${gadget}.${name}` : name;
 }
 
+function chatText(key: string, options?: Record<string, unknown>): string {
+  return i18n.t(`management.chat.${key}`, options);
+}
+
 // Convert raw tool calls into user-facing transcript labels.
 // What a `createGadget` call produced. Read from the gadget's own stamped output rather than
 // re-derived from the blueprint, so any blueprint declaring a format counts, not just promoted
@@ -632,28 +637,28 @@ function getToolCallSummary(
 ): { verb: string; target?: string } {
   switch (tc.toolName) {
     case "readFile":
-      return { verb: "Read", target: tc.input.filename };
+      return { verb: chatText("tool.read"), target: tc.input.filename };
     case "writeFile":
-      return { verb: "Wrote", target: tc.input.filename };
+      return { verb: chatText("tool.wrote"), target: tc.input.filename };
     case "editFile":
-      return { verb: "Edited", target: tc.input.filename };
+      return { verb: chatText("tool.edited"), target: tc.input.filename };
     case "describeBinding":
-      return { verb: "Inspected", target: `${String(tc.input.name)} binding` };
+      return { verb: chatText("tool.inspected"), target: `${String(tc.input.name)} ${chatText("tool.binding")}` };
     case "setBindingHook":
       return {
-        verb: "Connected",
+        verb: chatText("tool.connected"),
         target: tc.input.entrypoint
           ? `${tc.input.bindingName} → ${tc.input.entrypoint}`
           : tc.input.bindingName,
       };
     case "setGadgetBinding":
       return {
-        verb: "Wired up",
+        verb: chatText("tool.wired"),
         target: formatGadgetBindingTarget(tc.input.gadget, tc.input.name ?? tc.input.source),
       };
     // Obsolete predecessor of `setGadgetBinding`; appears only in old chat logs.
     case "saveCapsuleAsBinding":
-      return { verb: "Saved resource", target: tc.input.bindingName };
+      return { verb: chatText("tool.savedResource"), target: tc.input.bindingName };
     case "createGadget": {
 
       const output = outputOf?.(tc);
@@ -667,7 +672,7 @@ function getToolCallSummary(
         .map((line) => line.trim())
         .find((line) => line.length > 0);
       return {
-        verb: "Ran code",
+        verb: chatText("tool.ranCode"),
         target: firstLine
           ? firstLine.length > 60
             ? `${firstLine.slice(0, 57)}…`
@@ -676,7 +681,7 @@ function getToolCallSummary(
       };
     }
     case "giveUp":
-      return { verb: "Stopped" };
+      return { verb: chatText("tool.stopped") };
     case "webFetch": {
       let target = tc.input.url;
       try {
@@ -684,16 +689,16 @@ function getToolCallSummary(
       } catch {
         // Leave as the raw URL.
       }
-      return { verb: "Fetched", target };
+      return { verb: chatText("tool.fetched"), target };
     }
     case "observeUserChanges":
-      return { verb: "Observed user changes" };
+      return { verb: chatText("tool.observedChanges") };
     case "listBlueprints":
-      return { verb: "Listed blueprints" };
+      return { verb: chatText("tool.listedBlueprints") };
     case "listConnectableResources":
-      return { verb: "Listed connectable resources", target: tc.input.vendorId };
+      return { verb: chatText("tool.listedResources"), target: tc.input.vendorId };
     case "requestConnection":
-      return { verb: "Requested connection", target: tc.input.vendorId };
+      return { verb: chatText("tool.requestedConnection"), target: tc.input.vendorId };
   }
   // Compile-time exhaustiveness check.
   const _exhaustive: never = tc;
@@ -729,50 +734,42 @@ function lowerFirst(text: string): string {
   return text ? text[0].toLowerCase() + text.slice(1) : text;
 }
 
-function pluralize(count: number, singular: string, plural = `${singular}s`): string {
-  return `${count} ${count === 1 ? singular : plural}`;
-}
-
-function formatTimes(count: number): string {
-  return pluralize(count, "time");
-}
-
 function describeObservationCount(count: number): string {
-  return count === 1 ? "Read 1 resource" : `${count} resource reads`;
+  return chatText(count === 1 ? "tool.readResourceOne" : "tool.readResourceOther", { count });
 }
 
 function describeToolCallCount(toolName: AiToolCall["toolName"], count: number): string {
   switch (toolName) {
     case "readFile":
-      return `Read ${pluralize(count, "file")}`;
+      return chatText(count === 1 ? "tool.readFileOne" : "tool.readFileOther", { count });
     case "writeFile":
-      return `Wrote ${pluralize(count, "file")}`;
+      return chatText(count === 1 ? "tool.wroteFileOne" : "tool.wroteFileOther", { count });
     case "editFile":
-      return count === 1 ? "Made 1 edit" : `Made ${count} edits`;
+      return chatText(count === 1 ? "tool.editedOne" : "tool.editedOther", { count });
     case "webFetch":
-      return `Fetched ${pluralize(count, "page")}`;
+      return chatText(count === 1 ? "tool.fetchedPageOne" : "tool.fetchedPageOther", { count });
     case "executeCode":
-      return count === 1 ? "Ran code" : `Ran code ${formatTimes(count)}`;
+      return chatText(count === 1 ? "tool.ranCodeOne" : "tool.ranCodeOther", { count });
     case "describeBinding":
-      return `Inspected ${pluralize(count, "binding")}`;
+      return chatText(count === 1 ? "tool.inspectedBindingOne" : "tool.inspectedBindingOther", { count });
     case "setBindingHook":
-      return `Connected ${pluralize(count, "binding")}`;
+      return chatText(count === 1 ? "tool.connectedBindingOne" : "tool.connectedBindingOther", { count });
     case "setGadgetBinding":
-      return `Wired up ${pluralize(count, "binding")}`;
+      return chatText(count === 1 ? "tool.wiredBindingOne" : "tool.wiredBindingOther", { count });
     case "saveCapsuleAsBinding":
-      return `Saved ${pluralize(count, "resource")}`;
+      return chatText(count === 1 ? "tool.savedResourceOne" : "tool.savedResourceOther", { count });
     case "createGadget":
-      return `Created ${pluralize(count, "gadget")}`;
+      return chatText(count === 1 ? "tool.createdGadgetOne" : "tool.createdGadgetOther", { count });
     case "observeUserChanges":
-      return `Observed ${pluralize(count, "change set")}`;
+      return chatText(count === 1 ? "tool.observedChangeOne" : "tool.observedChangeOther", { count });
     case "giveUp":
-      return count === 1 ? "Stopped" : `Stopped ${count} times`;
+      return chatText(count === 1 ? "tool.stoppedOne" : "tool.stoppedOther", { count });
     case "listBlueprints":
-      return `Listed blueprints`;
+      return chatText("tool.listedBlueprints");
     case "listConnectableResources":
-      return `Listed connectable resources`;
+      return chatText("tool.listedResources");
     case "requestConnection":
-      return count === 1 ? "Requested a connection" : `Requested ${count} connections`;
+      return chatText(count === 1 ? "tool.requestedConnectionOne" : "tool.requestedConnectionOther", { count });
   }
   const _exhaustive: never = toolName;
   return _exhaustive;
@@ -816,31 +813,31 @@ function getToolIcon(
 function getProvisionalToolLabel(toolName: AiToolCall["toolName"] | null | undefined) {
   switch (toolName) {
     case "readFile":
-      return "Reading file";
+      return chatText("tool.readingFile");
     case "writeFile":
-      return "Writing file";
+      return chatText("tool.writingFile");
     case "editFile":
-      return "Editing file";
+      return chatText("tool.editingFile");
     case "describeBinding":
-      return "Inspecting binding";
+      return chatText("tool.inspectingBinding");
     case "setBindingHook":
-      return "Connecting binding";
+      return chatText("tool.connectingBinding");
     case "setGadgetBinding":
-      return "Wiring up binding";
+      return chatText("tool.wiringBinding");
     case "saveCapsuleAsBinding":
-      return "Saving resource";
+      return chatText("tool.savingResource");
     case "createGadget":
-      return "Creating gadget";
+      return chatText("tool.creatingGadget");
     case "executeCode":
-      return "Running code";
+      return chatText("tool.runningCode");
     case "webFetch":
-      return "Fetching web page";
+      return chatText("tool.fetchingPage");
     case "observeUserChanges":
-      return "Observing user changes";
+      return chatText("tool.observingChanges");
     case "giveUp":
-      return "Stopping";
+      return chatText("tool.stopping");
     default:
-      return "Using tool";
+      return chatText("tool.usingTool");
   }
 }
 
@@ -851,21 +848,21 @@ function getToolTarget(tc: AiToolCall): string | undefined {
 // Present-tense verb for an in-progress tool call.
 function getProvisionalToolVerb(toolName: AiToolCall["toolName"]): string {
   switch (toolName) {
-    case "readFile": return "Reading";
-    case "writeFile": return "Writing";
-    case "editFile": return "Editing";
-    case "describeBinding": return "Inspecting";
-    case "setBindingHook": return "Connecting";
-    case "setGadgetBinding": return "Wiring up";
-    case "saveCapsuleAsBinding": return "Saving";
-    case "createGadget": return "Creating gadget";
-    case "executeCode": return "Running code";
-    case "webFetch": return "Fetching";
-    case "observeUserChanges": return "Observing user changes";
-    case "giveUp": return "Stopping";
-    case "listBlueprints": return "Listing blueprints";
-    case "listConnectableResources": return "Listing connectable resources";
-    case "requestConnection": return "Requesting a connection";
+    case "readFile": return chatText("tool.reading");
+    case "writeFile": return chatText("tool.writing");
+    case "editFile": return chatText("tool.editing");
+    case "describeBinding": return chatText("tool.inspecting");
+    case "setBindingHook": return chatText("tool.connecting");
+    case "setGadgetBinding": return chatText("tool.wiring");
+    case "saveCapsuleAsBinding": return chatText("tool.saving");
+    case "createGadget": return chatText("tool.creatingGadget");
+    case "executeCode": return chatText("tool.runningCode");
+    case "webFetch": return chatText("tool.fetching");
+    case "observeUserChanges": return chatText("tool.observing");
+    case "giveUp": return chatText("tool.stopping");
+    case "listBlueprints": return chatText("tool.listingBlueprints");
+    case "listConnectableResources": return chatText("tool.listingResources");
+    case "requestConnection": return chatText("tool.requestingConnection");
   }
   const _exhaustive: never = toolName;
   return _exhaustive;
@@ -875,21 +872,21 @@ function getProvisionalToolVerb(toolName: AiToolCall["toolName"]): string {
 function describeProvisionalToolCount(toolName: AiToolCall["toolName"], count: number): string {
   if (count <= 1) return getProvisionalToolLabel(toolName);
   switch (toolName) {
-    case "readFile": return `Reading ${pluralize(count, "file")}`;
-    case "writeFile": return `Writing ${pluralize(count, "file")}`;
-    case "editFile": return `Making ${count} edits`;
-    case "webFetch": return `Fetching ${pluralize(count, "page")}`;
-    case "executeCode": return count === 1 ? "Running code" : `Running code ${formatTimes(count)}`;
-    case "describeBinding": return `Inspecting ${pluralize(count, "binding")}`;
-    case "setBindingHook": return `Connecting ${pluralize(count, "binding")}`;
-    case "setGadgetBinding": return `Wiring up ${pluralize(count, "binding")}`;
-    case "saveCapsuleAsBinding": return `Saving ${pluralize(count, "resource")}`;
-    case "createGadget": return `Creating ${pluralize(count, "gadget")}`;
-    case "observeUserChanges": return `Observing ${pluralize(count, "change set")}`;
-    case "giveUp": return "Stopping";
-    case "listBlueprints": return "Listing blueprints";
-    case "listConnectableResources": return "Listing connectable resources";
-    case "requestConnection": return `Requesting ${pluralize(count, "connection")}`;
+    case "readFile": return chatText("tool.readingFileOther", { count });
+    case "writeFile": return chatText("tool.writingFileOther", { count });
+    case "editFile": return chatText("tool.editingOther", { count });
+    case "webFetch": return chatText("tool.fetchingPageOther", { count });
+    case "executeCode": return chatText("tool.runningCodeOther", { count });
+    case "describeBinding": return chatText("tool.inspectingBindingOther", { count });
+    case "setBindingHook": return chatText("tool.connectingBindingOther", { count });
+    case "setGadgetBinding": return chatText("tool.wiringBindingOther", { count });
+    case "saveCapsuleAsBinding": return chatText("tool.savingResourceOther", { count });
+    case "createGadget": return chatText("tool.creatingGadgetOther", { count });
+    case "observeUserChanges": return chatText("tool.observingChangeOther", { count });
+    case "giveUp": return chatText("tool.stopping");
+    case "listBlueprints": return chatText("tool.listingBlueprints");
+    case "listConnectableResources": return chatText("tool.listingResources");
+    case "requestConnection": return chatText("tool.requestingConnectionOther", { count });
   }
   const _exhaustive: never = toolName;
   return _exhaustive;
@@ -901,7 +898,7 @@ function buildProvisionalToolSummary(
 ): { label: string; detailLines: string[] } {
 
   if (calls.length === 1 && calls[0].outputFormat) {
-    return { label: `Creating ${calls[0].outputFormat.noun}`, detailLines: [] };
+    return { label: `${chatText("tool.creating")} ${calls[0].outputFormat.noun}`, detailLines: [] };
   }
   const toolNames = Array.from(
     new Set(calls.map((c) => c.toolName).filter((n): n is AiToolCall["toolName"] => !!n)),
@@ -911,7 +908,7 @@ function buildProvisionalToolSummary(
   );
 
   if (toolNames.length === 0) {
-    return { label: "Using tool", detailLines: [] };
+    return { label: chatText("tool.usingTool"), detailLines: [] };
   }
 
   if (toolNames.length > 1) {
@@ -1594,7 +1591,9 @@ const NestedObservationRow = memo(function NestedObservationRow({
 }) {
   const key = `observation-${observation.chatId}-${observation.sequence}`;
   const log = observation.actionLog;
-  const label = `Read ${log.description.title || log.resourceTitle || "resource"}`;
+  const label = chatText("tool.readResource", {
+    resource: log.description.title || log.resourceTitle || "resource",
+  });
 
   return (
     <div className="group/nested">
@@ -2058,7 +2057,7 @@ export const ChatInput = ({
       setPendingAttachments((prev) => prev.map((attachment) => attachment.id === id ? {
         ...attachment,
         uploadState: "error",
-        error: err?.message || "Upload failed",
+        error: err?.message || t('management.chat.uploadError'),
       } : attachment));
       toasts.add({ title: err?.message || t('management.chat.uploadFailed'), variant: "error" });
     }
@@ -2069,14 +2068,14 @@ export const ChatInput = ({
 
     const initialRoom = MAX_PENDING_ATTACHMENTS - pendingAttachmentsRef.current.length;
     if (initialRoom <= 0) {
-      toasts.add({ title: `You can attach up to ${MAX_PENDING_ATTACHMENTS} attachments`, variant: "error" });
+      toasts.add({ title: t('management.chat.attachmentMax', { count: MAX_PENDING_ATTACHMENTS }), variant: "error" });
       return;
     }
     const accepted = attachmentFiles.slice(0, initialRoom);
     if (attachmentFiles.length > initialRoom) {
       const title = initialRoom === 1
-        ? "Only the first attachment was attached"
-        : `Only the first ${initialRoom} attachments were attached`;
+        ? t('management.chat.firstAttachmentOnly')
+        : t('management.chat.firstAttachmentsOnly', { count: initialRoom });
       toasts.add({ title, variant: "error" });
     }
 
@@ -2095,12 +2094,12 @@ export const ChatInput = ({
 
       const { file, blob, mimeType } = result.value;
       if (pendingAttachmentsRef.current.length >= MAX_PENDING_ATTACHMENTS) {
-        toasts.add({ title: `You can attach up to ${MAX_PENDING_ATTACHMENTS} attachments`, variant: "error" });
+        toasts.add({ title: t('management.chat.attachmentMax', { count: MAX_PENDING_ATTACHMENTS }), variant: "error" });
         continue;
       }
       const totalPendingBytes = pendingAttachmentsRef.current.reduce((sum, attachment) => sum + attachment.blob.size, 0);
       if (totalPendingBytes + blob.size > MAX_CHAT_ATTACHMENT_TOTAL_BYTES) {
-        toasts.add({ title: `Attached files must total ${formatAttachmentSize(MAX_CHAT_ATTACHMENT_TOTAL_BYTES)} or less`, variant: "error" });
+        toasts.add({ title: t('management.chat.attachmentTotalMax', { size: formatAttachmentSize(MAX_CHAT_ATTACHMENT_TOTAL_BYTES) }), variant: "error" });
         continue;
       }
       const id = crypto.randomUUID();
@@ -2352,7 +2351,7 @@ export const ChatInput = ({
         // position 0 would mean the text no longer starts with "/".
         let parsed = parseSlashCommandInput(messageInput, 1);
         if (!parsed) {
-          toasts.add({ title: "Slash command is invalid", variant: "error" });
+          toasts.add({ title: t('management.chat.invalidSlashCommand'), variant: "error" });
           return;
         }
         let match: SlashCommandChoice | null;
@@ -2364,7 +2363,7 @@ export const ChatInput = ({
           return;
         }
         if (!match) {
-          toasts.add({ title: "Choose a slash command", variant: "error" });
+          toasts.add({ title: t('management.chat.chooseSlashCommand'), variant: "error" });
           return;
         }
         slashCommand = match;
@@ -2382,7 +2381,7 @@ export const ChatInput = ({
       }
 
       if (slashCommand && (inputCapsules.length > 0 || readyAttachments.length > 0)) {
-        toasts.add({ title: "Slash commands cannot include resources or attachments", variant: "error" });
+        toasts.add({ title: t('management.chat.slashCommandAttachments'), variant: "error" });
         return;
       }
       let message: string | SlashCommandRequest = messageInput;
@@ -2964,7 +2963,7 @@ export const ChatInput = ({
       ? "warning"
       : "log";
   const selectedModelLabel = selectedModel == null
-    ? "No agent"
+    ? t('management.chat.noAgent')
     : models.find((model) => model.id === selectedModel)?.name ?? selectedModel;
 
   const hasReadyAttachment = pendingAttachments.some(
@@ -3018,8 +3017,10 @@ export const ChatInput = ({
               >
                 <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${logDotClass}`} />
                 <span className="truncate">
-                  Send {pendingConsoleLogCount} captured {logKind}
-                  {pendingConsoleLogCount !== 1 ? "s" : ""} to chat
+                  {t('management.chat.sendCapturedLogs', {
+                    count: pendingConsoleLogCount,
+                    kind: logKind,
+                  })}
                 </span>
               </button>
             </Tooltip>
@@ -3242,7 +3243,7 @@ export const ChatInput = ({
             {pendingAttachments.map((attachment) => (
               <div key={attachment.id} className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg border border-kumo-line/70 bg-kumo-elevated">
                 {attachment.previewUrl ? (
-                  <img src={attachment.previewUrl} alt={attachment.name ?? "Attached file"} className="h-full w-full object-cover" />
+                  <img src={attachment.previewUrl} alt={attachment.name ?? t('management.chat.attachedFile')} className="h-full w-full object-cover" />
                 ) : (
                   <FileIcon size={22} className="text-kumo-inactive" />
                 )}
@@ -3295,7 +3296,7 @@ export const ChatInput = ({
                       <Brain size={14} />
                     </span>
                     <span className="flex-1">
-                      {showThinkingTraces ? "Hide thinking" : "Show thinking"}
+                      {showThinkingTraces ? t('management.chat.hideThinking') : t('management.chat.showThinking')}
                     </span>
                   </DropdownMenu.Item>
                 )}
@@ -3552,7 +3553,7 @@ function appendWorkParts(target: WorkMessageParts, source: WorkMessageParts) {
 function describeCreatedGadgetDeletion(titles: string[] | undefined): string {
   if (!titles || titles.length === 0) return "";
   const names = titles.map((t) => `“${t}”`).join(", ");
-  return ` (deletes ${titles.length === 1 ? "gadget" : "gadgets"} ${names})`;
+  return ` (${chatText(titles.length === 1 ? "deletesGadgetOne" : "deletesGadgetOther", { names })})`;
 }
 
 // Label for the per-turn discard-changes button.
@@ -3561,8 +3562,8 @@ function getDiscardLabel(
   createdGadgetTitles?: string[],
 ): string {
   const base = isTrailing
-    ? "Discard changes from this response"
-    : "Discard changes from this response and later responses";
+    ? chatText("discardResponseChanges")
+    : chatText("discardResponseAndLater");
   return base + describeCreatedGadgetDeletion(createdGadgetTitles);
 }
 
@@ -3571,8 +3572,8 @@ function getSavedEditsDiscardLabel(
   createdGadgetTitles?: string[],
 ): string {
   const base = isTrailing
-    ? "Discard saved edits"
-    : "Discard saved edits and later changes";
+    ? chatText("discardSavedEdits")
+    : chatText("discardSavedAndLater");
   return base + describeCreatedGadgetDeletion(createdGadgetTitles);
 }
 
@@ -3599,7 +3600,7 @@ function DiscardPendingChangesPopover({
             disabled={disabled}
             className="inline-flex h-[30px] cursor-pointer items-center justify-center rounded-md border border-kumo-fill bg-kumo-base px-2.5 text-[12px] font-medium leading-[18px] tracking-[-0.25px] text-kumo-default transition-colors enabled:hover:bg-kumo-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kumo-ring disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Discard…
+            {t('management.chat.discard')}…
           </button>
         }
       />
@@ -4069,10 +4070,10 @@ interface ChatInterfaceProps {
 type ChatTimeBucket = "today" | "yesterday" | "thisWeek" | "earlier";
 
 const CHAT_TIME_BUCKET_LABELS: Record<ChatTimeBucket, string> = {
-  today: "Today",
-  yesterday: "Yesterday",
-  thisWeek: "Earlier this week",
-  earlier: "Earlier",
+  today: "today",
+  yesterday: "yesterday",
+  thisWeek: "earlierThisWeek",
+  earlier: "earlier",
 };
 const CHAT_TIME_BUCKET_ORDER: ChatTimeBucket[] = [
   "today",
@@ -4683,7 +4684,7 @@ function ChatInterface({
       console.error("Failed to download chat attachment:", err);
       toasts.add({ title: err?.message || t('management.chat.downloadFailed'), variant: "error" });
     }
-  }, [overseer, toasts]);
+  }, [overseer, t, toasts]);
 
   const onSelectedChatHasProposedChangesChangeRef = useRef(onSelectedChatHasProposedChangesChange);
   onSelectedChatHasProposedChangesChangeRef.current = onSelectedChatHasProposedChangesChange;
@@ -5090,7 +5091,7 @@ function ChatInterface({
           provisional.compacting = false;
           if (event.nothingToCompact) {
             toastsRef.current.add({
-              title: "Nothing to compact — there are no earlier messages to summarize.",
+              title: t('management.chat.nothingToCompact'),
             });
           }
           break;
@@ -5511,10 +5512,10 @@ function ChatInterface({
         bumpChatListVersion();
         forceUpdate();
       }
-      toasts.add({ title: "Chat title updated successfully", variant: "success" });
+      toasts.add({ title: t('management.chat.titleUpdated'), variant: "success" });
     } catch (err) {
       console.error("Failed to update chat title:", err);
-      toasts.add({ title: "Failed to update chat title", variant: "error" });
+      toasts.add({ title: t('management.chat.titleUpdateFailed'), variant: "error" });
     }
   };
 
@@ -5577,7 +5578,7 @@ function ChatInterface({
       setDiscardChangesTarget((current) =>
         current?.chatId === target.chatId ? null : current,
       );
-      toasts.add({ title: "Pending changes discarded", variant: "success" });
+      toasts.add({ title: t('management.chat.pendingDiscarded'), variant: "success" });
     } catch (err) {
       console.error("Failed to discard pending changes:", err);
       toasts.add({ title: t('management.chat.discardPendingFailed'), variant: "error" });
@@ -5671,12 +5672,12 @@ function ChatInterface({
 
     try {
       await overseer.revertChanges(selectedChatId, revertFrom);
-      toasts.add({ title: "Draft rewound", variant: "success" });
+      toasts.add({ title: t('management.chat.draftRewound'), variant: "success" });
     } catch (err) {
       console.error("Failed to rewind draft:", err);
       toasts.add({ title: t('management.chat.rewindFailed'), variant: "error" });
     }
-  }, [overseer, selectedChatId, toasts]);
+  }, [overseer, selectedChatId, t, toasts]);
 
   // Pending "always approve this type" confirmation, opened from a pending action card.
   const [autoApproveConfirm, setAutoApproveConfirm] = useState<
@@ -5858,7 +5859,7 @@ function ChatInterface({
       title: ok ? t('management.chat.copied') : t('management.chat.copyFailed'),
       variant: ok ? "success" : "error",
     });
-  }, [toasts]);
+  }, [t, toasts]);
 
   const lastDurablePendingChange = useMemo(
     () => {
@@ -6063,7 +6064,7 @@ function ChatInterface({
     const isDenied = msg.state === "denied";
     const isProc = processingConnections.has(msg.requestId);
 
-    const stateLabel = isAccepted ? "Connected" : isDenied ? "Denied" : null;
+    const stateLabel = isAccepted ? t('management.chat.connected') : isDenied ? t('management.chat.denied') : null;
     const stateLabelCls = isDenied ? "text-kumo-danger" : "text-kumo-success";
     const scope = msg.resourceTitle ?? msg.resourceUrl;
 
@@ -6079,7 +6080,7 @@ function ChatInterface({
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                 <span className="font-medium text-kumo-default">
-                  Connect {msg.vendorName}
+                  {t('management.chat.connectVendor', { vendor: msg.vendorName })}
                 </span>
                 {scope && (
                   <span className="rounded-full bg-kumo-tint px-2 py-0.5 text-[11px] leading-4 text-kumo-subtle">
@@ -6106,7 +6107,7 @@ function ChatInterface({
                   disabled={isProc}
                   className="cursor-pointer rounded-md px-2 py-1 font-medium text-kumo-inactive transition-colors duration-150 ease-out hover:text-kumo-danger focus-visible:text-kumo-danger focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  Deny
+                  {t('management.chat.deny')}
                 </button>
                 <button
                   type="button"
@@ -6114,7 +6115,7 @@ function ChatInterface({
                   disabled={isProc}
                   className="cursor-pointer rounded-md bg-kumo-brand px-3 py-1 font-medium text-white transition-[opacity,transform] duration-150 ease-out hover:opacity-90 focus-visible:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  Set up
+                  {t('management.chat.setUp')}
                 </button>
               </div>
             )}
@@ -6137,10 +6138,10 @@ function ChatInterface({
     if (log.type === "bindHook") {
       const isDeleted = log.hookId === undefined;
       const stateLabel = isDeleted
-        ? "Deleted"
+        ? t('management.chat.deletedState')
         : log.enabled
-          ? "Enabled"
-          : "Disabled";
+          ? t('management.chat.enabledState')
+          : t('management.chat.disabledState');
       const stateLabelCls = isDeleted
         ? "text-kumo-inactive"
         : log.enabled
@@ -6255,9 +6256,9 @@ function ChatInterface({
     const showDescription = isPending || open;
     const metadata = log.resourceTitle;
     const stateLabel = isApproved
-      ? "Approved"
+      ? t('management.chat.approved')
       : isRejected
-        ? "Denied"
+        ? t('management.chat.denied')
         : null;
     const stateLabelCls = isRejected
       ? "text-kumo-danger"
@@ -6282,7 +6283,7 @@ function ChatInterface({
       <>
         {autoApproveTarget &&
           !isTagAutoApproved(autoApproveTarget.gatekeeperId, autoApproveTarget.actionKind.tag) && (
-          <Tooltip content="Always approve this type of action on this connection, without future prompts." asChild>
+          <Tooltip content={t('management.chat.alwaysApproveTooltip')} asChild>
             <span className="flex">
               <AlwaysApproveButton
                 onClick={() => setAutoApproveConfirm(autoApproveTarget)}
@@ -6431,7 +6432,7 @@ function ChatInterface({
                 aria-label={t('management.chat.filterConversations')}
               >
                 <span className="text-[13px] leading-[18px] font-medium tracking-[-0.25px] text-kumo-default">
-                  {CHAT_LIST_SCOPE_LABELS[chatListScope]}
+                  {chatText(CHAT_LIST_SCOPE_LABELS[chatListScope])}
                 </span>
                 <CaretDown
                   size={10}
@@ -6453,7 +6454,7 @@ function ChatInterface({
                   <span className="mr-2 inline-flex h-3 w-3 items-center justify-center text-kumo-default">
                     {active ? <Check size={11} weight="bold" /> : null}
                   </span>
-                  <span className="flex-1">{CHAT_LIST_SCOPE_LABELS[scope.value]}</span>
+                  <span className="flex-1">{chatText(CHAT_LIST_SCOPE_LABELS[scope.value])}</span>
                   <span className="ml-3 font-mono text-[11px] text-kumo-inactive">
                     {scope.count}
                   </span>
@@ -6471,7 +6472,7 @@ function ChatInterface({
           </div>
         ) : chatList.length === 0 ? (
           <p className="text-sm text-kumo-inactive text-center py-8">
-            No conversations yet
+            {chatText("noConversations")}
           </p>
         ) : (
           <div className="flex flex-col gap-1">
@@ -6480,14 +6481,16 @@ function ChatInterface({
               // the all-empty case is handled by the outer chatList.length check.
               <div className="py-8 text-center">
                 <p className="text-[13px] leading-[18px] text-kumo-inactive">
-                  No conversations started by {chatListScope === "agents" ? "agents" : "people"} yet
+                  {chatText("filteredConversationsEmpty", {
+                    scope: chatText(CHAT_LIST_SCOPE_LABELS[chatListScope]),
+                  })}
                 </p>
                 <button
                   type="button"
                   onClick={() => setChatListScope("all")}
                   className="mt-2 cursor-pointer rounded-md px-2 py-1 text-[12px] leading-4 font-medium text-kumo-subtle transition-colors duration-150 ease-out hover:text-kumo-default focus-visible:text-kumo-default focus-visible:outline-none"
                 >
-                  Show all
+                  {t("shell.showAll")}
                 </button>
               </div>
             ) : (
@@ -6495,7 +6498,7 @@ function ChatInterface({
                 {bucketedVisibleChats.map(({ bucket, items }) => (
                   <section key={bucket} className="flex flex-col gap-0.5">
                     <p className="mb-1 px-1 text-[11px] font-medium uppercase tracking-[0.08em] text-kumo-inactive">
-                      {CHAT_TIME_BUCKET_LABELS[bucket]}
+                      {chatText(CHAT_TIME_BUCKET_LABELS[bucket])}
                     </p>
                     {items.map((chat) => (
               <div key={chat.id} className="relative">
@@ -6534,7 +6537,7 @@ function ChatInterface({
                             spellCheck={false}
                             autoCapitalize="off"
                             autoCorrect="off"
-                            aria-label={`Rename ${chat.title}`}
+                            aria-label={t('management.chat.renameChat')}
                             className="min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] font-medium tracking-[-0.25px] text-kumo-default outline-none placeholder:text-kumo-inactive"
                           />
                         ) : (
@@ -6545,13 +6548,13 @@ function ChatInterface({
                         {!isRenaming && chat.activeAgent ? (
                           <span className="inline-flex flex-shrink-0 cursor-pointer items-center gap-1 text-[11px] leading-4 font-medium text-kumo-brand">
                             <span className="h-1.5 w-1.5 rounded-full bg-kumo-brand animate-pulse" />
-                            Working
+                            {t('management.chat.working')}
                           </span>
                         ) : !isRenaming && chat.hasProposedChanges ? (
-                          <Tooltip content="This conversation has pending changes" asChild>
+                          <Tooltip content={t('management.chat.conversationPending')} asChild>
                             <span className="inline-flex flex-shrink-0 cursor-pointer items-center gap-1 text-[11px] leading-4 font-medium text-kumo-warning">
                               <span className="h-1.5 w-1.5 rounded-full bg-kumo-warning" />
-                              Pending changes
+                              {t('management.chat.pendingChanges')}
                             </span>
                           </Tooltip>
                         ) : null}
@@ -6559,7 +6562,7 @@ function ChatInterface({
                       <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[12px] leading-4 text-kumo-inactive">
                         {chat.spawnerName && (
                           <>
-                            <span className="truncate">Agent · {chat.spawnerName}</span>
+                            <span className="truncate">{t('management.chat.agentSpawner', { name: chat.spawnerName })}</span>
                             <span className="flex-shrink-0" aria-hidden="true">·</span>
                           </>
                         )}
@@ -6598,7 +6601,7 @@ function ChatInterface({
                             onClick={() => startListRename(chat.id, chat.title)}
                             className="!h-auto rounded-md !px-2.5 !py-1.5 text-[12px] leading-4 tracking-[-0.2px] text-kumo-default transition-colors data-highlighted:bg-kumo-tint"
                           >
-                            Rename
+                            {t('management.chat.renameChat')}
                           </DropdownMenu.Item>
                           <DropdownMenu.Item
                             icon={<Trash size={12} className="mr-2" />}
@@ -6606,7 +6609,7 @@ function ChatInterface({
                             onClick={() => handleDeleteChat(chat.id, chat.title)}
                             className="!h-auto rounded-md !px-2.5 !py-1.5 text-[12px] leading-4 tracking-[-0.2px] transition-colors data-highlighted:bg-kumo-danger-tint"
                           >
-                            Delete
+                            {t('management.chat.deleteChat')}
                           </DropdownMenu.Item>
                         </DropdownMenu.Content>
                       </DropdownMenu>
@@ -6765,7 +6768,7 @@ function ChatInterface({
                   ) : (
                     <>
                       <span className="min-w-0 flex-1 truncate text-[13px] leading-[18px] font-medium tracking-[-0.25px] text-kumo-default">
-                        {currentChatMetadata?.title || "Chat"}
+                        {currentChatMetadata?.title || t('management.chat.chatTitle')}
                       </span>
                       <WorkshopIconButton
                         onClick={() => setIsEditingTitle(true)}
@@ -6806,7 +6809,7 @@ function ChatInterface({
                   >
                     {isLoadingEarlier && (
                       <div className="mx-auto mb-6 text-[12px] leading-4 font-medium text-kumo-inactive">
-                        Loading earlier messages…
+                        {t('management.chat.loadingEarlierMessages')}
                       </div>
                     )}
 
@@ -6821,7 +6824,7 @@ function ChatInterface({
                             <div className="flex items-center gap-3" role="separator">
                               <span className="h-px flex-1 bg-kumo-line/60" aria-hidden="true" />
                               <span className="flex-shrink-0 text-[11px] leading-4 font-medium tracking-[0.6px] text-kumo-inactive uppercase">
-                                Kept in full from here
+                                {t('management.chat.keptInFullFromHere')}
                               </span>
                               <span className="h-px flex-1 bg-kumo-line/60" aria-hidden="true" />
                             </div>
@@ -6838,10 +6841,10 @@ function ChatInterface({
                               // Says what the agent traded away and what it still has, since the
                               // marker sits at the request rather than at the cut it describes.
                               <p className="mb-3 text-[12px] leading-[17px] text-kumo-subtle">
-                                The agent reads this in place of everything earlier in the chat.{" "}
+                                {t('management.chat.compactionSummaryPrefix')} {" "}
                                 {kept === 0
-                                  ? "Nothing after it was kept."
-                                  : `The ${kept === 1 ? "message" : `${kept} messages`} after the cut ${kept === 1 ? "was" : "were"} kept in full.`}
+                                  ? t('management.chat.compactionNothingKept')
+                                  : t('management.chat.compactionKept', { count: kept })}
                               </p>
                             )}
                             <div className={`min-w-0 text-[13px] leading-[19px] ${styles.markdownContent}`}>
@@ -7251,7 +7254,7 @@ function ChatInterface({
                                 <Tooltip
                                   content={
                                     isMerge
-                                      ? `Accepted draft changes${ts ? ` through ${formatFullTimestamp(ts, locale)}` : ""}.`
+                                      ? t('management.chat.acceptedDraftChanges', { through: ts ? ` ${formatFullTimestamp(ts, locale)}` : '' })
                                       : `Returned to the gadget state before the prompt sent ${ts ? `at ${formatTime(ts, locale, { hour: "2-digit", minute: "2-digit" })}` : "earlier"}.`
                                   }
                                   asChild
@@ -7325,19 +7328,19 @@ function ChatInterface({
                                     </Tooltip>
                                   </button>
                                   {isLast && msg.code === "usage_limit" && (
-                                    <Tooltip content="Add credits to continue." asChild>
+                                    <Tooltip content={t('management.chat.addCreditsTooltip')} asChild>
                                       <button
                                         type="button"
                                         onClick={() => setUsageModalOpen(true)}
                                         className="flex flex-shrink-0 cursor-pointer items-center gap-1 rounded-md px-1 py-0.5 text-[13px] leading-4 font-medium text-kumo-default transition-[color,opacity,transform] duration-150 ease-out hover:text-kumo-default-hover focus-visible:text-kumo-default-hover focus-visible:outline-none active:scale-[0.98]"
                                       >
                                         <Lightning size={12} weight="bold" />
-                                        Continue
+                                        {t('management.chat.continue')}
                                       </button>
                                     </Tooltip>
                                   )}
                                   {isLast && msg.code !== "usage_limit" && (
-                                    <Tooltip content="Retry the last action." asChild>
+                                    <Tooltip content={t('management.chat.retryTooltip')} asChild>
                                       <button
                                         type="button"
                                         onClick={() => handleRetry()}
@@ -7345,7 +7348,7 @@ function ChatInterface({
                                         className="flex flex-shrink-0 cursor-pointer items-center gap-1 rounded-md px-1 py-0.5 text-[13px] leading-4 font-medium text-kumo-default transition-[color,opacity,transform] duration-150 ease-out hover:text-kumo-default-hover focus-visible:text-kumo-default-hover focus-visible:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                                       >
                                         <ArrowsClockwise size={12} weight="bold" />
-                                        Retry
+                                        {t('management.chat.retry')}
                                       </button>
                                     </Tooltip>
                                   )}
@@ -7388,11 +7391,11 @@ function ChatInterface({
                       const latestAuthor = currentDraftState.latestAuthor;
                       const isUserAuthored = latestAuthor?.type === "user";
                       const title = isUserAuthored
-                        ? "Draft changes pending"
-                        : "Draft changes in progress";
+                        ? t('management.chat.draftPending')
+                        : t('management.chat.draftInProgress');
                       const description = isUserAuthored
-                        ? "Your edits are still a live draft."
-                        : `${latestAuthor?.name ?? "The agent"} is editing changes for this gadget.`;
+                        ? t('management.chat.liveDraft')
+                        : t('management.chat.authorEditing', { author: latestAuthor?.name ?? t('management.chat.theAgent') });
                       const lastDraftEntry =
                         currentDraftState.entries[
                           currentDraftState.entries.length - 1
@@ -7412,7 +7415,7 @@ function ChatInterface({
                               <Pencil size={16} />
                             </span>
                             <Tooltip
-                              content={`${description} Last edited ${formatFullTimestamp(lastDraftEntry.timestamp, locale)}`}
+                              content={t('management.chat.draftLastEdited', { description, timestamp: formatFullTimestamp(lastDraftEntry.timestamp, locale) })}
                               asChild
                             >
                               <span className="font-medium text-kumo-subtle">
@@ -7420,24 +7423,24 @@ function ChatInterface({
                               </span>
                             </Tooltip>
                             <div className="flex flex-wrap items-center gap-2 text-[13px] leading-4">
-                              <Tooltip content="Throw away these draft edits." asChild>
+                              <Tooltip content={t('management.chat.discardDraftTooltip')} asChild>
                                 <button
                                   type="button"
                                   disabled={isAgentActive}
                                   onClick={handleDiscardDraftChanges}
                                   className="cursor-pointer rounded-md px-1 py-0.5 font-medium text-kumo-inactive transition-colors duration-150 ease-out hover:text-kumo-danger focus-visible:text-kumo-danger focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                                 >
-                                  Discard
+                                  {t('management.chat.discard')}
                                 </button>
                               </Tooltip>
-                              <Tooltip content="Save these edits as a draft version. They won't affect the gadget until you accept changes." asChild>
+                              <Tooltip content={t('management.chat.saveDraftTooltip')} asChild>
                                 <button
                                   type="button"
                                   disabled={isAgentActive}
                                   onClick={handleFinalizeDraftChanges}
                                   className="cursor-pointer rounded-md px-1 py-0.5 font-medium text-kumo-default transition-[color,opacity,transform] duration-150 ease-out hover:text-kumo-default-hover focus-visible:text-kumo-default-hover focus-visible:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                                 >
-                                  Save draft
+                                  {t('management.chat.saveDraft')}
                                 </button>
                               </Tooltip>
                             </div>
@@ -7605,9 +7608,9 @@ function ChatInterface({
                     onToggleThinkingTraces={toggleShowThinkingTraces}
                     blockedReason={
                       hasPendingConnectionRequest
-                        ? "Set up or deny the connection request above to continue."
+                        ? t('management.chat.connectionRequestBlocked')
                         : hasPendingAwaitedAction
-                          ? "Approve or reject the pending action above to continue."
+                          ? t('management.chat.pendingActionBlocked')
                           : undefined
                     }
                     draftUpdateBanner={(() => {
@@ -7637,7 +7640,7 @@ function ChatInterface({
                         <div className="themed-surface-inset relative flex items-center gap-2 overflow-hidden rounded-t-[calc(1rem-1px)] border-b border-kumo-line bg-kumo-elevated px-3.5 py-2">
                           <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-kumo-brand/40 to-transparent" aria-hidden="true" />
                           <span className="min-w-0 flex-1 truncate text-[12px] font-medium leading-4 tracking-[-0.2px] text-kumo-default">
-                            Pending changes
+                            {t('management.chat.pendingChanges')}
                           </span>
                           <DiscardPendingChangesPopover
                             open={discardChangesTarget?.chatId === currentChatMetadata.id}
@@ -7652,10 +7655,10 @@ function ChatInterface({
                             onConfirm={handleDiscardPendingChanges}
                           />
                           <Tooltip content={isAgentActive
-                            ? "Wait for the agent to finish before accepting changes."
+                            ? t('management.chat.waitAgentBeforeAccept')
                             : isDiscardingChanges
-                              ? "Wait for pending changes to finish discarding."
-                              : "Keep this draft and make it the gadget's current version."} asChild>
+                              ? t('management.chat.waitDiscardBeforeAccept')
+                              : t('management.chat.keepDraft')} asChild>
                             <WorkshopButton
                               disabled={changesActionsDisabled}
                               onClick={() =>
@@ -7665,7 +7668,7 @@ function ChatInterface({
                               className="!h-7 !cursor-pointer !rounded-md !border-transparent !shadow-none gap-1 text-[12px]"
                             >
                               <Check size={11} weight="bold" />
-                              Accept changes
+                              {t('management.chat.acceptChanges')}
                             </WorkshopButton>
                           </Tooltip>
                         </div>
@@ -7677,7 +7680,7 @@ function ChatInterface({
                   <div className="-mt-1 flex min-h-[1.25rem] items-start justify-end gap-4 px-4 pb-1 font-mono text-[11px] leading-4 text-kumo-inactive">
                     {currentChatMetadata?.totalTokens != null && (
                       <span>
-                        {formatNumber(currentChatMetadata.totalTokens, locale)} tokens
+                        {t('management.chat.tokenCount', { count: formatNumber(currentChatMetadata.totalTokens, locale) })}
                       </span>
                     )}
                     {currentChatMetadata?.totalCost != null && (

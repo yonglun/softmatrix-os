@@ -243,10 +243,10 @@ export default function Connections({ overseer, gadget, chatId, authenticatedApi
                       <div className="flex flex-wrap items-center gap-3">
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-[13px] leading-[18px] font-medium tracking-[-0.25px] text-kumo-danger">
-                            Delete {gk.resourceTitle}?
+                            {t('management.connections.deleteBinding', { resource: gk.resourceTitle })}
                           </p>
                           <p className="truncate text-[12px] leading-4 font-normal tracking-[-0.2px] text-kumo-subtle">
-                            The binding <span className="font-mono">{gk.name}</span> will be removed from this gadget.
+                            {t('management.connections.deleteBindingDescriptionPrefix')} <span className="font-mono">{gk.name}</span> {t('management.connections.deleteBindingDescriptionSuffix')}
                           </p>
                         </div>
                         <WorkshopButton
@@ -375,10 +375,10 @@ export default function Connections({ overseer, gadget, chatId, authenticatedApi
                       <div className="flex flex-wrap items-center gap-3">
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-[13px] leading-[18px] font-medium tracking-[-0.25px] text-kumo-danger">
-                            Delete hook "{hook.description.title}"?
+                            {t('management.connections.deleteHookConfirm', { title: hook.description.title })}
                           </p>
                           <p className="truncate text-[12px] leading-4 font-normal tracking-[-0.2px] text-kumo-subtle">
-                            This permanently removes the hook. Future events will stop being delivered.
+                            {t('management.connections.hookDeleteDescription')}
                           </p>
                         </div>
                         <WorkshopButton
@@ -386,12 +386,12 @@ export default function Connections({ overseer, gadget, chatId, authenticatedApi
                           className="min-w-[68px]"
                           onClick={handleDeleteHookConfirm}
                         >
-                          Delete
+                          {t('common.delete')}
                         </WorkshopButton>
                         <WorkshopButton
                           onClick={() => setDeleteHookTarget(null)}
                         >
-                          Cancel
+                          {t('common.cancel')}
                         </WorkshopButton>
                       </div>
                     ) : (
@@ -512,20 +512,20 @@ function BlueprintAnnotationModal({
           if (loaded) {
             setData(loaded)
           } else {
-            setLoadError('Connection not found.')
+            setLoadError(t('management.connections.connectionNotFound'))
           }
         }
       } catch (err: any) {
         if (!cancelled) {
           reportIssue('connections.binding-load', err)
-          setLoadError(err?.message || 'Could not load binding.')
+          setLoadError(err?.message || t('management.connections.bindingLoadFailed'))
         }
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [target, gadget])
+  }, [target, gadget, t])
 
   const handleSave = async () => {
     if (!data || !target) return
@@ -536,7 +536,7 @@ function BlueprintAnnotationModal({
       onSaved()
     } catch (err: any) {
       reportIssue('connections.binding-save', err)
-      setSaveError(err?.message || 'Could not save.')
+      setSaveError(err?.message || t('management.connections.saveFailed'))
     } finally {
       setSaving(false)
     }

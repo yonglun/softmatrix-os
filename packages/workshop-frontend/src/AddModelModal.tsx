@@ -30,8 +30,8 @@ const API_TOKEN_PLACEHOLDERS: Record<AiModelProvider, string> = {
   anthropic: 'sk-ant-...',
   openai: 'sk-...',
   google: 'AIza...',
-  cloudflare: 'Cloudflare API token',
-  ollama: '(optional)',
+  cloudflare: '',
+  ollama: '',
 }
 
 // Example used in the custom-model placeholders for providers that have no suggested models
@@ -62,7 +62,7 @@ function decodeSelection(value: string): SelectionType {
 }
 
 // Build the flat list of options for the Select dropdown.
-function buildOptions(gatewayMode: boolean, enabledProviders: Set<string> | null) {
+function buildOptions(gatewayMode: boolean, enabledProviders: Set<string> | null, otherLabel: (provider: AiModelProvider) => string) {
   const options: { value: string; label: string; provider: string }[] = []
   const providerOrder = Object.keys(SUGGESTED_MODELS) as AiModelProvider[]
 
@@ -82,7 +82,7 @@ function buildOptions(gatewayMode: boolean, enabledProviders: Set<string> | null
 
     options.push({
       value: encodeSelection(provider),
-      label: `Other ${PROVIDER_LABELS[provider] || provider}...`,
+      label: otherLabel(provider),
       provider,
     })
   }
@@ -215,7 +215,8 @@ export default function AddModelModal({ visible, onCancel, onSuccess, authentica
     }
   }
 
-  const options = buildOptions(gatewayMode, enabledProviders)
+  const options = buildOptions(gatewayMode, enabledProviders,
+    provider => t('management.models.otherProvider', { provider: PROVIDER_LABELS[provider] || provider }))
   const showCustomFields = selection?.type === 'custom'
   const example = selection ? exampleModel(selection.provider) : null
   const isOllama = selection?.provider === 'ollama'
@@ -313,7 +314,11 @@ export default function AddModelModal({ visible, onCancel, onSuccess, authentica
           {showCredentials && selection && (
             <SensitiveInput
               label={t('management.models.apiToken')}
-              placeholder={API_TOKEN_PLACEHOLDERS[selection.provider]}
+              placeholder={selection.provider === 'cloudflare'
+                ? t('management.models.cloudflareTokenPlaceholder')
+                : selection.provider === 'ollama'
+                  ? t('management.models.optionalPlaceholder')
+                  : API_TOKEN_PLACEHOLDERS[selection.provider]}
               description={
                 isOllama
                   ? t('management.models.ollamaOptional')
