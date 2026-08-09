@@ -252,6 +252,12 @@ const en = {
   errors: {
     generic: "Something went wrong.",
     network: "Network error. Please try again.",
+    OIDC_STATE_INVALID: "This sign-in session expired or is invalid. ({{correlationId}})",
+    OIDC_TOKEN_INVALID: "The identity provider returned an invalid sign-in token. ({{correlationId}})",
+    OIDC_EMAIL_UNVERIFIED: "Your identity provider has not verified this email. ({{correlationId}})",
+    SIGNUP_NOT_ALLOWED: "New account registration is currently disabled. ({{correlationId}})",
+    EMAIL_DOMAIN_NOT_ALLOWED: "This email domain is not allowed to sign in. ({{correlationId}})",
+    OIDC_PROVIDER_UNAVAILABLE: "The identity provider is unavailable. Please try again. ({{correlationId}})",
   },
   admin: {
     title: "Administration",

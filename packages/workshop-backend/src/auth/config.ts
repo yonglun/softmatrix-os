@@ -20,12 +20,17 @@ export function hasAuthGatekeepers(env: Cloudflare.Env): boolean {
   return getAuthGatekeeperAllowlist(env).length > 0;
 }
 
+/** Whether at least one configured external sign-in path can prevent a lockout. */
+export function hasExternalAuthentication(env: Cloudflare.Env): boolean {
+  return hasAuthGatekeepers(env) || getOidcConfig(env) !== null;
+}
+
 // Whether username/password login + signup is available. Enabled by default. An installation can
 // set DISABLE_PASSWORD_AUTH=true to be OAuth-only — but that only takes effect when at least one
 // auth gatekeeper is allowlisted, otherwise we'd lock everyone out, so password auth stays on.
 export function isPasswordAuthEnabled(env: Cloudflare.Env): boolean {
   if (env.DISABLE_PASSWORD_AUTH !== "true") return true;
-  return !hasAuthGatekeepers(env);
+  return !hasExternalAuthentication(env);
 }
 
 /** Private OIDC configuration used by the backend protocol and login-attempt flow. */

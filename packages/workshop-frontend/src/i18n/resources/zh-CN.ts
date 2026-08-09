@@ -253,6 +253,12 @@ const zhCN = {
   errors: {
     generic: "出了点问题。",
     network: "网络错误，请重试。",
+    OIDC_STATE_INVALID: "此登录会话已过期或无效。（{{correlationId}}）",
+    OIDC_TOKEN_INVALID: "身份提供商返回了无效的登录令牌。（{{correlationId}}）",
+    OIDC_EMAIL_UNVERIFIED: "身份提供商尚未验证此邮箱。（{{correlationId}}）",
+    SIGNUP_NOT_ALLOWED: "此部署当前已禁用新账户注册。（{{correlationId}}）",
+    EMAIL_DOMAIN_NOT_ALLOWED: "此邮箱域名不允许登录。（{{correlationId}}）",
+    OIDC_PROVIDER_UNAVAILABLE: "身份提供商暂时不可用，请重试。（{{correlationId}}）",
   },
   admin: {
     title: "管理",

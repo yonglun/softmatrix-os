@@ -9,6 +9,7 @@ import { useServerConfig, useServerConfigError, useSiteName } from './ServerConf
 import { useDocumentTitle } from './useDocumentTitle'
 import { useConnectionLost } from './RpcContext'
 import OAuthButtons from './components/auth/OAuthButtons'
+import OidcButton from './components/auth/OidcButton'
 import SiteLogo from './components/SiteLogo'
 import SoftmatrixMark from './components/SoftmatrixMark'
 
@@ -85,6 +86,7 @@ export default function LoginPage({ rpcStub, onLoginSuccess }: LoginPageProps) {
   }
 
   const authVendors = serverConfig.authVendors ?? []
+  const oidc = serverConfig.oidc
   const passwordAuthEnabled = serverConfig.passwordAuthEnabled
 
   return (
@@ -161,7 +163,7 @@ export default function LoginPage({ rpcStub, onLoginSuccess }: LoginPageProps) {
         )}
 
         {/* Gatekeeper sign-in options, shown whenever any auth vendor is configured. */}
-        {authVendors.length > 0 && (
+        {(authVendors.length > 0 || oidc) && (
           <div className={passwordAuthEnabled ? 'mt-6' : ''}>
             {passwordAuthEnabled && (
               <div className="flex items-center gap-3 mb-4">
@@ -173,6 +175,7 @@ export default function LoginPage({ rpcStub, onLoginSuccess }: LoginPageProps) {
             {!passwordAuthEnabled && error && (
               <Banner variant="error" title={error} className="mb-4" />
             )}
+            {oidc && <OidcButton rpcStub={rpcStub} config={oidc} onSuccess={onLoginSuccess} />}
             <OAuthButtons rpcStub={rpcStub} vendors={authVendors} onSuccess={onLoginSuccess} />
           </div>
         )}

@@ -8,6 +8,7 @@ import { hashPassword } from "./passwordHash";
 import { useServerConfig, useServerConfigError, useSiteName } from "./ServerConfigContext";
 import { useDocumentTitle } from "./useDocumentTitle";
 import OAuthButtons from "./components/auth/OAuthButtons";
+import OidcButton from "./components/auth/OidcButton";
 import SiteLogo from "./components/SiteLogo";
 import SoftmatrixMark from "./components/SoftmatrixMark";
 import { useConnectionLost } from "./RpcContext";
@@ -104,6 +105,7 @@ export default function SignupPage({ rpcStub }: SignupPageProps) {
   }
 
   const authVendors = serverConfig.authVendors ?? [];
+  const oidc = serverConfig.oidc;
   const signupsEnabled = serverConfig.signupsEnabled;
   // The password create-account form requires both password auth AND open signups.
   const passwordAuthEnabled = serverConfig.passwordAuthEnabled && signupsEnabled;
@@ -201,7 +203,7 @@ export default function SignupPage({ rpcStub }: SignupPageProps) {
         )}
 
         {/* Gatekeeper sign-in options, shown whenever any auth vendor is configured. */}
-        {authVendors.length > 0 && (
+        {(authVendors.length > 0 || oidc) && (
           <div className={passwordAuthEnabled ? "mt-6" : ""}>
             {passwordAuthEnabled && (
               <div className="flex items-center gap-3 mb-4">
@@ -210,6 +212,7 @@ export default function SignupPage({ rpcStub }: SignupPageProps) {
                 <div className="h-px flex-1 bg-kumo-line" />
               </div>
             )}
+            {oidc && <OidcButton rpcStub={rpcStub} config={oidc} />}
             <OAuthButtons rpcStub={rpcStub} vendors={authVendors} />
           </div>
         )}
