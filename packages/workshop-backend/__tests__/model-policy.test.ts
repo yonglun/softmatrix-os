@@ -53,4 +53,11 @@ describe("ModelPolicy", () => {
     ]);
     expect(JSON.stringify(policy.listCatalog())).not.toContain('"apiToken"');
   });
+
+  it("denies personal resolution while retaining it for deletion in the catalog", () => {
+    let policy = new ModelPolicy([], [record("mine", "personal")], { allowUserByok: false });
+    expect(() => policy.resolve("mine")).toThrow();
+    expect(policy.listModels()).toEqual([]);
+    expect(policy.listCatalog()[0]).toMatchObject({ id: "mine", enabled: false, canDelete: true });
+  });
 });

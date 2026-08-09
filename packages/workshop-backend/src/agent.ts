@@ -17,6 +17,7 @@ import { AgentCatalogSnapshot, formatAlwaysAvailableResourcesPrompt } from "./ag
 import { formatInstanceInstructions } from "./admin-config";
 import type { AiGatewayLogRoute } from "./ai-gateway";
 import { AgentTurnError, completeText, httpStatusFromError, zeroUsage } from "./ai-invoke";
+import { classifyModelError } from "./model-policy/test-connection";
 import type { ModelHandle } from "./ai-models";
 import {
   buildCompactionState, buildSummaryPrompt, COMPACTION_SYSTEM_PROMPT, estimateProjectionTokens,
@@ -3079,8 +3080,11 @@ export async function runAgent(
   if (turnFailure) {
     // Other failures become an AgentTurnError carrying the failing request's HTTP status (when
     // it can be determined) for the overseer's triage.
+    let statusCode = httpStatusFromError(turnFailure.message, handle);
+    let modelErrorCode = classifyModelError(turnFailure.message, statusCode);
+    let correlationId = crypto.randomUUID();
     throw new AgentTurnError(
-        turnFailure.message, httpStatusFromError(turnFailure.message, handle));
+        `${modelErrorCode} (${correlationId})`, statusCode, { code: modelErrorCode, correlationId });
   }
 
   // The turn ran, so there is no checkpoint to report.

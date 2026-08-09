@@ -10,6 +10,7 @@ export type ResolvedModel = {
 export type ModelPolicyOptions = {
   disabledOrganizationModelIds?: Iterable<string>;
   defaultModelId?: string | null;
+  allowUserByok?: boolean;
 };
 
 function correlationId(): string {
@@ -30,6 +31,7 @@ export class ModelPolicy {
   readonly #personal: Map<string, CatalogModelRecord>;
   readonly #disabled: Set<string>;
   readonly #defaultModelId: string | null;
+  readonly #allowUserByok: boolean;
 
   constructor(organization: Iterable<CatalogModelRecord>, personal: Iterable<CatalogModelRecord>,
       options: ModelPolicyOptions = {}) {
@@ -47,6 +49,7 @@ export class ModelPolicy {
     }
     this.#disabled = new Set(options.disabledOrganizationModelIds ?? []);
     this.#defaultModelId = options.defaultModelId || null;
+    this.#allowUserByok = options.allowUserByok !== false;
   }
 
   #resolved(id: string): ResolvedModel | undefined {
@@ -60,7 +63,10 @@ export class ModelPolicy {
   /** Resolve exactly the requested ID. Disabled or missing models never fall back. */
   resolve(id: string): ResolvedModel {
     if (this.#organization.has(id) && this.#disabled.has(id)) fail("MODEL_DISABLED");
-    return this.#resolved(id) ?? fail("MODEL_PROVIDER_UNAVAILABLE");
+    let resolved = this.#resolved(id);
+    if (!resolved) fail("MODEL_PROVIDER_UNAVAILABLE");
+    if (resolved.source === "personal" && !this.#allowUserByok) fail("BYOK_DISABLED");
+    return resolved;
   }
 
   /** Return active records in organization-then-personal order. */
@@ -69,7 +75,9 @@ export class ModelPolicy {
     for (let [id, record] of this.#organization) {
       if (!this.#disabled.has(id)) result.push({ source: "organization", record: asRecord(record) });
     }
-    for (let record of this.#personal.values()) result.push({ source: "personal", record: asRecord(record) });
+    if (this.#allowUserByok) {
+      for (let record of this.#personal.values()) result.push({ source: "personal", record: asRecord(record) });
+    }
     return result;
   }
 
@@ -83,7 +91,7 @@ export class ModelPolicy {
       result.push(toCatalogItem(record, !this.#disabled.has(id), id === this.#defaultModelId));
     }
     for (let [id, record] of this.#personal) {
-      result.push(toCatalogItem(record, true, id === this.#defaultModelId, "personal"));
+      result.push(toCatalogItem(record, this.#allowUserByok, id === this.#defaultModelId, "personal"));
     }
     return result;
   }
@@ -91,7 +99,8 @@ export class ModelPolicy {
   /** Select a valid preference, then admin default, then first active model; never use disabled IDs. */
   effectiveDefault(userPreference: string | null | undefined): string | null {
     for (let id of [userPreference, this.#defaultModelId]) {
-      if (id && this.#resolved(id) && !(this.#organization.has(id) && this.#disabled.has(id))) return id;
+      if (id && this.#resolved(id) && !(this.#organization.has(id) && this.#disabled.has(id))
+          && (this.#allowUserByok || this.#organization.has(id))) return id;
     }
     return this.listActiveModels()[0]?.record.profile.id ?? null;
   }

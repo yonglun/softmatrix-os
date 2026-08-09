@@ -17,6 +17,7 @@ import { getOrganizationModels, isUserByokAllowed } from "./model-policy/organiz
 import { ModelPolicyError } from "./model-policy/types.js";
 import { ModelPolicy } from "./model-policy/model-policy.js";
 import type { CatalogModelRecord } from "./model-policy/types.js";
+import { testModelConnection as runModelConnectionTest } from "./model-policy/test-connection.js";
 
 const logger = createWorkshopLogger("workshop.user");
 
@@ -542,6 +543,7 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
     return new ModelPolicy(organization, personal, {
       disabledOrganizationModelIds: admin.modelPolicy.disabledOrganizationModelIds,
       defaultModelId: admin.modelPolicy.defaultModelId,
+      allowUserByok: isUserByokAllowed(this.env),
     });
   }
 
@@ -559,6 +561,14 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
       allowUserByok: isUserByokAllowed(this.env),
       defaultModelId: config.modelPolicy.defaultModelId || null,
     };
+  }
+
+  async testModelConnection(profile: AiChatAuthorInfo, config: AiModelConfig) {
+    if (!isUserByokAllowed(this.env)) {
+      return { ok: false as const, error: { code: "BYOK_DISABLED" as const,
+        correlationId: crypto.randomUUID() } };
+    }
+    return runModelConnectionTest(this.env, profile, config);
   }
 
   async addModel(profile: AiChatAuthorInfo, config: AiModelConfig): Promise<void> {

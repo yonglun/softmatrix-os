@@ -353,6 +353,9 @@ export interface AuthenticatedApi extends RpcTarget {
   /** Return the deployment model policy without exposing deployment credentials. */
   getAiModelPolicy(): Promise<AiModelPolicyInfo>;
 
+  /** Test a submitted personal model connection without persisting its credentials. */
+  testModelConnection(profile: AiChatAuthorInfo, config: AiModelConfig): Promise<ModelConnectionTestResult>;
+
   // Adds a new model to the user's configured set. The ID must be unique among the user's
   // configured models.
   addModel(profile: AiChatAuthorInfo, config: AiModelConfig): Promise<void>;
@@ -1009,6 +1012,11 @@ export type ModelErrorCode =
   | "MODEL_BALANCE_EXHAUSTED"
   | "MODEL_PROVIDER_UNAVAILABLE"
   | "BYOK_DISABLED";
+
+/** Secret-free result of testing a user-supplied model connection. */
+export type ModelConnectionTestResult =
+  | { ok: true }
+  | { ok: false; error: { code: ModelErrorCode; correlationId: string } };
 
 // Information about the AI gateway configuration. Returned by `AuthenticatedApi.getAiConfig()`.
 export type AiGatewayInfo = {
