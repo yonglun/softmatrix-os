@@ -6204,7 +6204,7 @@ function ChatInterface({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                   <span className="font-medium text-kumo-default">
-                    Hook: {log.description.title}
+                    {t('management.chat.hookLabel', { title: log.description.title })}
                   </span>
                   <span className={`text-[12px] font-medium ${stateLabelCls}`}>
                     {stateLabel}
@@ -6914,7 +6914,7 @@ function ChatInterface({
                                   <Brain size={16} />
                                 </span>
                                 <span className="font-medium">
-                                  {entry.requestedBy.name} compacted the context
+                                  {t('management.chat.compactedBy', { name: entry.requestedBy.name })}
                                 </span>
                                 <CaretRight
                                   size={11}
@@ -6960,7 +6960,7 @@ function ChatInterface({
                                 <Swap size={16} />
                               </span>
                               <span className="min-w-0 truncate">
-                                Switched to {entry.author.name}
+                                {t('management.chat.switchedTo', { name: entry.author.name })}
                               </span>
                             </div>
                           </div>
@@ -6969,15 +6969,19 @@ function ChatInterface({
 
                       if (entry.type === "savedChanges") {
                         const isOwnChange = entry.message.author.id === currentUser?.id;
-                        const actor = isOwnChange ? "You" : entry.message.author.name;
+                        const actor = isOwnChange ? t('management.chat.you') : entry.message.author.name;
                         // A user-authored creation is recorded as a "changes" message carrying
                         // createdGadgets over a no-op update, so label it as a creation rather
                         // than as saved edits.
                         const createdGadgets = entry.message.createdGadgets ?? [];
                         const label = createdGadgets.length > 0
-                          ? `${actor} created ${createdGadgets.length === 1 ? "gadget" : "gadgets"} ${
-                              createdGadgets.map((g) => `“${g.title}”`).join(", ")}`
-                          : `${actor} saved edits`;
+                          ? t(createdGadgets.length === 1
+                            ? 'management.chat.savedCreatedOne'
+                            : 'management.chat.savedCreatedOther', {
+                              actor,
+                              names: createdGadgets.map((g) => `“${g.title}”`).join(", "),
+                            })
+                          : t('management.chat.savedEditsBy', { actor });
                         const discardLabel = getSavedEditsDiscardLabel(
                           entry.message.sequence === lastDurablePendingChange?.sequence,
                           createdGadgets.map((g) => g.title),
@@ -7418,7 +7422,7 @@ function ChatInterface({
                                 <Code size={16} />
                               </span>
                               <span className="min-w-0 truncate font-mono text-[13px]">
-                                self.{msg.methodName}()
+                                {t('management.chat.selfPrefix')}{msg.methodName}()
                               </span>
                             </div>
                             {msg.argsSummary && (

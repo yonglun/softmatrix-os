@@ -69,6 +69,8 @@ export type UserAiModelRecord = {
 
 export type UserChatContext = {
   profile: AiChatAuthorInfo;
+  /** The user's preferred Agent response language, defaulting to English for legacy users. */
+  locale: SupportedLocale;
   aiModel?: UserAiModelRecord;
   quickModel?: AiModelConfig;
 }
@@ -682,7 +684,8 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
     let gwConfig = getAiGatewayConfig(this.env);
 
     let result: UserChatContext = {
-      profile: this.storage.profile.get()
+      profile: this.storage.profile.get(),
+      locale: this.storage.locale.get() === "zh-CN" ? "zh-CN" : "en",
     };
     if (modelId) {
       // In AI Gateway mode, resolve gateway models first.

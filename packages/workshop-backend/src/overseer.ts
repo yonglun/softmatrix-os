@@ -1,6 +1,6 @@
 import { RpcCompatible, RpcStub, RpcTarget } from "capnweb";
 import { validateRpc } from "capnweb-validate";
-import { Overseer, GadgetMetadata, UiBundle, WorkpieceId, WorkpieceSummary, WorkpiecesSubscriber, GadgetClient, GadgetBindingInfo, GatekeeperClient, ActionState, ActionLogEntry, ActionsSubscriber, CodeUpdate, CodeSubscriber, AiChatMetadata, AiChatMessage, AiChatHistoryPage, AiChatSubscriber, AiChatAuthorInfo, AiModelConfig, AiChatMessageBody, AgentSpawnerConfig, ConsoleLogSubscriber, ConsoleLogEvent, CapsuleSpecifier, CollaboratorInfo, CollaboratorRole, AffectedCollaborator, ShareLinkInfo, GatekeeperCreationSpec, ObserverConfigCallback, ObserverBindingNeed, ObserverBindingFailure, BlueprintBindingAnnotation, BlueprintBinding, BlueprintMetadata, BlueprintOutput, MessageFormatRef, isOutputIcon, SpawnerEnvTarget, BlueprintGadgetSummary, AiChatStreamEvent, BlueprintScreenshotUpload, BLUEPRINT_SCREENSHOT_R2_PREFIX, blueprintScreenshotUrl, ChatAttachmentUpload, ChatAttachmentHandle, ChatAttachmentRef, BoundHookInfo, PreApprovableAction, PresenceParticipant, PresenceSubscriber, SlashCommandChoice, SlashCommandRequest, validateBindingName, createOpenGadgetError, OPEN_GADGET_ERROR_CODES, resolveSiteName } from '@gadgets/workshop-shared/api';
+import { Overseer, GadgetMetadata, UiBundle, WorkpieceId, WorkpieceSummary, WorkpiecesSubscriber, GadgetClient, GadgetBindingInfo, GatekeeperClient, ActionState, ActionLogEntry, ActionsSubscriber, CodeUpdate, CodeSubscriber, AiChatMetadata, AiChatMessage, AiChatHistoryPage, AiChatSubscriber, AiChatAuthorInfo, AiModelConfig, AiChatMessageBody, AgentSpawnerConfig, ConsoleLogSubscriber, ConsoleLogEvent, CapsuleSpecifier, CollaboratorInfo, CollaboratorRole, AffectedCollaborator, ShareLinkInfo, GatekeeperCreationSpec, ObserverConfigCallback, ObserverBindingNeed, ObserverBindingFailure, BlueprintBindingAnnotation, BlueprintBinding, BlueprintMetadata, BlueprintOutput, MessageFormatRef, isOutputIcon, SpawnerEnvTarget, BlueprintGadgetSummary, AiChatStreamEvent, BlueprintScreenshotUpload, BLUEPRINT_SCREENSHOT_R2_PREFIX, blueprintScreenshotUrl, ChatAttachmentUpload, ChatAttachmentHandle, ChatAttachmentRef, BoundHookInfo, PreApprovableAction, PresenceParticipant, PresenceSubscriber, SlashCommandChoice, SlashCommandRequest, validateBindingName, createOpenGadgetError, OPEN_GADGET_ERROR_CODES, resolveSiteName, SupportedLocale } from '@gadgets/workshop-shared/api';
 import { Gatekeeper, HookInitiator, ResourceDescription, ApprovalQueue, ActionDescription, ObservationAuthorizer, ObservationDescription, VendorDescription, SupportedResource, resolveRequestedResource, HookController, HookDescription, AGENT_CATALOG_MAX_ENTRIES, ActionKind } from "@gadgets/workshop-shared/gatekeeper";
 import {
   DurableObject, WorkerEntrypoint, RpcStub as NativeRpcStub,
@@ -48,6 +48,11 @@ import { renderGadgetPdf } from "./browser-export";
 
 const logger = createWorkshopLogger("workshop.overseer");
 export const AGENT_RUNNING_ERROR_MESSAGE = "Agent is running, wait for it to finish.";
+
+/** Return the localized placeholder used while an LLM-generated chat title is pending. */
+export function defaultChatTitle(locale: SupportedLocale): string {
+  return locale === "zh-CN" ? "新对话" : "New Chat";
+}
 
 let CODE_MODE_HARNESS =
 `import { WorkerEntrypoint, restore, RpcStub, RpcTarget } from "cloudflare:workers";
@@ -571,6 +576,9 @@ type ActiveAgentRecord = {
   initiator: AiChatAuthorInfo;
   // Whether this turn was initiated by a gadget callback (vs. a chat message).
   callbackInitiated: boolean;
+  // Default response language captured when the turn started; legacy records fall back to the
+  // current user preference (which is English for users without a stored preference).
+  locale?: SupportedLocale;
 };
 
 // One agent step's model-facing snapshot (see StoredAssistantMessage in agent.ts), keyed by the
@@ -1265,10 +1273,12 @@ class OverseerImpl implements AgentHooks {
   // by replaying the persisted chat log.
   async #resumeAgent(record: ActiveAgentRecord, liveChat: LiveChatContext) {
     let aiModel: UserAiModelRecord | undefined;
+    let locale: SupportedLocale = record.locale ?? "en";
     try {
       let user = this.users.get(this.users.idFromString(record.initiatorUserId));
       let userMeta = await user.getChatContext(record.modelId);
       aiModel = userMeta.aiModel;
+      if (record.locale === undefined) locale = userMeta.locale;
     } catch (err) {
       this.logger.error("error resolving model while resuming agent", {
         event: "agent.resume.model.resolve.failed",
@@ -1295,7 +1305,8 @@ class OverseerImpl implements AgentHooks {
     }
 
     await this.#runAgentTurn(
-        record.chatId, aiModel, record.initiator, record.callbackInitiated, liveChat);
+        record.chatId, aiModel, record.initiator, locale,
+        record.callbackInitiated, liveChat);
   }
 
   constructor(public ctx: DurableObjectState, public env: Cloudflare.Env) {
@@ -3438,7 +3449,7 @@ class OverseerImpl implements AgentHooks {
       chatId = this.nextChatId();
       let meta: AiChatMetadata = {
         id: chatId,
-        title: "New Chat",   // filled in later by AI
+        title: defaultChatTitle(userMeta.locale),   // filled in later by AI
         started: timestamp,
         lastActive: timestamp,
       };
@@ -3468,7 +3479,7 @@ class OverseerImpl implements AgentHooks {
     if (prepared.message !== undefined && userMeta.aiModel) {
       let needsAgentTurnKeepAlive = responseTargetRegistration !== undefined;
       this.startAgent(chatId, userMeta.aiModel, userMeta.profile,
-                      clientUser.id.toString(), false, needsAgentTurnKeepAlive);
+                      clientUser.id.toString(), userMeta.locale, false, needsAgentTurnKeepAlive);
     }
 
     if (userMeta.quickModel) {
@@ -3543,7 +3554,7 @@ class OverseerImpl implements AgentHooks {
     if (runsAgentTurn && userMeta.aiModel) {
       let needsAgentTurnKeepAlive = responseTargetRegistration !== undefined;
       this.startAgent(chatId, userMeta.aiModel, userMeta.profile,
-                      clientUser.id.toString(), false, needsAgentTurnKeepAlive);
+                      clientUser.id.toString(), userMeta.locale, false, needsAgentTurnKeepAlive);
     }
     this.recordGadgetAnalytics({
       event_name: "gadget_interaction",
@@ -3830,6 +3841,7 @@ class OverseerImpl implements AgentHooks {
   // needed to re-resolve the model config on resume.
   startAgent(chatId: number, aiModel: UserAiModelRecord,
              initiator: AiChatAuthorInfo, initiatorUserId: string,
+             locale: SupportedLocale,
              callbackInitiated: boolean = false,
              keepAlive: boolean = false): void {
     // Register before starting the turn so registration always precedes the turn's teardown
@@ -3841,15 +3853,17 @@ class OverseerImpl implements AgentHooks {
       modelId: aiModel.profile.id,
       initiator,
       callbackInitiated,
+      locale,
     });
 
     let liveChat = this.#getLiveChat(chatId);
-    let turn = this.#runAgentTurn(chatId, aiModel, initiator, callbackInitiated, liveChat);
+    let turn = this.#runAgentTurn(chatId, aiModel, initiator, locale, callbackInitiated, liveChat);
     if (keepAlive) this.ctx.waitUntil(turn);
   }
 
   #runAgentTurn(chatId: number, aiModel: UserAiModelRecord,
                 initiator: AiChatAuthorInfo,
+                locale: SupportedLocale,
                 callbackInitiated: boolean,
                 liveChat: LiveChatContext): Promise<void> {
     return obsContext.with({
@@ -3858,11 +3872,12 @@ class OverseerImpl implements AgentHooks {
       chatId,
       modelId: aiModel.profile.id,
     }, () => this.#runAgentTurnWithContext(
-        chatId, aiModel, initiator, callbackInitiated, liveChat));
+        chatId, aiModel, initiator, locale, callbackInitiated, liveChat));
   }
 
   async #runAgentTurnWithContext(chatId: number, aiModel: UserAiModelRecord,
                                  initiator: AiChatAuthorInfo,
+                                 locale: SupportedLocale,
                                  callbackInitiated: boolean,
                                  liveChat: LiveChatContext): Promise<void> {
     // When this turn is billed to the user's own Cloudflare account, we refresh their cached credit
@@ -3935,7 +3950,7 @@ class OverseerImpl implements AgentHooks {
         let compactionTurn = isCompactionTurn(chatMessages);
         let newCheckpoint = await runAgent(
             this, chosenModel, chatId, aiModel.profile, chatMessages, controller.signal,
-            initiator, callbackInitiated, {
+            initiator, locale, callbackInitiated, {
               checkpoint,
               modelConfig: aiModel.config,
               measuredTokens: this.getChatMetaOrThrow(chatId).totalTokens ?? 0,
@@ -4269,7 +4284,7 @@ class OverseerImpl implements AgentHooks {
       meta.lastActive = this.getChatTimestamp();
       this.storage.chatMeta.put(meta);
       this.startAgent(chatId, userMeta.aiModel, author, callbacks[0].initiatorUserId,
-                      /* callbackInitiated */ true);
+                      userMeta.locale, /* callbackInitiated */ true);
     } catch (err) {
       // Failure to set up the agent. Make sure to reject all callbacks.
       liveChat.pendingAgentCallbacks = [];
@@ -5182,7 +5197,7 @@ class OverseerImpl implements AgentHooks {
 
       // TODO: Should we track costs for title generation? It's pretty negligible.
     } catch (err) {
-      // Oh well, just leave the title as "New Chat".
+      // Oh well, just leave the localized placeholder title in place.
       this.logger.warn("error generating chat title", {
         event: "chat.title.generate.failed", chatId, error: err,
       });
@@ -6784,7 +6799,7 @@ export class OverseerDurableObject extends DurableObject<Cloudflare.Env> {
     } else if (userMeta.aiModel) {
       // Fire off the agent (asynchronously).
       this.impl.startAgent(chatId, userMeta.aiModel, author,
-                           this.impl.users.idFromString(resolveUserId).toString());
+                           this.impl.users.idFromString(resolveUserId).toString(), userMeta.locale);
     } else {
       // TODO: Flag as needing user attention.
     }
@@ -7843,7 +7858,7 @@ class OverseerClientInterface extends RpcTarget implements Overseer {
     this.impl.storage.chatMeta.put(fresh);
 
     this.impl.startAgent(chatId, userMeta.aiModel, userMeta.profile,
-                         this.clientUser.id.toString());
+                         this.clientUser.id.toString(), userMeta.locale);
   }
 
   async acceptConnectionRequest(
@@ -8481,7 +8496,7 @@ class OverseerClientInterface extends RpcTarget implements Overseer {
     this.impl.storage.chatMeta.put(meta);
 
     this.impl.startAgent(chatId, userMeta.aiModel, userMeta.profile,
-                         this.clientUser.id.toString());
+                         this.clientUser.id.toString(), userMeta.locale);
   }
 
   async finalizeChatDraft(chatId: number): Promise<void> {

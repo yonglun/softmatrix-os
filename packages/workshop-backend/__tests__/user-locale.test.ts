@@ -5,11 +5,16 @@ import { UserDurableObject } from "../src/user.js";
 function makeUser(backing = { value: null as SupportedLocale | null }) {
   const user = Object.create(UserDurableObject.prototype) as UserDurableObject;
   Object.assign(user, {
+    env: {},
     storage: {
+      profile: {
+        get: () => ({ type: "user", name: "Test user", id: "test@example.com" }),
+      },
       locale: {
         get: () => backing.value,
         put: (value: SupportedLocale | null) => { backing.value = value; },
       },
+      quickModel: { get: () => null },
     },
   });
   return { user, backing };
@@ -47,5 +52,13 @@ describe("UserDurableObject locale preference", () => {
 
     const reloaded = makeUser(backing).user;
     await expect(reloaded.getLocale()).resolves.toBe("zh-CN");
+  });
+
+  it("includes the supported locale in Agent chat context with an English legacy fallback", async () => {
+    const legacy = makeUser();
+    await expect(legacy.user.getChatContext(null)).resolves.toMatchObject({ locale: "en" });
+
+    const chinese = makeUser({ value: "zh-CN" });
+    await expect(chinese.user.getChatContext(null)).resolves.toMatchObject({ locale: "zh-CN" });
   });
 });

@@ -1,0 +1,2768 @@
+[
+  {
+    "fileName": "Activity.tsx",
+    "kind": "toast title",
+    "text": "Failed to",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "toast title",
+    "text": "hook",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "Loading activity…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "Nothing to review",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "Requests that need your approval show up here and in the workspace header.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "View history",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "request",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "requests",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "waiting",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "Oldest first",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "event",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "events",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "No activity yet",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "Every resource an agent reads or changes is recorded here.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "No matching events",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "Show all activity",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "Time",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "Event",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "Status",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "Loading auto-approval…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "Could not load auto-approval",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "Nothing can run automatically",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "The current rules may be incomplete. Try loading them again.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "Action types appear here once a connected resource offers one its author marked safe to apply without review.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "Retry",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "Some auto-approval options could not be loaded.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "Actions agents may take without asking. Everything else waits for your review.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "This connection no longer offers this action; the rule still applies.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "Applied without asking",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "Waits for your approval",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX aria-label",
+    "text": "auto-approval for",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "Auto-approved (",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "'s rule)",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX expression",
+    "text": "By",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "Activity.tsx",
+    "kind": "JSX text",
+    "text": "Open resource",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ActivityNotifications.tsx",
+    "kind": "JSX aria-label",
+    "text": "Activity —",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ActivityNotifications.tsx",
+    "kind": "JSX aria-label",
+    "text": "review",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ActivityNotifications.tsx",
+    "kind": "JSX aria-label",
+    "text": "Activity",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ActivityNotifications.tsx",
+    "kind": "JSX text",
+    "text": "Needs review",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ActivityNotifications.tsx",
+    "kind": "JSX text",
+    "text": "Nothing is waiting on you.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ActivityNotifications.tsx",
+    "kind": "JSX expression",
+    "text": "View all",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ActivityNotifications.tsx",
+    "kind": "JSX expression",
+    "text": "requests",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ActivityNotifications.tsx",
+    "kind": "JSX expression",
+    "text": "View all activity",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintLandingPage.tsx",
+    "kind": "toast title",
+    "text": "Failed to feature blueprint",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintLandingPage.tsx",
+    "kind": "toast title",
+    "text": "Failed to unfeature blueprint",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintLandingPage.tsx",
+    "kind": "toast title",
+    "text": "Failed to delete blueprint",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintLandingPage.tsx",
+    "kind": "toast title",
+    "text": "Failed to remove blueprint from library",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintLandingPage.tsx",
+    "kind": "JSX text",
+    "text": "&times;",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintLandingPage.tsx",
+    "kind": "JSX text",
+    "text": "No AI models are available yet. Add a model from AI Providers first.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintModal.tsx",
+    "kind": "JSX expression",
+    "text": "The current screenshot will stay unless you upload a new one.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintModal.tsx",
+    "kind": "JSX text",
+    "text": "Delete \"",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintModal.tsx",
+    "kind": "JSX text",
+    "text": "People who started a gadget from this blueprint won't be affected, but the link will stop working.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintModal.tsx",
+    "kind": "JSX expression",
+    "text": "Deleting...",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintModal.tsx",
+    "kind": "JSX expression",
+    "text": "Delete",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintModal.tsx",
+    "kind": "JSX text",
+    "text": "Cancel",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintModal.tsx",
+    "kind": "JSX text",
+    "text": "v",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintModal.tsx",
+    "kind": "JSX text",
+    "text": "No description",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintModal.tsx",
+    "kind": "JSX text",
+    "text": "Update code",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintsPage.tsx",
+    "kind": "JSX aria-label",
+    "text": "Open featured blueprint",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "BlueprintsPage.tsx",
+    "kind": "JSX expression",
+    "text": "No description",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "CodeDiffEditor.tsx",
+    "kind": "JSX expression",
+    "text": "Select a file to view changes",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "CodeDiffEditor.tsx",
+    "kind": "JSX expression",
+    "text": "Loading diff...",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "CodeDiffEditor.tsx",
+    "kind": "JSX title",
+    "text": "Stacked diff",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "CodeDiffEditor.tsx",
+    "kind": "JSX aria-label",
+    "text": "Use stacked diff layout",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "CodeDiffEditor.tsx",
+    "kind": "JSX title",
+    "text": "Split diff",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "CodeDiffEditor.tsx",
+    "kind": "JSX title",
+    "text": "Split diff needs more space",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "CodeDiffEditor.tsx",
+    "kind": "JSX aria-label",
+    "text": "Use split diff layout",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "CodeEditor.tsx",
+    "kind": "JSX text",
+    "text": "Select a file to start editing",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/AnnouncementBanner.tsx",
+    "kind": "JSX aria-label",
+    "text": "Dismiss banner",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/AnnouncementBanner.tsx",
+    "kind": "JSX title",
+    "text": "Dismiss",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/AppShell/CommandPalette.tsx",
+    "kind": "JSX text",
+    "text": "ESC",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/AppShell/CommandPalette.tsx",
+    "kind": "JSX text",
+    "text": "esc",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/AutoApproveConfirmDialog.tsx",
+    "kind": "JSX text",
+    "text": "Always approve “",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/AutoApproveConfirmDialog.tsx",
+    "kind": "JSX text",
+    "text": "Future",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/AutoApproveConfirmDialog.tsx",
+    "kind": "JSX text",
+    "text": "actions on",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/AutoApproveConfirmDialog.tsx",
+    "kind": "JSX text",
+    "text": "will be applied automatically, without asking for approval. This action will be applied now too.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/AutoApproveConfirmDialog.tsx",
+    "kind": "JSX aria-label",
+    "text": "Close",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/AutoApproveConfirmDialog.tsx",
+    "kind": "JSX text",
+    "text": "Cancel",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/AutoApproveConfirmDialog.tsx",
+    "kind": "JSX expression",
+    "text": "Enabling...",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/AutoApproveConfirmDialog.tsx",
+    "kind": "JSX expression",
+    "text": "Always approve",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/AccountSelectionModal.tsx",
+    "kind": "toast title",
+    "text": "Cloudflare account selected",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/AccountSelectionModal.tsx",
+    "kind": "JSX text",
+    "text": "Choose a Cloudflare account",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/AccountSelectionModal.tsx",
+    "kind": "JSX text",
+    "text": "Your Cloudflare connection has access to multiple accounts. Select the one whose credits should be billed for usage beyond the free tier.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/AccountSelectionModal.tsx",
+    "kind": "JSX text",
+    "text": "No accounts available on this connection.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/AccountSelectionModal.tsx",
+    "kind": "JSX text",
+    "text": "Cloudflare account",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/AccountSelectionModal.tsx",
+    "kind": "JSX text",
+    "text": "Dismiss",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/AccountSelectionModal.tsx",
+    "kind": "JSX text",
+    "text": "Try again",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/AccountSelectionModal.tsx",
+    "kind": "JSX text",
+    "text": "Save",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "You've reached your free usage limit",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "You've used all",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "of your free",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX expression",
+    "text": "request",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX expression",
+    "text": "requests",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "for today. Connect your Cloudflare account to keep building now — usage beyond the free tier is billed to your own Cloudflare AI Gateway credits",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "— or wait: your free",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX expression",
+    "text": "request resets",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX expression",
+    "text": "requests reset",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "at 00:00 UTC, in",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "Your Cloudflare connection has access to multiple accounts. Choose which one's AI Gateway credits should be billed for usage beyond the free tier.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "Your Cloudflare account is connected",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "with a balance of",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": ", but it's below the minimum needed to continue. Add credits to your AI Gateway to keep building now",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "or wait — your free",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "Loading accounts…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "No accounts available on this connection.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "Learn more about",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "AI Gateway unified billing",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "Maybe later",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "Connect Cloudflare",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "Close",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/OutOfCreditsModal.tsx",
+    "kind": "JSX text",
+    "text": "Add credits in Cloudflare",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "toast title",
+    "text": "Failed to start Cloudflare connection",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "toast title",
+    "text": "Cloudflare account selected",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "Usage &amp; billing",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "Loading usage…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "Free daily allowance",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "of",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX expression",
+    "text": "request",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX expression",
+    "text": "requests",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "remaining today",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "Resets at 00:00 UTC, in",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "Cloudflare account",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "Not connected",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "Connect your Cloudflare account to keep building once your free allowance runs out. Usage beyond the free tier is billed to your own Cloudflare AI Gateway credits.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "Connect Cloudflare",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "Choose which Cloudflare account to bill",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "Your connection has access to multiple Cloudflare accounts. Select the one whose AI Gateway credits should be used.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "Loading accounts…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "No accounts available on this connection.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "Connected",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "Account balance:",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "unknown",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "Add credits",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "Learn more about",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/billing/UsageSettings.tsx",
+    "kind": "JSX text",
+    "text": "AI Gateway unified billing",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintBindingCard.tsx",
+    "kind": "JSX text",
+    "text": "Connection name",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintBindingCard.tsx",
+    "kind": "JSX aria-label",
+    "text": "Name for",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintBindingCard.tsx",
+    "kind": "JSX placeholder",
+    "text": "Connection name",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintBindingCard.tsx",
+    "kind": "JSX text",
+    "text": "Referenced in code as:",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintBindingCard.tsx",
+    "kind": "JSX aria-label",
+    "text": "Help text for",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintBindingCard.tsx",
+    "kind": "JSX placeholder",
+    "text": "What should people connect here?",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintCard.tsx",
+    "kind": "JSX aria-label",
+    "text": "Open blueprint",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintCard.tsx",
+    "kind": "JSX expression",
+    "text": "No description",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX expression",
+    "text": "Untitled blueprint",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX expression",
+    "text": "Unfavorite",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX expression",
+    "text": "Favorite",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX text",
+    "text": "Remove from library",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "toast title",
+    "text": "Blueprint uploaded",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "toast title",
+    "text": "Failed to upload blueprint",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "toast title",
+    "text": "Failed to update favorite",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "toast title",
+    "text": "Removed from library",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "toast title",
+    "text": "Failed to remove blueprint",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX placeholder",
+    "text": "Search blueprints…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX text",
+    "text": "Explore",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX title",
+    "text": "Upload a .gadget archive",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX expression",
+    "text": "Uploading…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX expression",
+    "text": "Upload",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX text",
+    "text": "Something went wrong loading your blueprints.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX text",
+    "text": "Try again",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX text",
+    "text": "No blueprints found",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX text",
+    "text": "No blueprints yet",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX text",
+    "text": "Publish a workspace as a blueprint, or add one from Explore.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX text",
+    "text": "Explore blueprints",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/BlueprintList.tsx",
+    "kind": "JSX expression",
+    "text": "Upload .gadget",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/AppPreview.tsx",
+    "kind": "JSX text",
+    "text": "Channel Summarizer",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/AppPreview.tsx",
+    "kind": "JSX text",
+    "text": "Daily digest of your Slack channels, powered by Workers AI",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/AppPreview.tsx",
+    "kind": "JSX text",
+    "text": "Live",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/AppPreview.tsx",
+    "kind": "JSX text",
+    "text": "msgs",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/AppPreview.tsx",
+    "kind": "JSX expression",
+    "text": "Team discussed Q1 planning timeline and agreed on March 15 deadline for proposals",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/AppPreview.tsx",
+    "kind": "JSX expression",
+    "text": "Deployed v2.4.1 hotfix for auth timeout. Monitoring dashboards show latency back to normal",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/AppPreview.tsx",
+    "kind": "JSX expression",
+    "text": "Active discussion about weekend hackathon projects and lunch plans for Friday",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/AppPreview.tsx",
+    "kind": "JSX expression",
+    "text": "3 action items assigned, 2 decisions made",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/AppPreview.tsx",
+    "kind": "JSX expression",
+    "text": "RFC for new caching layer received 5 approvals, moving to implementation",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/AppPreview.tsx",
+    "kind": "JSX expression",
+    "text": "12 participants, trending topics: hackathon, team lunch, offsite",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/AppPreview.tsx",
+    "kind": "JSX text",
+    "text": "No new activity",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/ChatMessage.tsx",
+    "kind": "JSX text",
+    "text": "U",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/ChatMessage.tsx",
+    "kind": "JSX expression",
+    "text": "You",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/ChatMessage.tsx",
+    "kind": "JSX expression",
+    "text": "Workshop",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/ConnectionConfigModal.tsx",
+    "kind": "JSX text",
+    "text": "Add",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/ConnectionConfigModal.tsx",
+    "kind": "JSX text",
+    "text": "No resources added yet",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/ConnectionConfigModal.tsx",
+    "kind": "JSX text",
+    "text": "Cancel",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/ConnectionConfigModal.tsx",
+    "kind": "JSX text",
+    "text": "Save",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/DataTab.tsx",
+    "kind": "JSX text",
+    "text": "channels",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/DataTab.tsx",
+    "kind": "JSX text",
+    "text": "rows",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/DataTab.tsx",
+    "kind": "JSX text",
+    "text": "selected",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/DataTab.tsx",
+    "kind": "JSX text",
+    "text": "Filter",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/DataTab.tsx",
+    "kind": "JSX text",
+    "text": "Sort",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/DataTab.tsx",
+    "kind": "JSX aria-label",
+    "text": "Select all rows",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/DataTab.tsx",
+    "kind": "JSX text",
+    "text": "Channel",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/DataTab.tsx",
+    "kind": "JSX text",
+    "text": "Messages",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/DataTab.tsx",
+    "kind": "JSX text",
+    "text": "Last Active",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/DataTab.tsx",
+    "kind": "JSX text",
+    "text": "Status",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/DataTab.tsx",
+    "kind": "JSX aria-label",
+    "text": "Select",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/DataTab.tsx",
+    "kind": "JSX text",
+    "text": "Unread",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/DataTab.tsx",
+    "kind": "JSX text",
+    "text": "Read",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/DataTab.tsx",
+    "kind": "JSX text",
+    "text": "rows in channels",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/DataTab.tsx",
+    "kind": "JSX text",
+    "text": "total messages",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/PermissionToast.tsx",
+    "kind": "JSX text",
+    "text": "Permission requested",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/PermissionToast.tsx",
+    "kind": "JSX text",
+    "text": "Workshop wants to access",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/PermissionToast.tsx",
+    "kind": "JSX expression",
+    "text": "scope",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/PermissionToast.tsx",
+    "kind": "JSX expression",
+    "text": "scopes",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/PermissionToast.tsx",
+    "kind": "JSX text",
+    "text": "Resources",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/PermissionToast.tsx",
+    "kind": "JSX text",
+    "text": "API scopes",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/PermissionToast.tsx",
+    "kind": "JSX text",
+    "text": "Deny",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/PermissionToast.tsx",
+    "kind": "JSX text",
+    "text": "Allow access",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/PermissionToast.tsx",
+    "kind": "JSX text",
+    "text": "access granted",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/SlashCommandPicker.tsx",
+    "kind": "JSX text",
+    "text": "Commands",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/SlashCommandPicker.tsx",
+    "kind": "JSX aria-label",
+    "text": "Slash commands",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/SlashCommandPicker.tsx",
+    "kind": "JSX text",
+    "text": "Loading commands…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/SlashCommandPicker.tsx",
+    "kind": "JSX expression",
+    "text": "Couldn’t load commands.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/SlashCommandPicker.tsx",
+    "kind": "JSX expression",
+    "text": "No commands match your search.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/SlashCommandPicker.tsx",
+    "kind": "JSX expression",
+    "text": "No commands are available.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/ToolCallCard.tsx",
+    "kind": "JSX expression",
+    "text": "s",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/ToolCallCard.tsx",
+    "kind": "JSX expression",
+    "text": "ms",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/ToolCallCard.tsx",
+    "kind": "JSX text",
+    "text": "Input",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/chat/ToolCallCard.tsx",
+    "kind": "JSX text",
+    "text": "Output",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX expression",
+    "text": "Credentials expired; reconnect from the Gatekeepers page",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX aria-label",
+    "text": "Close",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX expression",
+    "text": "Resources",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX expression",
+    "text": "Resources to enable",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX expression",
+    "text": "What this gatekeeper can do",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX aria-label",
+    "text": "Grant",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX aria-label",
+    "text": "Enable",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX text",
+    "text": "Gatekeeper sits between",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX text",
+    "text": "and your Gadgets.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX text",
+    "text": "Each Gadget only sees the resources you connect. If the workspace is shared, Gatekeeper verifies other users have the required permissions before they can access those resources.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX text",
+    "text": "This account can be used by Gadgets you connect it to. Shared users must have the required permissions before they can access those connected resources.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX text",
+    "text": "Disconnect",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX text",
+    "text": "? Gadgets using this will lose access.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX text",
+    "text": "resource",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX expression",
+    "text": "s",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX text",
+    "text": "to add",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX text",
+    "text": "Select at least one resource to continue.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX text",
+    "text": "Cancel",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX expression",
+    "text": "Disconnecting...",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX expression",
+    "text": "Yes, disconnect",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX expression",
+    "text": "Opening...",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX expression",
+    "text": "Continue to",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX text",
+    "text": "Close",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX expression",
+    "text": "Adding...",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ConnectConnectorModal.tsx",
+    "kind": "JSX expression",
+    "text": "Add",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/DeleteConfirmationDialog.tsx",
+    "kind": "JSX aria-label",
+    "text": "Close",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/DeleteConfirmationDialog.tsx",
+    "kind": "JSX text",
+    "text": "Cancel",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "toast title",
+    "text": "Couldn't update standard formats",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "Standard formats",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "A promoted blueprint is offered by name (“New Doc”, “New Slides”) wherever people start something, and the agent is told to prefer it over building the same thing from scratch.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "Promote a blueprint",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "Offer as a standard format",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX expression",
+    "text": "Untitled blueprint",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX expression",
+    "text": "Produces",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX expression",
+    "text": "No declared format. You’ll name it.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "What people will see",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "Nothing yet. People will only see “New workspace”.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "New",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "In the composer’s + menu, the command palette, and on an empty Outputs page, in this order.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "No standard formats yet",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "Promote a blueprint to offer it by name wherever people start something, and to have the agent prefer it over building the same thing from scratch.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX title",
+    "text": "This blueprint no longer exists",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX expression",
+    "text": "New",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "Bundled",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "Off",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "Needs a name",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX expression",
+    "text": "Blueprint deleted. Remove this entry.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX expression",
+    "text": "This blueprint doesn’t declare what it produces. Give it a name to offer it.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX expression",
+    "text": "· shown under",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX expression",
+    "text": "on Outputs",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "The blueprint behind this format was deleted, so nobody is offered it. Remove the entry.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX title",
+    "text": "How it’s presented",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "On Outputs",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX title",
+    "text": "How the agent picks it",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX placeholder",
+    "text": "e.g. prefer for customer-facing decks",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "” — a standard format on this deployment",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "Stop offering",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "Remove",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "(overridden)",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX text",
+    "text": "Icon",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/AdminFormatsPanel.tsx",
+    "kind": "JSX aria-label",
+    "text": "Choose icon",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/ComposerFormatMenuItems.tsx",
+    "kind": "JSX text",
+    "text": "Start with",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/ComposerFormatMenuItems.tsx",
+    "kind": "JSX expression",
+    "text": "Creating…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/NewFormatRow.tsx",
+    "kind": "JSX expression",
+    "text": "Creating…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/format/NewFormatRow.tsx",
+    "kind": "JSX expression",
+    "text": "New",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/Header.tsx",
+    "kind": "JSX text",
+    "text": "Home",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/Header.tsx",
+    "kind": "JSX text",
+    "text": "Gatekeepers",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/Header.tsx",
+    "kind": "JSX text",
+    "text": "Explore",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/Header.tsx",
+    "kind": "JSX text",
+    "text": "Profile",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/Header.tsx",
+    "kind": "JSX text",
+    "text": "Providers",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/Header.tsx",
+    "kind": "JSX text",
+    "text": "Admin",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/Header.tsx",
+    "kind": "JSX text",
+    "text": "Sign out",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/HookToggle.tsx",
+    "kind": "JSX aria-label",
+    "text": "Disable hook",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/HookToggle.tsx",
+    "kind": "JSX aria-label",
+    "text": "Enable hook",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/pickerRows.tsx",
+    "kind": "JSX text",
+    "text": "Tab",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/RecentApps.tsx",
+    "kind": "JSX expression",
+    "text": "Untitled Workspace",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/RecentApps.tsx",
+    "kind": "JSX text",
+    "text": "Shared by",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/RecentApps.tsx",
+    "kind": "JSX text",
+    "text": "Recent workspaces",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/RecentApps.tsx",
+    "kind": "JSX text",
+    "text": "Unable to load your workspaces. Check your connection and try refreshing.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/RecentApps.tsx",
+    "kind": "JSX text",
+    "text": "No workspaces yet. Create your first one above!",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/RecentApps.tsx",
+    "kind": "JSX text",
+    "text": "View all",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ResolveButton.tsx",
+    "kind": "JSX expression",
+    "text": "Approve",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ResolveButton.tsx",
+    "kind": "JSX expression",
+    "text": "Deny",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/ResolveButton.tsx",
+    "kind": "JSX text",
+    "text": "Always approve",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/TabButton.tsx",
+    "kind": "JSX aria-label",
+    "text": "pending",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/WorkspaceOpenErrorPage.tsx",
+    "kind": "JSX text",
+    "text": "Go to workspaces",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "components/WorkspaceOpenErrorPage.tsx",
+    "kind": "JSX text",
+    "text": "Try again",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "FileSidebar.tsx",
+    "kind": "JSX placeholder",
+    "text": "filename.ts",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "FrontendErrorBoundary.tsx",
+    "kind": "JSX text",
+    "text": "Something went wrong",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "FrontendErrorBoundary.tsx",
+    "kind": "JSX text",
+    "text": "Reload the Workshop to start again.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "FrontendErrorBoundary.tsx",
+    "kind": "JSX text",
+    "text": "Reload",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "GadgetCodeInterface.tsx",
+    "kind": "JSX text",
+    "text": "&#9888;&#65039;",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "GadgetEditor.tsx",
+    "kind": "JSX text",
+    "text": "Draft",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "GadgetEditor.tsx",
+    "kind": "JSX text",
+    "text": "No gadgets yet",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "GadgetEditor.tsx",
+    "kind": "JSX text",
+    "text": "Ask the agent in chat to build something, and it will appear here.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "GadgetExportMenu.tsx",
+    "kind": "toast title",
+    "text": "Failed to export PDF",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "GadgetExportMenu.tsx",
+    "kind": "JSX aria-label",
+    "text": "Export to PDF",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "GadgetUI.tsx",
+    "kind": "JSX text",
+    "text": "Switch to this tab to load the Gadget UI",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "GadgetUI.tsx",
+    "kind": "JSX title",
+    "text": "Error",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "GadgetUI.tsx",
+    "kind": "JSX text",
+    "text": "Try again",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "GadgetUI.tsx",
+    "kind": "JSX text",
+    "text": "No gadget UI yet",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "GadgetUI.tsx",
+    "kind": "JSX text",
+    "text": "When the gadget builds one, it will appear here.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "GadgetUI.tsx",
+    "kind": "JSX title",
+    "text": "Gadget UI",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "GadgetUseView.tsx",
+    "kind": "JSX aria-label",
+    "text": "Home",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "GadgetUseView.tsx",
+    "kind": "JSX text",
+    "text": "by",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "GadgetUseView.tsx",
+    "kind": "JSX text",
+    "text": "This workspace has no gadgets yet.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AccountChooser.tsx",
+    "kind": "JSX text",
+    "text": "Account",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AccountChooser.tsx",
+    "kind": "JSX expression",
+    "text": "Enable the Email receiver account, then choose the mailbox name below.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AccountChooser.tsx",
+    "kind": "JSX expression",
+    "text": "Pick which",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AccountChooser.tsx",
+    "kind": "JSX expression",
+    "text": "identity this",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AccountChooser.tsx",
+    "kind": "JSX expression",
+    "text": "should use.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AccountChooser.tsx",
+    "kind": "JSX expression",
+    "text": "Expired credentials",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AccountChooser.tsx",
+    "kind": "JSX expression",
+    "text": "Additional permission needed",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AccountChooser.tsx",
+    "kind": "JSX expression",
+    "text": "Connected",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AccountChooser.tsx",
+    "kind": "JSX expression",
+    "text": "account",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AccountChooser.tsx",
+    "kind": "JSX expression",
+    "text": "Opening...",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AccountChooser.tsx",
+    "kind": "JSX expression",
+    "text": "Reconnect",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AccountChooser.tsx",
+    "kind": "JSX expression",
+    "text": "Grant access",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AccountChooser.tsx",
+    "kind": "JSX expression",
+    "text": "Enable Email mailboxes",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AccountChooser.tsx",
+    "kind": "JSX expression",
+    "text": "Connect",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AccountChooser.tsx",
+    "kind": "JSX expression",
+    "text": "Use another",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AgentSpawnerConfigForm.tsx",
+    "kind": "JSX aria-label",
+    "text": "Agent display name",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AgentSpawnerConfigForm.tsx",
+    "kind": "JSX placeholder",
+    "text": "e.g. Email Responder",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AgentSpawnerConfigForm.tsx",
+    "kind": "JSX aria-label",
+    "text": "Agent model",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AgentSpawnerConfigForm.tsx",
+    "kind": "JSX placeholder",
+    "text": "Select a model",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AgentSpawnerConfigForm.tsx",
+    "kind": "JSX text",
+    "text": "None (no agent)",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AgentSpawnerConfigForm.tsx",
+    "kind": "JSX text",
+    "text": "Choose \"None\" to create conversations without an agent.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AgentSpawnerConfigForm.tsx",
+    "kind": "JSX text",
+    "text": "Nothing is available to offer spawned agents here. Create the agent from a gadget's Connections tab to give it access to that gadget and its resources.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AgentSpawnerConfigForm.tsx",
+    "kind": "JSX aria-label",
+    "text": "Give spawned agents access to",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AgentSpawnerConfigForm.tsx",
+    "kind": "JSX aria-label",
+    "text": "Binding name for",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AiModelConnectionConfig.tsx",
+    "kind": "JSX aria-label",
+    "text": "Select an AI model",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/AiModelConnectionConfig.tsx",
+    "kind": "JSX placeholder",
+    "text": "Select an AI model",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "gatekeeper-modal/ConnectionConfigField.tsx",
+    "kind": "JSX text",
+    "text": "Optional",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "toast title",
+    "text": "Failed to load your connected accounts",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "toast title",
+    "text": "Failed to start connection flow",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "toast title",
+    "text": "Failed to start re-authentication flow",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX expression",
+    "text": "Verify your access again",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX expression",
+    "text": "Verify your access",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX expression",
+    "text": "Waiting for connection…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX expression",
+    "text": "Connect",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX text",
+    "text": "Using your account",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX text",
+    "text": "Ready",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX placeholder",
+    "text": "Choose a",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX placeholder",
+    "text": "account…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX expression",
+    "text": "(expired)",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX expression",
+    "text": "Re-authenticating…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX expression",
+    "text": "Click to re-authenticate this account",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX expression",
+    "text": "This account has expired — click to re-authenticate",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX expression",
+    "text": "Connect a different account",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX text",
+    "text": "Cancel",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX expression",
+    "text": "Verify again",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ObserverConfigModal.tsx",
+    "kind": "JSX expression",
+    "text": "Verify and open",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ProtectedRoute.tsx",
+    "kind": "JSX text",
+    "text": "Loading...",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ProtectedRoute.tsx",
+    "kind": "JSX title",
+    "text": "Authentication error:",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ProtectedRoute.tsx",
+    "kind": "JSX text",
+    "text": "Retry",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ProtectedRoute.tsx",
+    "kind": "JSX text",
+    "text": "Authenticating...",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ResourceConfiguratorHost.tsx",
+    "kind": "JSX text",
+    "text": "Choose an account before selecting a resource.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ResourceConfiguratorHost.tsx",
+    "kind": "JSX text",
+    "text": "Loading configurator...",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "routes/context.tsx",
+    "kind": "JSX text",
+    "text": "Context &amp; Skills",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "routes/context.tsx",
+    "kind": "JSX text",
+    "text": "Curated collections of knowledge your agents read, plus reusable skills they can apply.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "routes/context.tsx",
+    "kind": "JSX title",
+    "text": "Context & Skills are coming soon to",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "SandboxedGatekeeperApp.tsx",
+    "kind": "JSX title",
+    "text": "Gatekeeper app",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "SandboxedResourceConfigurator.tsx",
+    "kind": "JSX title",
+    "text": "Resource configurator",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX aria-label",
+    "text": "Cancel",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "Couldn’t check which connections recipients will be asked to verify.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "Recipients must",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "People with",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "access must",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "prove their own account can reach:",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Failed to load sharing info",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Could not copy share link.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Could not copy the workspace link.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "No account found for that username.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Added",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "as a collaborator.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Failed to add collaborator.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Failed to create share link.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Link copied to clipboard.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Failed to copy share link.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Failed to preview collaborator removal.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Collaborator removed.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Your direct grant was removed. This collaborator still has access through another source.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Failed to remove collaborator.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Share link renamed.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Failed to rename share link.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Failed to preview share-link revocation.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Share link revoked.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "toast title",
+    "text": "Failed to revoke share link.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "Share “",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "Invite people or share a link.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX aria-label",
+    "text": "Close",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "This workspace can’t be shared",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "It has observed sensitive data that can only be accessed by you, the owner.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "To share something similar, create a blueprint from a gadget in this workspace, then use it to create a new workspace.",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX placeholder",
+    "text": "Username or email",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX aria-label",
+    "text": "Username or email",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "Inviting…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "Invite",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "Added",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "Link copied to your clipboard",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "Send them this link to open it",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "Copied",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "Copy link",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX aria-label",
+    "text": "Dismiss added collaborator",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "Link copied",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "Link ready",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "You can copy it again anytime from Share links",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "Copy",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX aria-label",
+    "text": "Dismiss created link",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX placeholder",
+    "text": "Name this link (optional)…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX aria-label",
+    "text": "Share link name (optional)",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "Creating…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "Create link",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX aria-label",
+    "text": "Cancel creating link",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "Create a share link",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "People with access",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "(you)",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "Owner",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX aria-label",
+    "text": "Remove",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "other",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "person loses",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "people lose",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "access through",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": ". Keep anyone?",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "Share links",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX placeholder",
+    "text": "Name this link…",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX aria-label",
+    "text": "Share link name",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX expression",
+    "text": "Untitled link",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "Created by",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX aria-label",
+    "text": "Copy",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX aria-label",
+    "text": "Rename",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX aria-label",
+    "text": "Revoke",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "ShareModal.tsx",
+    "kind": "JSX text",
+    "text": "access through this link. Keep anyone?",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "WorkpiecePicker.tsx",
+    "kind": "JSX title",
+    "text": "Collapse outputs",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "WorkpiecePicker.tsx",
+    "kind": "JSX title",
+    "text": "Expand outputs",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "WorkpiecePicker.tsx",
+    "kind": "JSX aria-label",
+    "text": "Collapse outputs",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "WorkpiecePicker.tsx",
+    "kind": "JSX aria-label",
+    "text": "Expand outputs",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "WorkpiecePicker.tsx",
+    "kind": "JSX text",
+    "text": "Outputs",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "WorkpiecePicker.tsx",
+    "kind": "JSX aria-label",
+    "text": "Save gadget name",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "WorkpiecePicker.tsx",
+    "kind": "JSX aria-label",
+    "text": "Cancel rename",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "WorkpiecePicker.tsx",
+    "kind": "JSX text",
+    "text": "Draft",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "WorkpiecePicker.tsx",
+    "kind": "JSX aria-label",
+    "text": "Hooks enabled",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "WorkpiecePicker.tsx",
+    "kind": "JSX title",
+    "text": "Rename gadget",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "WorkpiecePicker.tsx",
+    "kind": "JSX aria-label",
+    "text": "Rename",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  },
+  {
+    "fileName": "WorkpiecePicker.tsx",
+    "kind": "JSX text",
+    "text": "View activity",
+    "reason": "Pre-existing copy in a surface outside the completed migration scope; retain until its dedicated localization task lands."
+  }
+]
