@@ -83,6 +83,7 @@ test("Softmatrix distribution retains the exact Apache-2.0 license and attributi
     "rollback",
     "OIDC_CLIENT_SECRET",
     "journalctl",
+    "/usr/bin/node",
     "Cloudflare",
   ]) {
     assert.ok(vmDocumentation.includes(phrase), `VM documentation is missing ${phrase}`);

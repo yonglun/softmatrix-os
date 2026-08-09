@@ -7,8 +7,8 @@ required.
 
 ## 1. Prepare the VM
 
-- Linux VM with Node.js 22+ for installation tooling, `systemd`, and a pinned `workerd` binary
-  matching the release build.
+- Linux VM with Node.js 22+ installed at `/usr/bin/node` (used by installation tooling and the
+  systemd preflight), `systemd`, and a pinned `workerd` binary matching the release build.
 - At least 4 GB RAM, a persistent filesystem, and a DNS name with TLS terminated by Caddy or
   Nginx. Keep `workerd` on loopback (`127.0.0.1:8787`).
 - Create the service account and directories, then create the storage subdirectories:

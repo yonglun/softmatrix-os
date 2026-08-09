@@ -6,8 +6,8 @@ R2、Access 或 AI Gateway。
 
 ## 1. Prepare the VM
 
-- Linux VM，Node.js 22+（仅用于安装工具）、`systemd`，以及与发布构建匹配的固定版本
-  `workerd`。
+- Linux VM，Node.js 22+（安装到 `/usr/bin/node`，供安装工具和 systemd 启动预检使用）、
+  `systemd`，以及与发布构建匹配的固定版本 `workerd`。
 - 至少 4 GB 内存、持久化磁盘、带 TLS 的 DNS 名称。`workerd` 只监听回环地址
   `127.0.0.1:8787`，由 Caddy 或 Nginx 对外提供 HTTPS。
 - 创建服务账号和目录，再创建存储子目录：
