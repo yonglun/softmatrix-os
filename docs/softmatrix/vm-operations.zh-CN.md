@@ -58,3 +58,9 @@ OIDC 拒绝峰值、模型服务商延迟/错误以及异常公网监听。将 G
 此模式是独立的 Softmatrix OS 软件。Cloudflare 不运营该 VM，不提供其 IdP、不托管模型服务商，也
 不会接收实例数据。每次事故和发布都应保留精确 release、runtime 版本、备份 checksum 及操作员签字。
 
+## Release rehearsal
+
+首次发布的证据记录请使用 [`vm-release-rehearsal.md`](vm-release-rehearsal.md)。在干净的单台 VM
+上完成全部命令前，报告必须保持 `PENDING OPERATOR EXECUTION`。记录源代码 commit、release ID、
+workerd/runtime 版本、发布包和备份 checksum、重启/持久化结果、隔离恢复结果、回滚结果及操作员
+批准。本地自动化 E2E 只能作为辅助证据，不能替代干净 VM 的签字验收。

@@ -214,11 +214,12 @@ export async function rollbackVmRelease({
 }
 
 function parseArgs(argv) {
-  const args = { rootDir: "/opt/softmatrix", releaseDir: undefined, rollback: undefined };
+  const args = { rootDir: "/opt/softmatrix", releaseDir: undefined, rollback: undefined, baseUrl: undefined };
   for (let index = 0; index < argv.length; index++) {
     if (argv[index] === "--root") args.rootDir = resolve(argv[++index]);
     else if (argv[index] === "--release") args.releaseDir = resolve(argv[++index]);
     else if (argv[index] === "--rollback") args.rollback = argv[++index];
+    else if (argv[index] === "--base-url") args.baseUrl = argv[++index];
     else throw new Error(`unknown argument: ${argv[index]}`);
   }
   return args;
@@ -228,8 +229,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
     const args = parseArgs(process.argv.slice(2));
     const result = args.rollback
-      ? await rollbackVmRelease({ rootDir: args.rootDir, releaseId: args.rollback })
-      : await installVmRelease({ rootDir: args.rootDir, releaseDir: args.releaseDir });
+      ? await rollbackVmRelease({ rootDir: args.rootDir, releaseId: args.rollback, baseUrl: args.baseUrl })
+      : await installVmRelease({ rootDir: args.rootDir, releaseDir: args.releaseDir, baseUrl: args.baseUrl });
     console.log(JSON.stringify(result, null, 2));
   } catch (error) {
     console.error(error?.stack ?? error);
