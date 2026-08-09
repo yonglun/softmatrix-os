@@ -71,6 +71,19 @@ function pinnedWranglerVersion() {
   return pkg.version;
 }
 
+// Some Workers have generated configurator modules that are intentionally not committed. The
+// normal workspace build creates them, but release builds also run directly in clean checkouts
+// (including the VM smoke runner), so make that prerequisite explicit before Wrangler collects
+// modules. This keeps release output reproducible instead of depending on local build residue.
+function buildGeneratedConfiguratorSources(packages) {
+  for (const pkg of packages) {
+    const packageJson = JSON.parse(readFileSync(join(pkg.dir, "package.json"), "utf8"));
+    if (packageJson.scripts?.["build:configurator"]) {
+      run("pnpm", ["run", "build:configurator"], { cwd: pkg.dir });
+    }
+  }
+}
+
 // Builds the Access-mode frontend for Cloudflare releases. VM releases request the same
 // immutable bundle with password/OIDC mode enabled: they cannot rely on Cloudflare Access.
 function buildFrontend() {
@@ -110,8 +123,10 @@ function main() {
   // 2. Bundle every deployable package the way `wrangler deploy` would, without uploading.
   //    Run from each package dir so custom build commands (capnweb-validate) resolve their bins.
   const bundleDir = mkdtempSync(join(tmpdir(), "gadgets-release-"));
+  const deployablePackages = findDeployablePackages(PACKAGES_DIR);
+  buildGeneratedConfiguratorSources(deployablePackages);
   const workers = [];
-  for (const pkg of findDeployablePackages(PACKAGES_DIR)) {
+  for (const pkg of deployablePackages) {
     const outDir = join(bundleDir, pkg.name);
     run("pnpm", ["exec", "wrangler", "deploy", "--dry-run", "--outdir", outDir],
         { cwd: pkg.dir });
