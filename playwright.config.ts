@@ -28,7 +28,9 @@ export default defineConfig({
       command: vmE2E ? "node scripts/run-vm-e2e.mjs" : "node scripts/run-e2e-server.mjs",
       url: baseURL,
       reuseExistingServer: false,
-      timeout: 120_000,
+      // VM E2E builds the immutable release from a clean checkout, including the two
+      // single-file gatekeeper apps. Allow that first build to finish on slower CI runners.
+      timeout: vmE2E ? 300_000 : 120_000,
       stdout: "pipe",
       stderr: "pipe",
     },
