@@ -71,10 +71,13 @@ function pinnedWranglerVersion() {
   return pkg.version;
 }
 
-// Builds the Access-mode frontend (VITE_CF_ACCESS_MODE is a build-time flag,
-// workshop-frontend/src/useAuth.ts) — the one asset variant every release carries.
+// Builds the Access-mode frontend for Cloudflare releases. VM releases request the same
+// immutable bundle with password/OIDC mode enabled: they cannot rely on Cloudflare Access.
 function buildFrontend() {
-  const env = { ...process.env, VITE_CF_ACCESS_MODE: "true" };
+  const env = {
+    ...process.env,
+    VITE_CF_ACCESS_MODE: process.env.SOFTMATRIX_VM_PROFILE === "true" ? "false" : "true",
+  };
   run("pnpm", ["run", "build"], { cwd: FRONTEND_DIR, env });
   return collectAssets(join(FRONTEND_DIR, "dist"));
 }

@@ -84,6 +84,11 @@ function serviceNameForBinding(type, name) {
   return `softmatrix-${prefix}-${sanitizeEnvironmentName(name).toLowerCase()}`;
 }
 
+function localResourceId(type, name) {
+  const prefix = type === "kv_namespace" ? "kv" : "r2";
+  return `softmatrix:${prefix}:${sanitizeEnvironmentName(name).toLowerCase()}`;
+}
+
 function workerServiceName(pkgName) {
   return `softmatrix-${pkgName}`;
 }
@@ -123,6 +128,7 @@ function transformBinding(binding, pkgName) {
         type: binding.type,
         name: binding.name,
         service: serviceNameForBinding(binding.type, binding.name),
+        localId: localResourceId(binding.type, binding.name),
       };
     case "worker_loader":
       return { type: "worker_loader", name: binding.name, id: "softmatrix-dynamic-workers" };
@@ -175,7 +181,7 @@ function transformWorker(pkgName, worker) {
     bindings: [
       ...(worker.bindings ?? []).map(binding => transformBinding(binding, pkgName)),
       ...(pkgName === "workshop-backend"
-        ? ["ADMINS", "ORG_AI_MODELS", "ALLOW_USER_BYOK", "DISABLE_PASSWORD_AUTH",
+        ? ["ADMINS", "ORG_AI_MODELS", "ALLOW_USER_BYOK", "DISABLE_PASSWORD_AUTH", "DEV",
           "OIDC_ISSUER", "OIDC_CLIENT_ID", "OIDC_CLIENT_SECRET", "OIDC_DISPLAY_NAME",
           "OIDC_ALLOWED_EMAIL_DOMAINS", "AUTH_GATEKEEPERS"].map(name => ({
           type: "from_environment",
@@ -229,6 +235,88 @@ function capnpBinding(binding) {
   throw new Error(`cannot render binding type: ${binding.type}`);
 }
 
+function miniflareWorkerFiles(rootDir) {
+  const pnpmDirectory = join(resolve(rootDir), "node_modules", ".pnpm");
+  const packageDirectory = readdirSync(pnpmDirectory)
+      .find(name => name.startsWith("miniflare@"));
+  if (!packageDirectory) throw new Error("miniflare package is required to build VM local storage services");
+  const workerDirectory = join(pnpmDirectory, packageDirectory, "node_modules", "miniflare", "dist", "src", "workers");
+  const files = {
+    shared: join(workerDirectory, "shared", "index.worker.js"),
+    zod: join(workerDirectory, "shared", "zod.worker.js"),
+    objectEntry: join(workerDirectory, "shared", "object-entry.worker.js"),
+    kvNamespace: join(workerDirectory, "kv", "namespace.worker.js"),
+    r2Bucket: join(workerDirectory, "r2", "bucket.worker.js"),
+  };
+  for (const [name, path] of Object.entries(files)) {
+    if (!existsSync(path)) throw new Error(`missing Miniflare local storage worker (${name}): ${path}`);
+  }
+  return files;
+}
+
+function renderLocalStorageServices(workers) {
+  const resources = [];
+  for (const worker of Object.values(workers)) {
+    for (const binding of worker.bindings) {
+      if (binding.type !== "kv_namespace" && binding.type !== "r2_bucket") continue;
+      resources.push({
+        kind: binding.type === "kv_namespace" ? "kv" : "r2",
+        entryService: binding.service,
+        id: binding.localId,
+      });
+    }
+  }
+  const uniqueResources = [...new Map(resources.map(resource => [resource.entryService, resource])).values()]
+      .toSorted((left, right) => left.entryService.localeCompare(right.entryService));
+  if (uniqueResources.length === 0) return { services: "", hasKv: false, hasR2: false };
+  const hasKv = uniqueResources.some(resource => resource.kind === "kv");
+  const hasR2 = uniqueResources.some(resource => resource.kind === "r2");
+  const services = [];
+  if (hasKv) {
+    services.push(`(name = "softmatrix-kv-storage", disk = (path = "data/kv", writable = true))`);
+    services.push(`(name = "softmatrix-kv-ns", worker = (
+      modules = [(name = "namespace.worker.js", esModule = embed "miniflare/kv-namespace.worker.js")],
+      compatibilityDate = "2023-07-24",
+      compatibilityFlags = ["nodejs_compat", "experimental"],
+      bindings = [
+        (name = "MINIFLARE_BLOBS", service = "softmatrix-kv-storage")
+      ],
+      durableObjectNamespaces = [
+        (className = "KVNamespaceObject", uniqueKey = "softmatrix:kv:namespace", enableSql = true)
+      ],
+      durableObjectStorage = (localDisk = "softmatrix-kv-storage")
+    ))`);
+  }
+  if (hasR2) {
+    services.push(`(name = "softmatrix-r2-storage", disk = (path = "objects/r2", writable = true))`);
+    services.push(`(name = "softmatrix-r2-bucket", worker = (
+      modules = [(name = "bucket.worker.js", esModule = embed "miniflare/r2-bucket.worker.js")],
+      compatibilityDate = "2023-07-24",
+      compatibilityFlags = ["nodejs_compat", "experimental"],
+      bindings = [
+        (name = "MINIFLARE_BLOBS", service = "softmatrix-r2-storage")
+      ],
+      durableObjectNamespaces = [
+        (className = "R2BucketObject", uniqueKey = "softmatrix:r2:bucket", enableSql = true)
+      ],
+      durableObjectStorage = (localDisk = "softmatrix-r2-storage")
+    ))`);
+  }
+  for (const resource of uniqueResources) {
+    const className = resource.kind === "kv" ? "KVNamespaceObject" : "R2BucketObject";
+    const serviceName = resource.kind === "kv" ? "softmatrix-kv-ns" : "softmatrix-r2-bucket";
+    services.push(`(name = ${capnpString(resource.entryService)}, worker = (
+      modules = [(name = "object-entry.worker.js", esModule = embed "miniflare/object-entry.worker.js")],
+      compatibilityDate = "2023-07-24",
+      bindings = [
+        (name = "MINIFLARE_NAMESPACE", text = ${capnpString(resource.id)}),
+        (name = "MINIFLARE_OBJECT", durableObjectNamespace = (className = ${capnpString(className)}, serviceName = ${capnpString(serviceName)}))
+      ]
+    ))`);
+  }
+  return { services: services.join(",\n    "), hasKv, hasR2 };
+}
+
 function capnpModules(worker) {
   const main = worker.modules.find(module => module.name === worker.mainModule);
   if (!main) throw new Error(`main module ${worker.mainModule} is missing from ${worker.pkgName}`);
@@ -271,6 +359,7 @@ function renderWorker(pkgName, worker) {
       ],
       compatibilityDate = ${capnpString(worker.compatibilityDate)},
       compatibilityFlags = ${capnpTextList(worker.compatibilityFlags)},
+      ${pkgName === "workshop-backend" ? 'globalOutbound = "softmatrix-model-network",' : ""}
       bindings = [
         ${[...bindings.map(capnpBinding), ...vars].join(",\n        ")}
       ],
@@ -281,23 +370,9 @@ function renderWorker(pkgName, worker) {
     ))`;
 }
 
-function renderStorageServices(workers) {
-  const services = new Map();
-  for (const worker of Object.values(workers)) {
-    for (const binding of worker.bindings) {
-      if (binding.type !== "kv_namespace" && binding.type !== "r2_bucket") continue;
-      const directory = binding.type === "kv_namespace" ? "data" : "objects";
-      const suffix = binding.service.replace(/^softmatrix-(?:kv|r2)-/u, "");
-      services.set(binding.service, `${directory}/${binding.type === "kv_namespace" ? "kv" : "r2"}-${suffix}`);
-    }
-  }
-  return [...services.entries()].toSorted(([left], [right]) => left.localeCompare(right)).map(([name, path]) =>
-    `(name = ${capnpString(name)}, disk = (path = ${capnpString(path)}, writable = true))`).join(",\n    ");
-}
-
 function renderWorkerdConfig(workers) {
   const workerServices = Object.entries(workers).map(([pkgName, worker]) => renderWorker(pkgName, worker));
-  const storageServices = renderStorageServices(workers);
+  const localStorage = renderLocalStorageServices(workers);
   return `using Workerd = import "/workerd/workerd.capnp";
 
 const config :Workerd.Config = (
@@ -307,8 +382,15 @@ const config :Workerd.Config = (
     (name = "objects", disk = (writable = true)),
     (name = "softmatrix-assets", disk = (path = "assets", writable = false)),
     (name = "internet", network = (allow = ["public"])),
-    ${storageServices},
+    (name = "softmatrix-model-network", network = (allow = ["public", "private", "local"])),
+    ${localStorage.services},
     ${workerServices.join(",\n    ")}
+  ],
+  extensions = [
+    (modules = [
+      (name = "miniflare:shared", esModule = embed "miniflare/shared.js")
+      , (name = "miniflare:zod", esModule = embed "miniflare/zod.js")
+    ])
   ],
   sockets = [
     (name = "http", address = "127.0.0.1:8787", http = (), service = "softmatrix-router")
@@ -372,11 +454,27 @@ export async function buildVmRelease({
         join(ROOT, "scripts/release/build-release.mjs"),
         "--out", source,
         "--release-id", releaseId,
-      ], { cwd: ROOT, stdio: "inherit", env: { ...process.env, CI: "true" } });
+      ], {
+        cwd: ROOT,
+        stdio: "inherit",
+        env: { ...process.env, CI: "true", SOFTMATRIX_VM_PROFILE: "true" },
+      });
     }
     const sourceManifest = JSON.parse(readFileSync(join(source, "manifest.json"), "utf8"));
     mkdirSync(join(output, "modules"), { recursive: true });
     mkdirSync(join(output, "assets"), { recursive: true });
+    mkdirSync(join(output, "runtime", "miniflare"), { recursive: true });
+    const miniflareFiles = miniflareWorkerFiles(rootDir);
+    for (const [name, sourcePath] of Object.entries(miniflareFiles)) {
+      const destinationName = {
+        shared: "shared.js",
+        zod: "zod.js",
+        objectEntry: "object-entry.worker.js",
+        kvNamespace: "kv-namespace.worker.js",
+        r2Bucket: "r2-bucket.worker.js",
+      }[name];
+      cpSync(sourcePath, join(output, "runtime", "miniflare", destinationName));
+    }
     copyDirectory(join(source, "modules"), join(output, "modules"));
     copyDirectory(join(source, "assets"), join(output, "assets"));
     materializeAssetPaths(sourceManifest, source, output);
@@ -397,6 +495,12 @@ export async function buildVmRelease({
         dataDirectory: "data",
         objectStoreDirectory: "objects",
         assetsDirectory: "assets",
+        storageAdapters: {
+          miniflareLocal: {
+            kvDirectory: "data/kv",
+            r2Directory: "objects/r2",
+          },
+        },
       },
     };
     rejectPlaceholders(manifest);

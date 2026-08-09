@@ -9,7 +9,7 @@ User=softmatrix
 Group=softmatrix
 WorkingDirectory=/opt/softmatrix/current
 EnvironmentFile=-/etc/softmatrix/softmatrix.env
-ExecStart=/usr/local/bin/workerd serve --experimental /opt/softmatrix/current/runtime/workerd.capnp config --directory-path data=/var/lib/softmatrix/data --directory-path objects=/var/lib/softmatrix/objects --directory-path softmatrix-assets=/opt/softmatrix/current/assets --directory-path softmatrix-kv-context_collections=/var/lib/softmatrix/data --directory-path softmatrix-kv-blueprints=/var/lib/softmatrix/data --directory-path softmatrix-kv-avatars=/var/lib/softmatrix/data --directory-path softmatrix-r2-blueprint_content=/var/lib/softmatrix/objects --socket-addr http=127.0.0.1:8787
+ExecStart=/usr/local/bin/workerd serve --experimental /opt/softmatrix/current/runtime/workerd.capnp config --directory-path data=/var/lib/softmatrix/data --directory-path objects=/var/lib/softmatrix/objects --directory-path softmatrix-assets=/opt/softmatrix/current/assets --directory-path softmatrix-kv-storage=/var/lib/softmatrix/data/kv --directory-path softmatrix-r2-storage=/var/lib/softmatrix/objects/r2 --socket-addr http=127.0.0.1:8787
 Restart=on-failure
 RestartSec=3
 NoNewPrivileges=true

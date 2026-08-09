@@ -76,7 +76,7 @@ export async function selectModelIfAvailable(page: Page, locale: FixtureLocale):
   const picker = page.getByRole("button", { name: labels.selectModel, exact: true });
   if (await picker.count() === 0) return;
   const selected = await picker.innerText();
-  if (selected === "No agent" || selected === "无智能体" || selected === "Fixture Model") return;
+  if (selected === "Fixture Model") return;
   await picker.click();
   const model = page.getByRole("menuitem", { name: "Fixture Model", exact: true });
   if (await model.count() > 0) await model.click();

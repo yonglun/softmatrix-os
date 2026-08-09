@@ -83,3 +83,63 @@ test("VM release records commit, worker hashes, legal files, and runtime config"
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test("VM release provisions Miniflare-compatible local KV and R2 services", async () => {
+  const root = await mkdtemp(join(tmpdir(), "softmatrix-vm-storage-test-"));
+  const source = join(root, "source");
+  const outDir = join(root, "release");
+  await mkdir(join(source, "modules"), { recursive: true });
+  await mkdir(join(source, "assets"), { recursive: true });
+
+  const moduleBytes = Buffer.from("export default {fetch(){return new Response('ok')}};\n");
+  const moduleHash = "d".repeat(64);
+  await writeFile(join(source, "modules", moduleHash), moduleBytes);
+  await writeFile(join(source, "assets", "e".repeat(32)), Buffer.from("hello"));
+  await writeFile(join(source, "manifest.json"), JSON.stringify({
+    manifestVersion: 1,
+    releaseId: "fixture",
+    commit: "fixture",
+    createdAt: "2026-08-09T00:00:00.000Z",
+    wranglerVersion: "fixture",
+    workers: {
+      "workshop-backend": {
+        kind: "backend",
+        mainModule: "index.js",
+        modules: [{ name: "index.js", type: "esm", sha256: moduleHash, size: moduleBytes.length }],
+        compatibilityDate: "2026-01-01",
+        compatibilityFlags: [],
+        migrations: [],
+        bindings: [
+          { type: "kv_namespace", name: "BLUEPRINTS", namespace_id: "$KV_BLUEPRINTS_ID" },
+          { type: "r2_bucket", name: "BLUEPRINT_CONTENT", bucket_name: "$R2_BLUEPRINT_CONTENT_NAME" },
+        ],
+        vars: {},
+      },
+    },
+    assets: { ["e".repeat(32)]: { size: 5 } },
+  }, null, 2));
+
+  try {
+    const release = await buildVmRelease({
+      outDir,
+      releaseId: "softmatrix-vm-storage-test",
+      commit: "fixture",
+      sourceReleaseDir: source,
+      rootDir: process.cwd(),
+    });
+
+    const runtimeConfig = await readFile(join(outDir, "runtime", "workerd.capnp"), "utf8");
+    assert.match(runtimeConfig, /name = "miniflare:shared"/);
+    assert.match(runtimeConfig, /name = "softmatrix-kv-storage"/);
+    assert.match(runtimeConfig, /name = "softmatrix-r2-storage"/);
+    assert.match(runtimeConfig, /name = "softmatrix-kv-blueprints"/);
+    assert.match(runtimeConfig, /name = "softmatrix-r2-blueprint_content"/);
+    assert.match(runtimeConfig, /name = "softmatrix-model-network"/);
+    assert.match(runtimeConfig, /globalOutbound = "softmatrix-model-network"/);
+    assert.match(runtimeConfig, /KVNamespaceObject/);
+    assert.match(runtimeConfig, /R2BucketObject/);
+    assert.ok(release.manifest.runtime.storageAdapters?.miniflareLocal);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

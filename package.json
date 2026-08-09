@@ -8,6 +8,7 @@
     "build": "pnpm run --recursive build",
     "verify:softmatrix": "pnpm lint && pnpm test && pnpm build && pnpm licenses list --json",
     "test:e2e": "playwright test",
+    "test:e2e:vm": "SOFTMATRIX_E2E_VM=1 playwright test e2e/vm-self-hosting.spec.ts",
     "test:vm:workerd": "node --test scripts/vm/workerd-smoke.test.js",
     "build:vm": "node scripts/vm/build-release.mjs --out release-out",
     "install:vm": "node scripts/vm/install-release.mjs",

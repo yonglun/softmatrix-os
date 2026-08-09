@@ -89,6 +89,16 @@ describe('router fetch', () => {
     expect(paths).toEqual(['/index.html', '/index.html', '/assets/index.js']);
   });
 
+  it('adds browser MIME types for opaque native DiskDirectory assets', async () => {
+    const assets = {
+      fetch: async () => new Response('<!doctype html>', {
+        headers: { 'content-type': 'application/octet-stream' },
+      }),
+    } as unknown as Fetcher;
+    const response = await router.fetch!(new Request('https://example.com/signup'), makeEnv({ ASSETS: assets }), {} as ExecutionContext);
+    expect(response.headers.get('content-type')).toBe('text/html; charset=utf-8');
+  });
+
   // Dev has no ASSETS binding: the backend serves the frontend from its own assets binding in
   // `run-local` mode, and in normal dev mode you open the Vite server on :3000 directly.
   it('falls through to the backend when ASSETS is absent', async () => {

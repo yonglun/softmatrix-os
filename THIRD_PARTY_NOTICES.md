@@ -27,6 +27,7 @@ used by the current source milestone.
 | `@tanstack/react-router` | pinned in lockfile | MIT | <https://github.com/TanStack/router> |
 | `i18next` | 26.3.6 | MIT | <https://github.com/i18next/i18next> |
 | `react-i18next` | 17.0.11 | MIT | <https://github.com/i18next/react-i18next> |
+| `miniflare` (vendored local KV/R2 workers) | 5.20260801.0-alpha | MIT | <https://github.com/cloudflare/workers-sdk/tree/main/packages/miniflare> |
 
 Each package retains the copyright and license text supplied by its upstream project. When a
 dependency ships a separate `NOTICE` file, the release job copies that notice into the legal
@@ -39,4 +40,3 @@ Every candidate and published release contains the exact root `LICENSE`, `NOTICE
 and a SHA-256/size sidecar at `legal-manifest.json`. See
 [`docs/compliance.md`](docs/compliance.md) and the bilingual deployment runbooks for the
 review and rollback procedure.
-

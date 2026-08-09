@@ -2,6 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 import { existsSync } from "node:fs";
 
 const baseURL = process.env.SOFTMATRIX_E2E_BASE_URL ?? "http://127.0.0.1:8787";
+const vmE2E = process.env.SOFTMATRIX_E2E_VM === "1";
 const systemChrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
 export default defineConfig({
@@ -24,7 +25,7 @@ export default defineConfig({
   webServer: process.env.SOFTMATRIX_E2E_BASE_URL
     ? undefined
     : {
-      command: "node scripts/run-e2e-server.mjs",
+      command: vmE2E ? "node scripts/run-vm-e2e.mjs" : "node scripts/run-e2e-server.mjs",
       url: baseURL,
       reuseExistingServer: false,
       timeout: 120_000,
