@@ -13,6 +13,8 @@
     "install:vm": "node scripts/vm/install-release.mjs",
     "healthcheck:vm": "node scripts/vm/healthcheck.mjs",
     "rollback:vm": "node scripts/vm/install-release.mjs --rollback",
+    "backup:vm": "node scripts/vm/backup-data.mjs",
+    "restore:vm": "node scripts/vm/restore-data.mjs",
     "run-local": "node scripts/run-local.mjs",
     "test": "node --test scripts/*.test.js && pnpm run --recursive --if-present test",
     "test:branding": "node --test scripts/softmatrix-branding.test.js scripts/softmatrix-compliance.test.js",
