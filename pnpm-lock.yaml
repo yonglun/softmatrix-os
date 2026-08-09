@@ -746,6 +746,9 @@ importers:
       jose:
         specifier: ^6.2.5
         version: 6.2.5
+      oauth4webapi:
+        specifier: ^3.8.6
+        version: 3.8.6
       yjs:
         specifier: ^13.6.31
         version: 13.6.31
@@ -3453,6 +3456,9 @@ packages:
 
   nwsapi@2.2.24:
     resolution: {integrity: sha512-7YRhZ3jS45LwmSCT4b2sVFHt/WuovaktDU07QrtOBY2PXskss5a9jfmR9jptyumwXST+rFjrmppMY1KT/yn35A==}
+
+  oauth4webapi@3.8.6:
+    resolution: {integrity: sha512-iwemM91xz8nryHti2yTmg5fhyEMVOkOXwHNqbvcATjyajb5oQxCQzrNOA6uElRHuMhQQTKUyFKV9y/CNyg25BQ==}
 
   obug@2.1.4:
     resolution: {integrity: sha512-4a+OsYv9UktOJKE+l1A4OufDgdRF9PifWj+tJnHURo/P+WOxpG4GzUFL9qCalmWauao6ogiG+QvnCovwPoyAWA==}
@@ -7080,6 +7086,8 @@ snapshots:
       boolbase: 1.0.0
 
   nwsapi@2.2.24: {}
+
+  oauth4webapi@3.8.6: {}
 
   obug@2.1.4: {}
 
