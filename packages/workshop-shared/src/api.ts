@@ -347,6 +347,12 @@ export interface AuthenticatedApi extends RpcTarget {
   // especially if the gadget is owned by someone else.
   listModels(): Promise<AiChatAuthorInfo[]>;
 
+  /** List the authenticated user's secret-free organization and personal model catalog. */
+  listModelCatalog(): Promise<AiModelCatalogItem[]>;
+
+  /** Return the deployment model policy without exposing deployment credentials. */
+  getAiModelPolicy(): Promise<AiModelPolicyInfo>;
+
   // Adds a new model to the user's configured set. The ID must be unique among the user's
   // configured models.
   addModel(profile: AiChatAuthorInfo, config: AiModelConfig): Promise<void>;
@@ -960,6 +966,35 @@ export type CloudflareAccountOption = {
 
 // Supported AI providers.
 export type AiModelProvider = "openai" | "anthropic" | "google" | "cloudflare" | "ollama";
+
+/** Ownership boundary for a model displayed in the management UI. */
+export type AiModelSource = "organization" | "personal";
+
+/** Secret-free model metadata returned to the authenticated management UI. */
+export type AiModelCatalogItem = {
+  id: string;
+  name: string;
+  provider: AiModelProvider;
+  source: AiModelSource;
+  enabled: boolean;
+  isDefault: boolean;
+  canDelete: boolean;
+};
+
+/** Deployment model policy visible to an authenticated user. */
+export type AiModelPolicyInfo = {
+  allowUserByok: boolean;
+  defaultModelId: string | null;
+};
+
+/** Stable model failure categories safe to localize. */
+export type ModelErrorCode =
+  | "MODEL_DISABLED"
+  | "MODEL_CREDENTIAL_INVALID"
+  | "MODEL_RATE_LIMITED"
+  | "MODEL_BALANCE_EXHAUSTED"
+  | "MODEL_PROVIDER_UNAVAILABLE"
+  | "BYOK_DISABLED";
 
 // Information about the AI gateway configuration. Returned by `AuthenticatedApi.getAiConfig()`.
 export type AiGatewayInfo = {
