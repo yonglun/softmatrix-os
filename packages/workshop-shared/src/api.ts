@@ -746,6 +746,8 @@ export type AdminSettingsView = {
   banner: BannerConfig;
   // Accent color hex, or "" for the default theme.
   accentColor: string;
+  /** Non-secret organization model enable/default choices. */
+  modelPolicy: AdminModelPolicy;
   // Every bound gatekeeper and its resource types, with enabled state (not hidden when disabled).
   resourceVendors: AdminResourceVendor[];
   // The blueprints promoted as standard output formats, in menu order (including disabled ones).
@@ -795,6 +797,12 @@ export type AdminFormat = {
 export interface AdminApi {
   // Read all admin-managed settings for the admin UI in one call.
   getSettings(): Promise<AdminSettingsView>;
+
+  /** Set the organization model used by default, or empty string to clear it. */
+  setDefaultModel(id: string): Promise<void>;
+
+  /** Enable or disable an organization model. Disabling the current default clears it first. */
+  setOrganizationModelEnabled(id: string, enabled: boolean): Promise<void>;
 
   // Enable or disable new account signups. Existing users can still log in while signups are closed.
   setSignupsEnabled(enabled: boolean): Promise<void>;
@@ -985,6 +993,12 @@ export type AiModelCatalogItem = {
 export type AiModelPolicyInfo = {
   allowUserByok: boolean;
   defaultModelId: string | null;
+};
+
+/** Non-secret deployment choices maintained by an administrator. */
+export type AdminModelPolicy = {
+  defaultModelId: string;
+  disabledOrganizationModelIds: string[];
 };
 
 /** Stable model failure categories safe to localize. */

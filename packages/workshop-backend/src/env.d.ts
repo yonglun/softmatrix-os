@@ -26,6 +26,13 @@ declare global {
       // Note: outside gateway mode, Workers AI (provider "cloudflare") is BYOK like every other
       // provider -- the account ID and API token live in the user's model config, not in env.
 
+      // Secret JSON catalog of organization-managed models. Parsed only by the backend; no field
+      // from this binding may be returned through RPC. See docs/model-governance.md.
+      ORG_AI_MODELS?: string;
+      // Deployment hard policy for personal model credentials. Unset defaults to enabled for
+      // backwards compatibility; set exactly "false" to disable user BYOK.
+      ALLOW_USER_BYOK?: string;
+
       // Blueprint storage bindings.
       BLUEPRINTS: KVNamespace;             // Workers KV for blueprint metadata lookup
       BLUEPRINT_CONTENT: R2Bucket;         // R2 bucket for blueprint code snapshots
