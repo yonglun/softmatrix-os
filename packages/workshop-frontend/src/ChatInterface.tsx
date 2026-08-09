@@ -1455,6 +1455,7 @@ const ChatAttachmentGrid = memo(function ChatAttachmentGrid(
 const ToolCallDetails = memo(function ToolCallDetails(
   { toolCall: tc }: { toolCall: AiToolCall },
 ) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-2">
       {tc.error && (
@@ -1465,7 +1466,7 @@ const ToolCallDetails = memo(function ToolCallDetails(
       {tc.toolName === "executeCode" ? (
         <>
           <span className="font-mono text-[11px] leading-4 text-kumo-inactive uppercase tracking-[0.08em]">
-            Code
+            {t('management.chat.code')}
           </span>
           <pre className="max-h-56 overflow-auto rounded-xl border border-kumo-line/70 bg-kumo-base p-3 font-mono text-[12px] leading-[18px] text-kumo-subtle whitespace-pre-wrap">
             {tc.input.code}
@@ -1473,7 +1474,7 @@ const ToolCallDetails = memo(function ToolCallDetails(
           {tc.output && (
             <>
               <span className="font-mono text-[11px] leading-4 text-kumo-inactive uppercase tracking-[0.08em]">
-                Output
+                {t('management.chat.output')}
               </span>
               <pre className="max-h-56 overflow-auto rounded-xl border border-kumo-line/70 bg-kumo-base p-3 font-mono text-[12px] leading-[18px] text-kumo-subtle whitespace-pre-wrap">
                 {tc.output}
@@ -1541,6 +1542,7 @@ const NestedToolCallRow = memo(function NestedToolCallRow({
   onToggle: (key: string) => void;
   outputOf?: ToolOutputResolver;
 }) {
+  const { t } = useTranslation();
   const key = `call-${tc.toolCallId}`;
   const summary = getToolCallSummary(tc, outputOf);
   const label = `${summary.verb}${summary.target ? ` ${summary.target}` : ""}`;
@@ -1561,7 +1563,7 @@ const NestedToolCallRow = memo(function NestedToolCallRow({
           <span className="min-w-0 truncate">{label}</span>
           {tc.error && (
             <span className="flex-shrink-0 rounded-full bg-kumo-danger-tint px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.04em] text-kumo-danger">
-              Error
+              {t('management.chat.errorPrefix')}
             </span>
           )}
           <CaretRight
@@ -1663,6 +1665,7 @@ const ToolGroupRow = memo(function ToolGroupRow({
   onFooterRevert?: (sequence: number) => void;
   outputOf?: ToolOutputResolver;
 }) {
+  const { t } = useTranslation();
   const { locale } = useLocale()
   const footerLabel = footerChangeSequence !== undefined
     ? getDiscardLabel(footerIsTrailing, footerCreatedGadgetTitles)
@@ -1683,7 +1686,7 @@ const ToolGroupRow = memo(function ToolGroupRow({
             <span className="min-w-0 truncate">{group.label}</span>
             {group.hasError && (
               <span className="flex-shrink-0 rounded-full bg-kumo-danger-tint px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.04em] text-kumo-danger">
-                Error
+                {t('management.chat.errorPrefix')}
               </span>
             )}
             <CaretRight
@@ -6698,7 +6701,7 @@ function ChatInterface({
                     : "font-normal text-kumo-subtle hover:text-kumo-default"
                 }`}
               >
-                Chat
+                {t('management.chat.chatTab')}
               </button>
               <button
                 type="button"
@@ -6709,7 +6712,7 @@ function ChatInterface({
                     : "font-normal text-kumo-subtle hover:text-kumo-default"
                 }`}
               >
-                Connections
+                {t('management.chat.connectionsTab')}
               </button>
             </div>
           )}
@@ -6893,7 +6896,7 @@ function ChatInterface({
                                 className="flex flex-shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-1 py-0.5 text-[11px] leading-4 font-medium tracking-[0.6px] text-kumo-inactive uppercase transition-colors duration-150 ease-out hover:text-kumo-default focus-visible:text-kumo-default focus-visible:outline-none"
                               >
                                 <Brain size={13} aria-hidden="true" />
-                                Context compacted
+                                {t('management.chat.contextCompacted')}
                                 <CaretRight
                                   size={11}
                                   weight="bold"
@@ -7255,7 +7258,9 @@ function ChatInterface({
                                   content={
                                     isMerge
                                       ? t('management.chat.acceptedDraftChanges', { through: ts ? ` ${formatFullTimestamp(ts, locale)}` : '' })
-                                      : `Returned to the gadget state before the prompt sent ${ts ? `at ${formatTime(ts, locale, { hour: "2-digit", minute: "2-digit" })}` : "earlier"}.`
+                                      : t('management.chat.revertedToPrompt', {
+                                        time: ts ? formatTime(ts, locale, { hour: "2-digit", minute: "2-digit" }) : t('management.chat.earlier'),
+                                      })
                                   }
                                   asChild
                                 >
@@ -7266,8 +7271,8 @@ function ChatInterface({
                                     <span className="font-medium">
                                       {msg.author.name}{" "}
                                       {isMerge
-                                        ? "accepted changes"
-                                        : "discarded changes"}
+                                        ? t('management.chat.acceptedChangesBy')
+                                        : t('management.chat.discardedChangesBy')}
                                     </span>
                                   </span>
                                 </Tooltip>
@@ -7490,13 +7495,13 @@ function ChatInterface({
                         <div className={`group/agent min-w-0 w-full max-w-[860px] space-y-2 ${provisionalTopClass}`}>
                           {isCompacting && (
                             <div className={`inline-flex px-1.5 py-1 text-[14px] leading-5 tracking-[-0.25px] ${styles.thinkingShimmer}`}>
-                              Compacting…
+                              {t('management.chat.compacting')}
                             </div>
                           )}
 
                           {showThinking && (
                             <div className={`inline-flex px-1.5 py-1 text-[14px] leading-5 tracking-[-0.25px] ${styles.thinkingShimmer}`}>
-                              Thinking
+                              {t('management.chat.thinking')}
                             </div>
                           )}
 

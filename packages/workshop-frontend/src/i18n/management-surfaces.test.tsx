@@ -7,10 +7,20 @@ import { Toasty } from "@cloudflare/kumo";
 import { renderWithLocale } from "../test/renderWithLocale";
 import { useTranslation } from "react-i18next";
 import ConnectAccountModal from "../ConnectAccountModal";
-import type { AuthenticatedApi } from "@gadgets/workshop-shared/api";
+import AdminPage from "../AdminPage";
+import { AuthProvider } from "../AuthContext";
+import { ChatInput } from "../ChatInterface";
+import type { AdminApi, AuthenticatedApi, Overseer } from "@gadgets/workshop-shared/api";
 import type { RpcStub } from "capnweb";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+if (typeof globalThis.ResizeObserver === "undefined") {
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as typeof ResizeObserver;
+}
 
 function ManagementProbe({ providerName, vendorDescription }: { providerName: string; vendorDescription: string }) {
   const { t } = useTranslation();
@@ -33,6 +43,62 @@ afterEach(() => {
 });
 
 describe("chat and management surface localization", () => {
+  it("renders the real admin page and chat input in Chinese", async () => {
+    const adminApi = {
+      getSettings: async () => ({
+        signupsEnabled: true,
+        siteName: "",
+        instanceInstructions: "",
+        announcement: "",
+        banner: { text: "", color: "info" },
+        accentColor: "",
+        resourceVendors: [],
+        formats: [],
+      }),
+    } as unknown as RpcStub<AdminApi>;
+    const authenticatedApi = {
+      getLocale: async () => "zh-CN" as const,
+      whoami: async () => ({ type: "user", id: "admin", name: "Admin" }),
+      amIAdmin: async () => true,
+      getAdminApi: async () => adminApi,
+      listGatekeeperVendors: async () => [],
+    } as unknown as RpcStub<AuthenticatedApi>;
+    const rendered = renderWithLocale(
+      <Toasty>
+        <AuthProvider authenticatedApi={authenticatedApi} onLogout={() => {}}>
+          <AdminPage />
+        </AuthProvider>
+      </Toasty>,
+      "zh-CN",
+    );
+    await act(async () => {});
+    expect(rendered.container.textContent).toContain("站点名称");
+    expect(rendered.container.textContent).toContain("顶部导航栏");
+    expect(rendered.container.textContent).not.toContain("Shown next to the logo");
+    rendered.unmount();
+
+    const chat = renderWithLocale(
+      <Toasty>
+        <AuthProvider authenticatedApi={authenticatedApi} onLogout={() => {}}>
+          <ChatInput
+            createCapsuleGatekeeper={async () => null}
+            getOverseer={() => ({ } as RpcStub<Overseer>)}
+            onSend={() => {}}
+            isAgentActive={false}
+            models={[]}
+            selectedModel={null}
+            onModelChange={() => {}}
+          />
+        </AuthProvider>
+      </Toasty>,
+      "zh-CN",
+    );
+    await act(async () => {});
+    expect(chat.container.querySelector('[aria-label="选择模型"]')).not.toBeNull();
+    expect(chat.container.querySelector('[aria-label="Select model"]')).toBeNull();
+    chat.unmount();
+  });
+
   it("renders a real management modal in Chinese with an empty typed API", async () => {
     const authenticatedApi = {
       listGatekeeperVendors: async () => [],
