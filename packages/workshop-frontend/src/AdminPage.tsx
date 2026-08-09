@@ -3,7 +3,7 @@ import { RpcStub } from 'capnweb'
 import { Switch, Textarea, Input, Button, Tabs, useKumoToastManager } from '@cloudflare/kumo'
 import { ShieldWarning, UserPlus } from '@phosphor-icons/react'
 import { useAuthenticatedApi } from './AuthContext'
-import { AdminApi, AdminFormat, AdminResourceVendor, AmbientGatekeeperMode, MAX_INSTANCE_INSTRUCTIONS_LENGTH, MAX_ANNOUNCEMENT_LENGTH, MAX_SITE_NAME_LENGTH, DEFAULT_SITE_NAME, BannerColor, BANNER_COLORS, DEFAULT_BANNER_COLOR } from '@gadgets/workshop-shared/api'
+import { AdminApi, AdminFormat, AdminResourceVendor, AiModelCatalogItem, AmbientGatekeeperMode, MAX_INSTANCE_INSTRUCTIONS_LENGTH, MAX_ANNOUNCEMENT_LENGTH, MAX_SITE_NAME_LENGTH, DEFAULT_SITE_NAME, BannerColor, BANNER_COLORS, DEFAULT_BANNER_COLOR } from '@gadgets/workshop-shared/api'
 import { applyAccentColor, DEFAULT_ACCENT_COLOR } from './theme'
 import { cacheBustSiteLogoUrl, prepareSiteLogo } from './siteLogoUtils'
 import SiteLogo from './components/SiteLogo'
@@ -90,6 +90,9 @@ export default function AdminPage() {
 
   // Promoted output formats, in menu order (see AdminFormatsPanel).
   const [formats, setFormats] = useState<AdminFormat[]>([])
+  const [modelCatalog, setModelCatalog] = useState<AiModelCatalogItem[]>([])
+  const [modelPolicy, setModelPolicy] = useState({ defaultModelId: '', disabledOrganizationModelIds: [] as string[] })
+  const [modelBusy, setModelBusy] = useState<Set<string>>(new Set())
 
   const resourceKey = (vendorId: string, urlPattern: string) => `${vendorId}\u0000${urlPattern}`
 
@@ -110,6 +113,7 @@ export default function AdminPage() {
     setSavedAccent(view.accentColor)
     setAccentDraft(view.accentColor)
     setFormats(view.formats)
+    setModelPolicy(view.modelPolicy)
   }
 
   // Mint the admin capability once (the access check happens server-side) and load settings.
@@ -133,7 +137,12 @@ export default function AdminPage() {
         }
         stub = api
         setAdmin({ api })
-        applySettings(await api.getSettings())
+        const [view, catalog] = await Promise.all([
+          api.getSettings(),
+          authenticatedApi.listModelCatalog?.() ?? Promise.resolve([]),
+        ])
+        applySettings(view)
+        setModelCatalog(catalog.filter(model => model.source === 'organization'))
       } catch (err) {
         if (!cancelled) {
           console.error('Failed to load admin settings:', err)
@@ -300,6 +309,44 @@ export default function AdminPage() {
     }
   }
 
+  const handleDefaultModel = async (id: string) => {
+    if (!admin) return
+    setModelBusy(prev => new Set(prev).add('default'))
+    try {
+      await admin.api.setDefaultModel(id)
+      setModelPolicy(prev => ({ ...prev, defaultModelId: id }))
+    } catch (err) {
+      toasts.add({ title: err instanceof Error ? err.message : t('management.admin.modelPolicyUpdateFailed'), variant: 'error' })
+    } finally {
+      setModelBusy(prev => { const next = new Set(prev); next.delete('default'); return next })
+    }
+  }
+
+  const handleOrganizationModelToggle = async (model: AiModelCatalogItem, enabled: boolean) => {
+    if (!admin) return
+    setModelBusy(prev => new Set(prev).add(model.id))
+    try {
+      // Clear the default in a separate, ordered call before disabling it. This avoids a transient
+      // policy that points at an unavailable model and makes the operation safe for stale clients.
+      if (!enabled && modelPolicy.defaultModelId === model.id) {
+        await admin.api.setDefaultModel('')
+        setModelPolicy(prev => ({ ...prev, defaultModelId: '' }))
+      }
+      await admin.api.setOrganizationModelEnabled(model.id, enabled)
+      setModelPolicy(prev => ({
+        ...prev,
+        disabledOrganizationModelIds: enabled
+          ? prev.disabledOrganizationModelIds.filter(id => id !== model.id)
+          : [...new Set([...prev.disabledOrganizationModelIds, model.id])],
+      }))
+      setModelCatalog(prev => prev.map(item => item.id === model.id ? { ...item, enabled, isDefault: enabled && item.isDefault } : item))
+    } catch (err) {
+      toasts.add({ title: err instanceof Error ? err.message : t('management.admin.modelPolicyUpdateFailed'), variant: 'error' })
+    } finally {
+      setModelBusy(prev => { const next = new Set(prev); next.delete(model.id); return next })
+    }
+  }
+
   const handleSaveSiteName = async () => {
     if (!admin) return
     setSavingSiteName(true)
@@ -409,6 +456,7 @@ export default function AdminPage() {
           { value: 'general', label: t('management.admin.general') },
           { value: 'gatekeepers', label: t('management.admin.gatekeepers') },
           { value: 'formats', label: t('management.admin.formats') },
+          { value: 'models', label: t('management.admin.models') },
           { value: 'access', label: t('management.admin.access') },
         ]}
       />
@@ -420,6 +468,55 @@ export default function AdminPage() {
           formats={formats}
           onChanged={async () => { setFormats((await admin.api.getSettings()).formats) }}
         />
+      )}
+
+      {activeTab === 'models' && (
+        <div className="space-y-4">
+          <div className="bg-kumo-elevated border border-kumo-line rounded-xl p-6">
+            <h2 className="text-lg font-semibold text-kumo-strong mb-1">{t('management.admin.modelPolicy')}</h2>
+            <p className="text-sm text-kumo-subtle mb-4">{t('management.admin.modelPolicyDescription')}</p>
+            <label className="block text-sm font-medium text-kumo-default mb-1" htmlFor="default-model">
+              {t('management.admin.defaultModel')}
+            </label>
+            <select
+              id="default-model"
+              value={modelPolicy.defaultModelId}
+              disabled={modelBusy.has('default')}
+              onChange={(event) => void handleDefaultModel(event.target.value)}
+              className="h-9 w-full max-w-md rounded-lg border border-kumo-line bg-kumo-base px-3 text-sm text-kumo-default"
+            >
+              <option value="">{t('management.admin.noDefaultModel')}</option>
+              {modelCatalog.filter(model => model.enabled).map(model => (
+                <option key={model.id} value={model.id}>{model.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="bg-kumo-elevated border border-kumo-line rounded-xl p-6">
+            <h2 className="text-lg font-semibold text-kumo-strong mb-1">{t('management.admin.organizationModels')}</h2>
+            <p className="text-sm text-kumo-subtle mb-4">{t('management.admin.organizationModelsDescription')}</p>
+            {modelCatalog.length === 0 ? <p className="text-sm text-kumo-subtle">{t('management.admin.noOrganizationModels')}</p> : (
+              <div className="space-y-2">
+                {modelCatalog.map(model => (
+                  <div key={model.id} className="flex items-center gap-3 rounded-lg border border-kumo-line px-3 py-2.5">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium text-kumo-default">{model.name}</div>
+                      <div className="font-mono text-xs text-kumo-subtle">{model.provider} · {model.id}</div>
+                    </div>
+                    <Switch
+                      aria-label={model.name}
+                      checked={model.enabled}
+                      disabled={modelBusy.has(model.id)}
+                      onCheckedChange={(enabled) => void handleOrganizationModelToggle(model, enabled)}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="bg-kumo-tint border border-kumo-line rounded-xl p-4 text-sm text-kumo-subtle">
+            {t('management.admin.byokDeploymentNotice')}
+          </div>
+        </div>
       )}
 
       {/* Sign-ups */}

@@ -11,7 +11,7 @@ import { getAiGatewayConfig } from "./ai-gateway.js";
 import { utcDayKey, nextUtcMidnightIso, DailyQuotaResult } from "./ai-gateway-billing/limits/config.js";
 import type { AdminSettings } from "./admin-settings.js";
 import { isReservedBlueprintKey, readBlueprintKvRecord } from "./blueprint-archive.js";
-import { filterEnabledResources, isResourceDisabled, readAdminConfig } from "./admin-config.js";
+import { DEFAULT_ADMIN_CONFIG, filterEnabledResources, isResourceDisabled, readAdminConfig } from "./admin-config.js";
 import { buildGatekeeperVendorMap } from "./auth/auth-vendors.js";
 import { getOrganizationModels, isUserByokAllowed } from "./model-policy/organization-models.js";
 import { ModelPolicyError } from "./model-policy/types.js";
@@ -527,7 +527,7 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
     this.storage.profile.put(profile);
   }
 
-  async #modelPolicy(options: { additionalPersonal?: CatalogModelRecord[] } = {}): Promise<ModelPolicy> {
+  async modelPolicy(options: { additionalPersonal?: CatalogModelRecord[] } = {}): Promise<ModelPolicy> {
     let organization: CatalogModelRecord[] = [...getOrganizationModels(this.env).values()];
     let gateway = getAiGatewayConfig(this.env);
     if (gateway) {
@@ -536,10 +536,11 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
         if (record) organization.push({...record, source: "organization"});
       }
     }
-    let personal: CatalogModelRecord[] = Array.from(this.storage.aiModels.list())
-      .map(record => ({...record, source: "personal" as const}));
+    let personal: CatalogModelRecord[] = this.storage.aiModels
+      ? Array.from(this.storage.aiModels.list()).map(record => ({...record, source: "personal" as const}))
+      : [];
     personal.push(...(options.additionalPersonal ?? []));
-    let admin = await readAdminConfig(this.env);
+    let admin = this.env.BLUEPRINTS ? await readAdminConfig(this.env) : DEFAULT_ADMIN_CONFIG;
     return new ModelPolicy(organization, personal, {
       disabledOrganizationModelIds: admin.modelPolicy.disabledOrganizationModelIds,
       defaultModelId: admin.modelPolicy.defaultModelId,
@@ -548,11 +549,11 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
   }
 
   async listModels(): Promise<AiChatAuthorInfo[]> {
-    return (await this.#modelPolicy()).listModels().map(model => model.profile);
+    return (await this.modelPolicy()).listModels().map(model => model.profile);
   }
 
   async listModelCatalog(): Promise<AiModelCatalogItem[]> {
-    return (await this.#modelPolicy()).listCatalog();
+    return (await this.modelPolicy()).listCatalog();
   }
 
   async getAiModelPolicy(): Promise<AiModelPolicyInfo> {
@@ -583,7 +584,7 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
     profile.type = "agent";
     // Constructing the policy rejects collisions with organization and gateway IDs before any
     // credential-bearing record is persisted.
-    await this.#modelPolicy({ additionalPersonal: [{ profile, config }] });
+    await this.modelPolicy({ additionalPersonal: [{ profile, config }] });
     this.storage.aiModels.put({profile, config});
   }
 
@@ -623,7 +624,7 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
 
   async setPreferredModel(id: string | null): Promise<void> {
     if (id !== null) {
-      (await this.#modelPolicy()).resolve(id);
+      (await this.modelPolicy()).resolve(id);
     }
     this.storage.preferredModel.put(id);
   }
@@ -715,7 +716,7 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
 
   // DO NOT MAKE PUBLIC -- returns API keys.
   async getChatContext(modelId: string | null): Promise<UserChatContext> {
-    let policy = await this.#modelPolicy();
+    let policy = await this.modelPolicy();
     let gwConfig = getAiGatewayConfig(this.env);
 
     let result: UserChatContext = {
