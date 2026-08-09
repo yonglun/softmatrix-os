@@ -571,7 +571,9 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
     }
     try {
       validateModelConfig(config, this.env);
-      if (profile.id.trim() === "" || profile.id !== config.model) throw new Error("Model profile ID must match model config.");
+      if (typeof profile?.id !== "string" || profile.id.trim() === "" || profile.id !== config.model) {
+        throw new Error("Model profile ID must match model config.");
+      }
     } catch {
       return { ok: false as const, error: { code: "MODEL_CREDENTIAL_INVALID" as const,
         correlationId: crypto.randomUUID() } };
@@ -584,7 +586,9 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
       throw new ModelPolicyError("BYOK_DISABLED", crypto.randomUUID());
     }
     validateModelConfig(config, this.env);
-    if (profile.id.trim() === "" || profile.id !== config.model) throw new Error("Model profile ID must match model config.");
+    if (typeof profile?.id !== "string" || profile.id.trim() === "" || profile.id !== config.model) {
+      throw new Error("Model profile ID must match model config.");
+    }
     let gwConfig = getAiGatewayConfig(this.env);
     if (gwConfig && !gwConfig.providers.has(config.provider)) {
       throw new Error(`Provider "${config.provider}" is not available in AI Gateway mode.`);

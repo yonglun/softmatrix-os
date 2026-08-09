@@ -15,7 +15,8 @@ export type OrganizationModelRecord = {
 export function validateModelConfig(config: AiModelConfig, env: Cloudflare.Env): void {
   if (!PROVIDERS.has(config.provider)) throw new Error(`Unsupported model provider: ${config.provider}.`);
   if (typeof config.model !== "string" || config.model.trim() === "") throw new Error("Model ID is required.");
-  if (config.provider !== "ollama" && (typeof config.apiToken !== "string" || config.apiToken === "")) {
+  if (typeof config.apiToken !== "string") throw new Error("Model credentials must be a string.");
+  if (config.provider !== "ollama" && config.apiToken === "") {
     throw new Error("Model credentials are required.");
   }
   if (config.provider === "cloudflare" && (!config.accountId || config.accountId.trim() === "")) {
@@ -106,7 +107,9 @@ function parseModel(value: unknown, dev: boolean): OrganizationModelRecord {
 /** Parse the deployment-only organization catalog without returning secret-bearing data. */
 export function getOrganizationModels(env: Cloudflare.Env): Map<string, OrganizationModelRecord> {
   let raw = env.ORG_AI_MODELS;
-  if (raw === undefined || raw.trim() === "") return new Map();
+  if (raw === undefined) return new Map();
+  if (typeof raw !== "string") throw new Error("ORG_AI_MODELS must be a string secret.");
+  if (raw.trim() === "") return new Map();
   if (new TextEncoder().encode(raw).byteLength > MAX_SECRET_BYTES) {
     throw new Error("ORG_AI_MODELS exceeds the 5 KiB deployment limit.");
   }
