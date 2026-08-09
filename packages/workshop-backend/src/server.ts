@@ -25,6 +25,7 @@ import { RpcStub as NativeRpcStub } from "cloudflare:workers";
 import { recordAnalytics } from "./analytics";
 import { handleClientErrorRequest } from "./client-errors.js";
 import { verifyCfAccessJwt } from "./access.js";
+import { normalizeVerifiedEmail } from "./auth/email-identity.js";
 import { resolveUiFeatureFlags } from "./feature-flags";
 import { serveSiteLogo, SITE_LOGO_PATH } from "./site-logo.js";
 import { createWorkshopLogger } from "./observability";
@@ -693,7 +694,12 @@ class PublicApiImpl extends RpcTarget implements PublicApi {
       throw new Error("Not authenticated with Access.");
     }
 
-    let email = this.accessPayload.email as string;
+    let email: string;
+    try {
+      email = normalizeVerifiedEmail(String(this.accessPayload.email ?? ""));
+    } catch {
+      throw new Error("Access identity did not contain a valid verified email.");
+    }
     let userId = this.users.idFromName(email);
     let stub = this.users.get(userId);
     let signupsEnabled = (await readAdminConfig(this.env)).signupsEnabled;

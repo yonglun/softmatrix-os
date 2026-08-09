@@ -24,6 +24,7 @@ import { GatekeeperConnectCallback, GatekeeperUser } from "@gadgets/workshop-sha
 import { createWorkshopLogger } from "../observability";
 import { CLOUDFLARE_VENDOR_ID } from "../user.js";
 import { readAdminConfig } from "../admin-config.js";
+import { normalizeVerifiedEmail } from "./email-identity.js";
 
 const logger = createWorkshopLogger("workshop.auth");
 
@@ -95,12 +96,19 @@ export class LoginConnectCallbackImpl
     // returns — no explicit disposal needed. We read the verified email to resolve/create the user.
     // The email's local-part seeds the initial display name, like the Cloudflare Access flow.
     try {
-      const email = await account.getAuthenticatedEmail();
-      if (!email) {
+      const rawEmail = await account.getAuthenticatedEmail();
+      if (!rawEmail) {
         loginLogger.info("gatekeeper login finished", {
           event: "gatekeeper.login.finished", outcome: "no_email",
         });
         await pending.fail("This account has no verified email, so it can't be used to sign in.");
+        return;
+      }
+      let email: string;
+      try {
+        email = normalizeVerifiedEmail(rawEmail);
+      } catch {
+        await pending.fail("This account has no valid verified email, so it can't be used to sign in.");
         return;
       }
       const userStub = this.ctx.exports.UserDurableObject.get(

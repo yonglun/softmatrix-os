@@ -3,6 +3,7 @@ import { GadgetMetadataWithTimestamps, AiChatAuthorInfo, AiModelConfig, SUGGESTE
 import { Gatekeeper, GatekeeperUser, GatekeeperUserVerifier, GatekeeperVendor, AccountDescription, VendorDescription, GatekeeperConnectCallback, SupportedResource, ResourceConfiguratorFrame, AppUiContext, GatekeeperUiFrame } from "@gadgets/workshop-shared/gatekeeper";
 import { shouldAutoProvisionAccount, ambientGatekeeperMode } from "./provisioning-policy.js";
 import { CloudflareGatekeeperUser } from "@gadgets/workshop-shared/cloudflare-gatekeeper";
+import { normalizeVerifiedEmail } from "./auth/email-identity.js";
 import { DurableObject, WorkerEntrypoint } from "cloudflare:workers";
 import { createTypedStorage, collection } from "@gadgets/typed-storage";
 import { createWorkshopLogger } from "./observability";
@@ -314,6 +315,7 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
   // exist and `allowCreate` is false (deployment signups are closed), refuses rather than creating —
   // existing users can still sign in.
   async authenticateFromCfAccess(email: string, allowCreate: boolean): Promise<boolean> {
+    email = normalizeVerifiedEmail(email);
     if (!this.storage.created.get()) {
       if (!allowCreate) {
         throw new Error("New sign-ups are currently disabled on this deployment.");
@@ -402,6 +404,7 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
   // When the account doesn't yet exist and `allowCreate` is false (deployment signups are closed),
   // returns null instead of creating one — existing users can still sign in.
   async loginOrCreateViaGatekeeper(email: string, allowCreate: boolean): Promise<string | null> {
+    email = normalizeVerifiedEmail(email);
     if (!this.storage.created.get()) {
       if (!allowCreate) return null;
       this.storage.created.put(true);
