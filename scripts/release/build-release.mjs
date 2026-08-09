@@ -78,7 +78,7 @@ function pinnedWranglerVersion() {
 function buildGeneratedWorkerSources(packages) {
   for (const pkg of packages) {
     const packageJson = JSON.parse(readFileSync(join(pkg.dir, "package.json"), "utf8"));
-    for (const script of ["build:app", "build:configurator"]) {
+    for (const script of ["build:app", "build:configurator", "build:format-blueprints"]) {
       if (packageJson.scripts?.[script]) {
         run("pnpm", ["run", script], { cwd: pkg.dir });
       }
