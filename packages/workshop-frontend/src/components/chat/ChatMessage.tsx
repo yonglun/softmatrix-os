@@ -1,4 +1,5 @@
 import { Loader } from '@cloudflare/kumo'
+import { useTranslation } from 'react-i18next'
 import { Hexagon } from '@phosphor-icons/react'
 import type { ChatMessage as ChatMessageType } from '../../data/chat'
 import ToolCallCard from './ToolCallCard'
@@ -12,9 +13,10 @@ function AssistantAvatar() {
 }
 
 function UserAvatar() {
+  const { t } = useTranslation()
   return (
     <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 bg-kumo-tint">
-      <span className="text-[10px] font-semibold text-kumo-strong">U</span>
+      <span className="text-[10px] font-semibold text-kumo-strong">{t('management.misc.userInitial')}</span>
     </div>
   )
 }
@@ -57,6 +59,7 @@ function RichContent({ text }: { text: string }) {
 }
 
 export default function ChatMessage({ message }: { message: ChatMessageType }) {
+  const { t } = useTranslation()
   const isUser = message.role === 'user'
 
   return (
@@ -67,7 +70,7 @@ export default function ChatMessage({ message }: { message: ChatMessageType }) {
         {/* Role + time */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold text-kumo-default">
-            {isUser ? 'You' : 'Workshop'}
+            {isUser ? t('management.misc.you') : t('management.misc.workshop')}
           </span>
           <span className="font-mono text-xs text-kumo-subtle">{message.timestamp}</span>
         </div>

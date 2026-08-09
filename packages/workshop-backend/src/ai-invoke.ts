@@ -1,5 +1,6 @@
 import type { Message, Usage } from "@earendil-works/pi-ai";
 import type { ModelHandle } from "./ai-models.js";
+import type { ModelErrorCode } from "@gadgets/workshop-shared/api";
 
 /**
  * An all-zeros pi Usage record, for synthesizing assistant messages that were never actually
@@ -21,10 +22,15 @@ export function zeroUsage(): Usage {
 export class AgentTurnError extends Error {
   /** HTTP status of the failing request, when the handle observed a response for it. */
   readonly statusCode?: number;
+  readonly modelErrorCode?: ModelErrorCode;
+  readonly correlationId?: string;
 
-  constructor(message: string, statusCode?: number) {
+  constructor(message: string, statusCode?: number,
+      modelError?: {code: ModelErrorCode, correlationId: string}) {
     super(message);
     this.statusCode = statusCode;
+    this.modelErrorCode = modelError?.code;
+    this.correlationId = modelError?.correlationId;
   }
 }
 

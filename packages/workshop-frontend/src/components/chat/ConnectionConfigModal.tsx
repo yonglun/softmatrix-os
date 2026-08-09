@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Dialog, Button, Input } from '@cloudflare/kumo'
 import { X } from '@phosphor-icons/react'
 import type { Connection, ConnectionResource } from '../../data/sample'
@@ -15,6 +16,7 @@ export default function ConnectionConfigModal({
   onOpenChange: (open: boolean) => void
   onSave?: (resources: ConnectionResource[]) => void
 }) {
+  const { t } = useTranslation()
   const [resources, setResources] = useState<ConnectionResource[]>(
     connection.resources ?? []
   )
@@ -92,7 +94,7 @@ export default function ConnectionConfigModal({
                 onClick={handleAdd}
                 disabled={!inputValue.trim()}
               >
-                Add
+                {t('management.misc.add')}
               </Button>
             </div>
           </div>
@@ -102,7 +104,7 @@ export default function ConnectionConfigModal({
         <div className="max-h-56 overflow-y-auto px-5 pb-4">
           {resources.length === 0 ? (
             <p className="text-sm text-kumo-inactive text-center py-4">
-              No resources added yet
+              {t('management.misc.noResources')}
             </p>
           ) : (
             <div className="space-y-1">
@@ -131,7 +133,7 @@ export default function ConnectionConfigModal({
           <Dialog.Close
             render={(props) => (
               <Button {...props} variant="outline" size="sm">
-                Cancel
+                {t('management.misc.cancel')}
               </Button>
             )}
           />
@@ -143,7 +145,7 @@ export default function ConnectionConfigModal({
               onOpenChange(false)
             }}
           >
-            Save
+            {t('management.misc.save')}
           </Button>
         </div>
       </Dialog>

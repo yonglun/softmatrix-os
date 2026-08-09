@@ -1,10 +1,15 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Table } from '@cloudflare/kumo'
 import { Badge } from '@cloudflare/kumo'
 import { Button } from '@cloudflare/kumo'
 import { sampleDataRows } from '../../data/chat'
+import { useLocale } from '../../i18n/LocaleProvider'
+import { formatNumber } from '../../i18n/format'
 
 export default function DataTab() {
+  const { t } = useTranslation()
+  const { locale } = useLocale()
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   function toggleRow(id: string) {
@@ -29,17 +34,17 @@ export default function DataTab() {
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-kumo-fill bg-kumo-elevated">
         <div className="flex items-center gap-3">
-          <span className="font-mono text-sm text-kumo-default">channels</span>
-          <Badge variant="secondary">{sampleDataRows.length} rows</Badge>
+          <span className="font-mono text-sm text-kumo-default">{t('management.data.channels')}</span>
+          <Badge variant="secondary">{t(sampleDataRows.length === 1 ? 'management.data.rows_one' : 'management.data.rows_other', { count: sampleDataRows.length })}</Badge>
         </div>
         <div className="flex items-center gap-2">
           {selectedIds.size > 0 && (
             <span className="text-xs text-kumo-subtle">
-              {selectedIds.size} selected
+              {selectedIds.size} {t('management.data.selected')}
             </span>
           )}
-          <Button variant="ghost" size="xs">Filter</Button>
-          <Button variant="ghost" size="xs">Sort</Button>
+          <Button variant="ghost" size="xs">{t('management.data.filter')}</Button>
+          <Button variant="ghost" size="xs">{t('management.data.sort')}</Button>
         </div>
       </div>
 
@@ -52,12 +57,12 @@ export default function DataTab() {
                 checked={selectedIds.size === sampleDataRows.length}
                 indeterminate={selectedIds.size > 0 && selectedIds.size < sampleDataRows.length}
                 onValueChange={toggleAll}
-                aria-label="Select all rows"
+                aria-label={t('management.data.selectAllRows')}
               />
-              <Table.Head>Channel</Table.Head>
-              <Table.Head>Messages</Table.Head>
-              <Table.Head>Last Active</Table.Head>
-              <Table.Head>Status</Table.Head>
+              <Table.Head>{t('management.data.channel')}</Table.Head>
+              <Table.Head>{t('management.data.messages')}</Table.Head>
+              <Table.Head>{t('management.data.lastActive')}</Table.Head>
+              <Table.Head>{t('management.data.status')}</Table.Head>
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -66,14 +71,14 @@ export default function DataTab() {
                 <Table.CheckCell
                   checked={selectedIds.has(row.id)}
                   onValueChange={() => toggleRow(row.id)}
-                  aria-label={`Select ${row.channel}`}
+                  aria-label={t('management.data.select', { channel: row.channel })}
                 />
                 <Table.Cell>
                   <span className="font-mono text-sm text-kumo-default">{row.channel}</span>
                 </Table.Cell>
                 <Table.Cell>
                   <span className="text-sm text-kumo-subtle tabular-nums">
-                    {row.messages.toLocaleString()}
+                    {formatNumber(row.messages, locale)}
                   </span>
                 </Table.Cell>
                 <Table.Cell>
@@ -81,9 +86,9 @@ export default function DataTab() {
                 </Table.Cell>
                 <Table.Cell>
                   {row.unread ? (
-                    <Badge variant="primary">Unread</Badge>
+                    <Badge variant="primary">{t('management.data.unread')}</Badge>
                   ) : (
-                    <Badge variant="secondary">Read</Badge>
+                    <Badge variant="secondary">{t('management.data.read')}</Badge>
                   )}
                 </Table.Cell>
               </Table.Row>
@@ -95,10 +100,10 @@ export default function DataTab() {
       {/* Footer */}
       <div className="px-4 py-2 border-t border-kumo-fill bg-kumo-elevated flex items-center justify-between">
         <span className="font-mono text-xs text-kumo-subtle">
-          {sampleDataRows.length} rows in channels
+          {t('management.data.rowsInChannels', { count: sampleDataRows.length })}
         </span>
         <span className="font-mono text-xs text-kumo-subtle">
-          {sampleDataRows.reduce((sum, r) => sum + r.messages, 0).toLocaleString()} total messages
+          {t('management.data.totalMessages', { count: formatNumber(sampleDataRows.reduce((sum, r) => sum + r.messages, 0), locale) })}
         </span>
       </div>
     </div>

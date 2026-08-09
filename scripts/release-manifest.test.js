@@ -115,6 +115,12 @@ test("worker entries carry the deploy contract", () => {
   // Full ordered migration history, verbatim from wrangler.jsonc.
   assert.equal(backend.migrations[0].tag, "v0");
   assert.ok(backend.migrations[0].new_sqlite_classes.includes("UserDurableObject"));
+  assert.deepEqual(backend.migrations.at(-1), {
+    tag: "v3",
+    new_sqlite_classes: ["OidcLoginDurableObject"],
+  });
+  assert.ok(!Object.keys(backend.vars).some((name) => name.startsWith("OIDC_")),
+      "OIDC instance state is injected as backendExtraVars, never serialized in the manifest");
 
   // Router: serves the access asset variant, binds the backend by templated worker name.
   const router = workers["router"];

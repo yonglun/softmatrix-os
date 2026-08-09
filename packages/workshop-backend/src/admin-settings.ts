@@ -7,6 +7,8 @@ import { collection, createTypedStorage } from '@gadgets/typed-storage';
 import { createWorkshopLogger } from "./observability";
 import { ADMIN_CONFIG_KEY, FEATURED_BLUEPRINTS_KEY, isReservedBlueprintKey, parseBlueprintKvRecord, readBlueprintKvRecord, sanitizeBlueprintOutput, serializeFeaturedBlueprints } from './blueprint-archive.js';
 import { AdminConfig, DEFAULT_ADMIN_CONFIG, FormatCuration, MAX_AGENT_HINT, defaultOutputFormatId, listPromotedFormats, reorderFormats, sanitizeOutputOverrides, serializeAdminConfig } from './admin-config.js';
+import { getAiGatewayConfig } from './ai-gateway.js';
+import { getOrganizationModels } from './model-policy/organization-models.js';
 import { SITE_LOGO_R2_KEY, siteLogoImage, validateSiteLogo } from './site-logo.js';
 import { ambientGatekeeperMode, DEFAULT_AMBIENT_GATEKEEPER_MODE } from './provisioning-policy.js';
 import { buildGatekeeperVendorMap } from './auth/auth-vendors.js';
@@ -292,6 +294,44 @@ export class AdminSettings extends DurableObject<Cloudflare.Env> {
     return this.#mutateAdminConfig(config => ({ ...config, ...patch }));
   }
 
+  #organizationModelIds(): Set<string> {
+    let ids = new Set(getOrganizationModels(this.env).keys());
+    let gateway = getAiGatewayConfig(this.env);
+    for (let model of gateway?.getModelList() ?? []) ids.add(model.id);
+    return ids;
+  }
+
+  async setDefaultModel(id: string): Promise<void> {
+    id = id.trim();
+    if (id !== "") {
+      if (!this.#organizationModelIds().has(id)) throw new Error(`Unknown organization model: ${id}`);
+      if (this.#config().modelPolicy.disabledOrganizationModelIds.includes(id)) {
+        throw new Error(`Cannot select disabled model: ${id}`);
+      }
+    }
+    await this.#mutateAdminConfig(config => ({
+      ...config,
+      modelPolicy: { ...config.modelPolicy, defaultModelId: id },
+    }));
+  }
+
+  async setOrganizationModelEnabled(id: string, enabled: boolean): Promise<void> {
+    id = id.trim();
+    if (!id || !this.#organizationModelIds().has(id)) throw new Error(`Unknown organization model: ${id}`);
+    await this.#mutateAdminConfig(config => {
+      let disabled = new Set(config.modelPolicy.disabledOrganizationModelIds);
+      if (enabled) disabled.delete(id); else disabled.add(id);
+      return {
+        ...config,
+        modelPolicy: {
+          defaultModelId: !enabled && config.modelPolicy.defaultModelId === id
+            ? "" : config.modelPolicy.defaultModelId,
+          disabledOrganizationModelIds: [...disabled],
+        },
+      };
+    });
+  }
+
   // Read all admin-managed settings for the admin UI in one call: the stored config plus the live
   // resource catalog (every bound gatekeeper's resource types annotated with their enabled state).
   //
@@ -309,6 +349,7 @@ export class AdminSettings extends DurableObject<Cloudflare.Env> {
       announcement: config.announcement,
       banner: config.banner,
       accentColor: config.accentColor,
+      modelPolicy: config.modelPolicy,
       resourceVendors: await this.#listResourceConfig(config, adminUserId),
       formats: await this.#listFormatConfig(config),
     };
@@ -560,6 +601,14 @@ export class AdminApiImpl extends RpcTarget implements AdminApi {
 
   getSettings(): Promise<AdminSettingsView> {
     return this.admin.getSettings(this.adminUserId);
+  }
+
+  setDefaultModel(id: string): Promise<void> {
+    return this.admin.setDefaultModel(id);
+  }
+
+  setOrganizationModelEnabled(id: string, enabled: boolean): Promise<void> {
+    return this.admin.setOrganizationModelEnabled(id, enabled);
   }
 
   async setSignupsEnabled(enabled: boolean): Promise<void> {

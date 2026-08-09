@@ -28,6 +28,7 @@ describe('router fetch', () => {
     const env = makeEnv({ ASSETS: stubFetcher('assets') });
     expect(await route(env, '/api')).toBe('backend');
     expect(await route(env, '/api/workshop')).toBe('backend');
+    expect(await route(env, '/api/auth/oidc/callback?code=x&state=y')).toBe('backend');
     expect(await route(env, '/blueprint-screenshot')).toBe('backend');
     expect(await route(env, '/blueprint-screenshot/abc')).toBe('backend');
   });

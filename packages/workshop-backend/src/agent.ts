@@ -1,4 +1,4 @@
-import { AiChatMessage, AiChatAuthorInfo, AiToolCall, AiChatMessageBody, AgentSpawnerConfig, AiChatStreamEvent, BlueprintOutput, WorkpieceId, type AiModelConfig, isTextLikeAttachmentMimeType, validateBindingName } from '@gadgets/workshop-shared/api';
+import { AiChatMessage, AiChatAuthorInfo, AiToolCall, AiChatMessageBody, AgentSpawnerConfig, AiChatStreamEvent, BlueprintOutput, WorkpieceId, SupportedLocale, type AiModelConfig, isTextLikeAttachmentMimeType, validateBindingName } from '@gadgets/workshop-shared/api';
 import { PDF_MIME_TYPE, modelApiSupportsPdfAttachments } from './chat-attachment-pdf';
 import { AgentCatalog, ObservationDescription } from '@gadgets/workshop-shared/gatekeeper';
 import { createWorkshopLogger } from "./observability";
@@ -17,6 +17,7 @@ import { AgentCatalogSnapshot, formatAlwaysAvailableResourcesPrompt } from "./ag
 import { formatInstanceInstructions } from "./admin-config";
 import type { AiGatewayLogRoute } from "./ai-gateway";
 import { AgentTurnError, completeText, httpStatusFromError, zeroUsage } from "./ai-invoke";
+import { classifyModelError } from "./model-policy/test-connection";
 import type { ModelHandle } from "./ai-models";
 import {
   buildCompactionState, buildSummaryPrompt, COMPACTION_SYSTEM_PROMPT, estimateProjectionTokens,
@@ -26,6 +27,14 @@ import {
 } from "./agent-compaction";
 
 const logger = createWorkshopLogger("workshop.agent");
+
+/** Build the bounded default-language instruction appended to every Agent system context. */
+export function buildLocaleInstruction(locale: SupportedLocale): string {
+  if (locale === "zh-CN") {
+    return "默认使用简体中文（zh-CN）回答。若用户明确要求其他语言，则遵循该语言要求；明确的语言要求优先于此默认值。除非用户明确要求翻译，否则不要翻译用户内容、源代码、标识符、引用文本、模型输出、操作载荷或外部服务商数据。";
+  }
+  return "Use English as the default response language. If the user explicitly requests another language, follow that request; an explicit language request overrides this default. Do not translate user content, source code, identifiers, quoted text, model output, action payloads, or external provider data unless the user explicitly asks for a translation.";
+}
 
 // Additional per-chat-thread info needed by the AI agent but not by the client.
 export type AiChatAgentContext = {
@@ -1069,6 +1078,7 @@ export async function runAgent(
     chatMessages: AiChatMessage[],
     abortSignal: AbortSignal,
     initiator: AiChatAuthorInfo,
+    locale: SupportedLocale,
     callbackInitiated: boolean,
     compaction: CompactionContext): Promise<CompactionCheckpoint | undefined> {
   let checkpoint = compaction.checkpoint;
@@ -2054,6 +2064,7 @@ export async function runAgent(
   // Deployment-wide admin instructions, appended to the static system slot (slot 0) so they stay
   // inside the Anthropic prompt cache window. "" when unset.
   let instanceInstructions = formatInstanceInstructions(await hooks.getInstanceInstructions());
+  let localeInstruction = buildLocaleInstruction(locale);
 
   // The two system prompt slots: the non-project-specific parts, followed by the
   // project-specific parts. Kept as a two-part construction (static slot first) so the shared
@@ -2084,8 +2095,8 @@ export async function runAgent(
     // Split the system prompt into static and dynamic parts for better caching.
     systemPromptSlots = [
       instanceInstructions
-          ? `${SPAWNER_SYSTEM_PROMPT}\n\n${instanceInstructions}`
-          : SPAWNER_SYSTEM_PROMPT,
+          ? `${SPAWNER_SYSTEM_PROMPT}\n\n${localeInstruction}\n\n${instanceInstructions}`
+          : `${SPAWNER_SYSTEM_PROMPT}\n\n${localeInstruction}`,
       alwaysAvailableResourcesPrompt
           ? `${systemPromptBindings}\n\n${alwaysAvailableResourcesPrompt}`
           : systemPromptBindings,
@@ -2191,8 +2202,8 @@ export async function runAgent(
     // Split the system prompt into static and dynamic parts for better caching.
     systemPromptSlots = [
       instanceInstructions
-          ? `${SYSTEM_PROMPT}\n\n${instanceInstructions}`
-          : SYSTEM_PROMPT,
+          ? `${SYSTEM_PROMPT}\n\n${localeInstruction}\n\n${instanceInstructions}`
+          : `${SYSTEM_PROMPT}\n\n${localeInstruction}`,
       (standardFormats ? `${standardFormats}\n\n` : "") +
           `${systemPromptWorkspace}${systemPromptConnections}` +
           (alwaysAvailableResourcesPrompt ? `\n\n${alwaysAvailableResourcesPrompt}` : ""),
@@ -3069,8 +3080,11 @@ export async function runAgent(
   if (turnFailure) {
     // Other failures become an AgentTurnError carrying the failing request's HTTP status (when
     // it can be determined) for the overseer's triage.
+    let statusCode = httpStatusFromError(turnFailure.message, handle);
+    let modelErrorCode = classifyModelError(turnFailure.message, statusCode);
+    let correlationId = crypto.randomUUID();
     throw new AgentTurnError(
-        turnFailure.message, httpStatusFromError(turnFailure.message, handle));
+        `${modelErrorCode} (${correlationId})`, statusCode, { code: modelErrorCode, correlationId });
   }
 
   // The turn ran, so there is no checkpoint to report.

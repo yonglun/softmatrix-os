@@ -8,8 +8,10 @@ import UserMenu from './UserMenu'
 import TopBarNotice from '../TopBarNotice'
 import SiteLogo from './SiteLogo'
 import SoftmatrixMark from './SoftmatrixMark'
+import { useTranslation } from 'react-i18next'
 
 export default function Header() {
+  const { t } = useTranslation()
   const auth = useOptionalAuthenticatedApi()
   const gatekeeperApps = useGatekeeperApps()
   const siteName = useSiteName()
@@ -63,7 +65,7 @@ export default function Header() {
               activeProps={{ className: navLinkActiveClass }}
               activeOptions={{ exact: true }}
             >
-              Home
+              {t('management.header.home')}
             </Link>
             <Link
               to="/gatekeepers"
@@ -71,14 +73,14 @@ export default function Header() {
               activeProps={{ className: navLinkActiveClass }}
               activeOptions={{ exact: true }}
             >
-              Gatekeepers
+              {t('management.header.gatekeepers')}
             </Link>
             <Link
               to="/explore"
               className={navLinkClass}
               activeProps={{ className: navLinkActiveClass }}
             >
-              Explore
+              {t('management.header.explore')}
             </Link>
             {gatekeeperApps.map((app) => (
               <Link
@@ -126,7 +128,7 @@ export default function Header() {
               activeProps={{ className: navLinkActiveClass }}
               activeOptions={{ exact: true }}
             >
-              Home
+              {t('management.header.home')}
             </Link>
             <Link
               to="/gatekeepers"
@@ -135,7 +137,7 @@ export default function Header() {
               activeProps={{ className: navLinkActiveClass }}
               activeOptions={{ exact: true }}
             >
-              Gatekeepers
+              {t('management.header.gatekeepers')}
             </Link>
             <Link
               to="/explore"
@@ -143,7 +145,7 @@ export default function Header() {
               className={navLinkClass}
               activeProps={{ className: navLinkActiveClass }}
             >
-              Explore
+              {t('management.header.explore')}
             </Link>
             {gatekeeperApps.map((app) => (
               <Link
@@ -168,7 +170,7 @@ export default function Header() {
                   className={navLinkClass}
                   activeProps={{ className: navLinkActiveClass }}
                 >
-                  Profile
+                  {t('management.header.profile')}
                 </Link>
                 <Link
                   to="/providers"
@@ -176,7 +178,7 @@ export default function Header() {
                   className={navLinkClass}
                   activeProps={{ className: navLinkActiveClass }}
                 >
-                  Providers
+                  {t('management.header.providers')}
                 </Link>
                 {auth.isAdmin && (
                   <Link
@@ -185,14 +187,14 @@ export default function Header() {
                     className={navLinkClass}
                     activeProps={{ className: navLinkActiveClass }}
                   >
-                    Admin
+                    {t('management.header.admin')}
                   </Link>
                 )}
                 <button
                   onClick={() => { closeMobileMenu(); auth.logout() }}
                   className="text-left text-sm px-3 py-1.5 rounded-md text-kumo-danger hover:bg-kumo-tint transition-colors"
                 >
-                  Sign out
+                  {t('management.header.signOut')}
                 </button>
               </>
             )}

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CloudflareUsageInfo, CloudflareAccountOption } from '@gadgets/workshop-shared/api'
 import { Dialog, Button, Loader, useKumoToastManager } from '@cloudflare/kumo'
 import { CloudWarning, Lightning } from '@phosphor-icons/react'
@@ -15,6 +16,7 @@ interface OutOfCreditsModalProps {
 // Cloudflare account (if not connected), pick which account to bill (if they have several), or top
 // up credits in the Cloudflare dashboard (if connected but low balance).
 export default function OutOfCreditsModal({ open, onClose }: OutOfCreditsModalProps) {
+  const { t } = useTranslation()
   const auth = useOptionalAuthenticatedApi()
   const toasts = useKumoToastManager()
   const [usage, setUsage] = useState<CloudflareUsageInfo | null>(null)
@@ -75,7 +77,7 @@ export default function OutOfCreditsModal({ open, onClose }: OutOfCreditsModalPr
       setAccounts(null)
       refresh()
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to select account'
+      const msg = err instanceof Error ? err.message : t('management.billing.selectAccountFailed')
       toasts.add({ title: msg, variant: 'error' })
     } finally {
       setSelecting(null)
@@ -90,7 +92,7 @@ export default function OutOfCreditsModal({ open, onClose }: OutOfCreditsModalPr
       <Dialog className="p-6 sm:w-[560px]" size="base">
         <Dialog.Title className="text-lg font-semibold mb-2 flex items-center gap-2">
           <CloudWarning size={22} weight="bold" className="text-kumo-warning" />
-          You've reached your free usage limit
+          {t('management.billing.outOfCreditsTitle')}
         </Dialog.Title>
 
         {usage === null ? (
@@ -99,33 +101,29 @@ export default function OutOfCreditsModal({ open, onClose }: OutOfCreditsModalPr
           <div className="space-y-4">
             {!connected ? (
               <p className="text-sm text-kumo-subtle">
-                You've used all {usage.dailyLimit} of your free {usage.dailyLimit === 1 ? 'request' : 'requests'} for
-                today. Connect your Cloudflare account to keep building now — usage beyond the free
-                tier is billed to your own Cloudflare AI Gateway credits
+                {t(usage.dailyLimit === 1 ? 'management.billing.outOfCreditsDescription_one' : 'management.billing.outOfCreditsDescription_other', { limit: usage.dailyLimit })}
                 {usage.resetAt ? (
                   <>
-                    {' '}— or wait: your free {usage.dailyLimit === 1 ? 'request resets' : 'requests reset'} at
-                    00:00 UTC, in <ResetCountdown resetAt={usage.resetAt} onElapsed={refresh} />.
+                    {' '}{t(usage.dailyLimit === 1 ? 'management.billing.orWait_one' : 'management.billing.orWait_other')} {t('management.billing.resetAtUtc')}{' '}
+                    <ResetCountdown resetAt={usage.resetAt} onElapsed={refresh} />。
                   </>
                 ) : '.'}
               </p>
             ) : needsSelection ? (
               <p className="text-sm text-kumo-subtle">
-                Your Cloudflare connection has access to multiple accounts. Choose which one's AI
-                Gateway credits should be billed for usage beyond the free tier.
+                {t('management.billing.multipleAccountsBillingDescription')}
               </p>
             ) : (
               <p className="text-sm text-kumo-subtle">
-                Your Cloudflare account is connected
+                {t('management.billing.connectedBalanceDescription')}
                 {usage.balance !== null && (
-                  <> with a balance of <strong>${usage.balance.toFixed(2)}</strong></>
+                  <> {t('management.billing.balanceOf')} <strong>${usage.balance.toFixed(2)}</strong></>
                 )}
-                , but it's below the minimum needed to continue. Add credits to your AI Gateway to
-                keep building now
+                {t('management.billing.belowMinimumDescription')}
                 {usage.resetAt ? (
                   <>
-                    {' '}or wait — your free {usage.dailyLimit === 1 ? 'request resets' : 'requests reset'} at
-                    00:00 UTC, in <ResetCountdown resetAt={usage.resetAt} onElapsed={refresh} />.
+                    {' '}{t(usage.dailyLimit === 1 ? 'management.billing.orWaitShort_one' : 'management.billing.orWaitShort_other')} {t('management.billing.resetAtUtc')}{' '}
+                    <ResetCountdown resetAt={usage.resetAt} onElapsed={refresh} />。
                   </>
                 ) : '.'}
               </p>
@@ -134,9 +132,9 @@ export default function OutOfCreditsModal({ open, onClose }: OutOfCreditsModalPr
             {needsSelection && (
               <div className="flex flex-col gap-2">
                 {accounts === null ? (
-                  <p className="text-sm text-kumo-subtle">Loading accounts…</p>
+                  <p className="text-sm text-kumo-subtle">{t('management.billing.loadingAccounts')}</p>
                 ) : accounts.length === 0 ? (
-                  <p className="text-sm text-kumo-subtle">No accounts available on this connection.</p>
+                  <p className="text-sm text-kumo-subtle">{t('management.billing.noAccounts')}</p>
                 ) : (
                   accounts.map((a) => (
                     <Button
@@ -155,14 +153,14 @@ export default function OutOfCreditsModal({ open, onClose }: OutOfCreditsModalPr
             )}
 
             <p className="text-sm text-kumo-subtle">
-              Learn more about{' '}
+              {t('management.billing.learnMoreAbout')}{' '}
               <a
                 href="https://developers.cloudflare.com/ai-gateway/features/unified-billing/"
                 target="_blank"
                 rel="noreferrer"
                 className="underline"
               >
-                AI Gateway unified billing
+                {t('management.billing.unifiedBilling')}
               </a>
               .
             </p>
@@ -170,22 +168,22 @@ export default function OutOfCreditsModal({ open, onClose }: OutOfCreditsModalPr
             <div className="flex items-center justify-end gap-2 pt-2">
               {!connected ? (
                 <>
-                  <Button variant="secondary" onClick={onClose}>Maybe later</Button>
+                  <Button variant="secondary" onClick={onClose}>{t('management.billing.maybeLater')}</Button>
                   <Button variant="primary" onClick={connect} loading={connecting}>
                     <Lightning size={16} weight="bold" />
-                    Connect Cloudflare
+                    {t('management.billing.connectCloudflare')}
                   </Button>
                 </>
               ) : needsSelection ? (
-                <Button variant="secondary" onClick={onClose}>Close</Button>
+                <Button variant="secondary" onClick={onClose}>{t('management.billing.close')}</Button>
               ) : (
                 <>
-                  <Button variant="secondary" onClick={onClose}>Close</Button>
+                  <Button variant="secondary" onClick={onClose}>{t('management.billing.close')}</Button>
                   <Button
                     variant="primary"
                     onClick={() => window.open(buildAddCreditsUrl(usage.accountId), '_blank')}
                   >
-                    Add credits in Cloudflare
+                    {t('management.billing.addCreditsInCloudflare')}
                   </Button>
                 </>
               )}

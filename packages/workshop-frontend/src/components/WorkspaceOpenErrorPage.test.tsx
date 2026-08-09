@@ -6,6 +6,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest'
 import { createOpenGadgetError, OPEN_GADGET_ERROR_CODES } from '@gadgets/workshop-shared/api'
 import WorkspaceOpenErrorPage, { classifyWorkspaceOpenFailure } from './WorkspaceOpenErrorPage'
+import { LocaleProvider } from '../i18n/LocaleProvider'
 
 const testGlobal = globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
 const previousActEnvironment = testGlobal.IS_REACT_ACT_ENVIRONMENT
@@ -39,11 +40,13 @@ describe('WorkspaceOpenErrorPage', () => {
     document.body.append(container)
     root = createRoot(container)
     await act(async () => root!.render(
-      <WorkspaceOpenErrorPage
-        kind={kind}
-        onRetry={onRetry}
-        onGoToWorkspaces={onGoToWorkspaces}
-      />,
+      <LocaleProvider>
+        <WorkspaceOpenErrorPage
+          kind={kind}
+          onRetry={onRetry}
+          onGoToWorkspaces={onGoToWorkspaces}
+        />
+      </LocaleProvider>,
     ))
     return { container, onGoToWorkspaces, onRetry }
   }

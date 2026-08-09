@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { Dialog, Select, Loader, Text, useKumoToastManager } from '@cloudflare/kumo'
 import { Warning, Plus, ArrowClockwise, CheckCircle } from '@phosphor-icons/react'
 import { RpcStub, RpcTarget } from 'capnweb'
@@ -32,8 +34,8 @@ interface AccountInfo {
 
 // How to name one of the user's accounts in the UI. Falls back to the id, which is all we can show
 // for an account that has since been disconnected (so `accounts` no longer has it).
-function accountLabel(account: AccountInfo | undefined, accountId: number): string {
-  return account?.description.uniqueName || account?.description.displayName || `Account ${accountId}`
+function accountLabel(account: AccountInfo | undefined, accountId: number, t: TFunction): string {
+  return account?.description.uniqueName || account?.description.displayName || t('management.observer.account', { id: accountId })
 }
 
 interface ObserverConfigModalProps {
@@ -49,6 +51,7 @@ export default function ObserverConfigModal({
   onConfirm,
   onCancel,
 }: ObserverConfigModalProps) {
+  const { t } = useTranslation()
   const toasts = useKumoToastManager()
 
   const [accounts, setAccounts] = useState<Map<number, AccountInfo>>(new Map())
@@ -116,7 +119,7 @@ export default function ObserverConfigModal({
       })
       .catch(err => {
         console.error('Failed to subscribe to connected accounts:', err)
-        toasts.add({ title: 'Failed to load your connected accounts', variant: 'error' })
+        toasts.add({ title: t('management.observer.loadAccountsFailed'), variant: 'error' })
       })
 
     return () => {
@@ -188,7 +191,7 @@ export default function ObserverConfigModal({
       }
     } catch (err) {
       console.error('Failed to initiate connection:', err)
-      toasts.add({ title: 'Failed to start connection flow', variant: 'error' })
+      toasts.add({ title: t('management.observer.connectStartFailed'), variant: 'error' })
       connectingRef.current = null
       setConnecting(null)
     }
@@ -202,7 +205,7 @@ export default function ObserverConfigModal({
       // Subscription fires add() with credentialsValid:true on completion, clearing `reconnecting`.
     } catch (err) {
       console.error('Failed to initiate reconnection:', err)
-      toasts.add({ title: 'Failed to start re-authentication flow', variant: 'error' })
+      toasts.add({ title: t('management.observer.reauthStartFailed'), variant: 'error' })
       setReconnecting(null)
     }
   }
@@ -232,14 +235,12 @@ export default function ObserverConfigModal({
     <Dialog.Root open disablePointerDismissal onOpenChange={open => { if (!open) onCancel() }}>
       <Dialog className="p-6" size="lg">
         <Dialog.Title className="mb-2 text-lg font-semibold">
-          {isRetry ? 'Verify your access again' : 'Verify your access'}
+          {isRetry ? t('management.observer.verifyAgainTitle') : t('management.observer.verifyTitle')}
         </Dialog.Title>
         <Text variant="secondary" size="sm" as="p">
           {isRetry
-            ? 'We couldn’t confirm your access to everything this workspace has read. Re-authenticate ' +
-              'the account below, or choose a different one, then try again.'
-            : 'Before opening this workspace, confirm that your own accounts can access the connected ' +
-              'data it uses.'}
+            ? t('management.observer.retryDescription')
+            : t('management.observer.introDescription')}
         </Text>
 
         {!ready || !vendorsReady ? (
@@ -251,7 +252,7 @@ export default function ObserverConfigModal({
             {needs.map(need => {
               const matching = [...accounts.values()].filter(a => a.vendorId === need.vendorId)
               const vendor = matching[0]?.vendor ?? vendorsById.get(need.vendorId)
-              const vendorName = vendor?.displayName || need.vendorId || 'service'
+              const vendorName = vendor?.displayName || need.vendorId || t('management.observer.service')
               const chosen = accountFor(need.gatekeeperId)
 
               return (
@@ -279,7 +280,7 @@ export default function ObserverConfigModal({
                         onClick={() => handleConnect(need)}
                         disabled={connecting === need.vendorId}
                       >
-                        {connecting === need.vendorId ? 'Waiting for connection…' : 'Connect'}
+                        {connecting === need.vendorId ? t('management.observer.waitingConnection') : t('management.observer.connect')}
                       </WorkshopButton>
                     )}
                   </div>
@@ -291,7 +292,7 @@ export default function ObserverConfigModal({
                       <Warning size={14} className="mt-0.5 shrink-0" />
                       <div className="min-w-0">
                         <span className="font-medium">
-                          {accountLabel(accounts.get(need.failure.accountId), need.failure.accountId)}
+                          {accountLabel(accounts.get(need.failure.accountId), need.failure.accountId, t)}
                         </span>
                         {' — '}
                         {need.failure.reason}
@@ -304,14 +305,14 @@ export default function ObserverConfigModal({
                       {matching.length === 1 ? (
                         <div className="flex min-h-10 items-center gap-3 rounded-lg border border-kumo-line bg-kumo-elevated/50 px-3 py-2">
                           <div className="min-w-0 flex-1">
-                            <div className="text-[11px] leading-4 text-kumo-subtle">Using your account</div>
+                            <div className="text-[11px] leading-4 text-kumo-subtle">{t('management.observer.usingAccount')}</div>
                             <div className="truncate text-sm font-medium text-kumo-default">
-                              {accountLabel(matching[0], matching[0].id)}
+                              {accountLabel(matching[0], matching[0].id, t)}
                             </div>
                           </div>
                           {matching[0].credentialsValid && (
                             <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-kumo-success">
-                              <CheckCircle size={15} weight="fill" /> Ready
+                              <CheckCircle size={15} weight="fill" /> {t('management.observer.ready')}
                             </span>
                           )}
                         </div>
@@ -323,16 +324,16 @@ export default function ObserverConfigModal({
                               ? String(choices[need.gatekeeperId])
                               : undefined
                           }
-                          placeholder={`Choose a ${vendorName} account…`}
+                          placeholder={t('management.observer.chooseAccount', { vendor: vendorName })}
                           onValueChange={v =>
                             setChoices(prev => ({ ...prev, [need.gatekeeperId]: Number(v) }))
                           }
-                          renderValue={v => accountLabel(accounts.get(Number(v)), Number(v))}
+                            renderValue={v => accountLabel(accounts.get(Number(v)), Number(v), t)}
                         >
                           {matching.map(acct => (
                             <Select.Option key={acct.id} value={String(acct.id)}>
-                              {accountLabel(acct, acct.id)}
-                              {!acct.credentialsValid ? ' (expired)' : ''}
+                              {accountLabel(acct, acct.id, t)}
+                              {!acct.credentialsValid ? ` ${t('management.observer.expired')}` : ''}
                             </Select.Option>
                           ))}
                         </Select>
@@ -356,10 +357,10 @@ export default function ObserverConfigModal({
                             <Warning size={12} />
                           )}
                           {reconnecting === chosen.id
-                            ? 'Re-authenticating…'
+                            ? t('management.observer.reauthenticating')
                             : chosen.credentialsValid
-                              ? 'Click to re-authenticate this account'
-                              : 'This account has expired — click to re-authenticate'}
+                              ? t('management.observer.reauthAccount')
+                              : t('management.observer.expiredReauth')}
                         </button>
                       )}
 
@@ -371,7 +372,7 @@ export default function ObserverConfigModal({
                           className="flex items-center gap-1 text-xs text-kumo-subtle hover:text-kumo-default disabled:opacity-60 self-start"
                         >
                           <Plus size={11} />
-                          {connecting === need.vendorId ? 'Waiting for connection…' : 'Connect a different account'}
+                          {connecting === need.vendorId ? t('management.observer.waitingConnection') : t('management.observer.differentAccount')}
                         </button>
                       )}
                     </div>
@@ -384,14 +385,14 @@ export default function ObserverConfigModal({
 
         <div className="flex justify-end gap-2 mt-6">
           <WorkshopButton tone="secondary" onClick={onCancel}>
-            Cancel
+            {t('management.observer.cancel')}
           </WorkshopButton>
           <WorkshopButton
             tone="primary"
             onClick={handleConfirm}
             disabled={!ready || !vendorsReady || !allSatisfied}
           >
-            {isRetry ? 'Verify again' : 'Verify and open'}
+            {isRetry ? t('management.observer.verifyAgain') : t('management.observer.verifyAndOpen')}
           </WorkshopButton>
         </div>
       </Dialog>

@@ -1,4 +1,5 @@
 import { Dialog } from '@cloudflare/kumo'
+import { useTranslation } from 'react-i18next'
 import { X } from '@phosphor-icons/react'
 import type { ReactNode } from 'react'
 import { WorkshopButton, WorkshopIconButton } from './WorkshopControls'
@@ -26,6 +27,7 @@ export default function DeleteConfirmationDialog({
   onOpenChange,
   onConfirm,
 }: DeleteConfirmationDialogProps) {
+  const { t } = useTranslation()
   return (
     <Dialog.Root
       open={open}
@@ -52,7 +54,7 @@ export default function DeleteConfirmationDialog({
                 {...props}
                 className="!h-7 !w-7"
                 disabled={isDeleting}
-                aria-label="Close"
+                aria-label={t('management.misc.close')}
               >
                 <X size={16} />
               </WorkshopIconButton>
@@ -68,7 +70,7 @@ export default function DeleteConfirmationDialog({
                 className="!h-9"
                 disabled={isDeleting}
               >
-                Cancel
+                {t('management.misc.cancel')}
               </WorkshopButton>
             )}
           />

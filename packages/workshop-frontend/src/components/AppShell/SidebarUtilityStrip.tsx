@@ -1,6 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import { Desktop, Moon, Plug, Sun } from '@phosphor-icons/react'
 import { Tooltip } from '@cloudflare/kumo'
+import { useTranslation } from 'react-i18next'
 import UserMenu from '../UserMenu'
 import { useTheme } from '../../ThemeContext'
 import type { ThemeMode } from '../../theme'
@@ -11,20 +12,27 @@ function nextThemeMode(mode: ThemeMode): ThemeMode {
   return THEME_SEQUENCE[(THEME_SEQUENCE.indexOf(mode) + 1) % THEME_SEQUENCE.length]
 }
 
+function themeModeName(mode: ThemeMode, t: (key: string) => string): string {
+  if (mode === 'system') return t('shell.themeSystemName')
+  if (mode === 'light') return t('shell.themeLightName')
+  return t('shell.themeDarkName')
+}
+
 function ThemeModeButton() {
+  const { t } = useTranslation()
   const { themeMode, resolvedThemeMode, setThemeMode } = useTheme()
   const label = themeMode === 'system'
-    ? `Theme: system (${resolvedThemeMode})`
-    : `Theme: ${themeMode}`
+    ? t('shell.themeSystem', { resolved: themeModeName(resolvedThemeMode, t) })
+    : t('shell.themeMode', { mode: themeModeName(themeMode, t) })
   const nextMode = nextThemeMode(themeMode)
 
   return (
     <Tooltip
-      content={`${label}. Switch to ${nextMode}.`}
+      content={t('shell.switchTheme', { label, next: themeModeName(nextMode, t) })}
       render={(
         <button
           type="button"
-          aria-label={`${label}. Switch to ${nextMode}.`}
+          aria-label={t('shell.switchTheme', { label, next: themeModeName(nextMode, t) })}
           onClick={() => setThemeMode(nextMode)}
           className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-kumo-inactive transition-colors hover:bg-kumo-tint hover:text-kumo-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kumo-ring focus-visible:ring-offset-2 focus-visible:ring-offset-kumo-elevated"
         >
@@ -74,6 +82,7 @@ function StripLink({
 }
 
 export default function SidebarUtilityStrip({ collapsed = false }: { collapsed?: boolean }) {
+  const { t } = useTranslation()
   return (
     <div
       className={[
@@ -83,7 +92,7 @@ export default function SidebarUtilityStrip({ collapsed = false }: { collapsed?:
         collapsed ? 'flex-col justify-center gap-2 px-1.5' : '',
       ].join(' ')}
     >
-      <StripLink to="/gatekeepers" label="Gatekeepers">
+      <StripLink to="/gatekeepers" label={t('shell.gatekeepers')}>
         <Plug size={15} />
       </StripLink>
       <div className={collapsed ? 'flex flex-col items-center gap-2' : 'ml-auto flex items-center gap-1'}>

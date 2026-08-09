@@ -15,6 +15,7 @@ export type WorkshopObservabilityFields = {
   gadgetId: string;
   gatekeeperId: number | string;
   modelId: string;
+  provider: string;
   observerId: string;
   operation: string;
   outcome: "ok" | "error" | "usage_limit" | "callbacks_stalled" | "no_email" | "signups_disabled";

@@ -40,3 +40,14 @@ VITE_CF_ACCESS_MODE=true
 ```
 
 The backend also needs to be configured with the `CF_ACCESS_ISS` and `CF_ACCESS_AUD` environment variables (see the workshop-backend package) for the JWT verification to work.
+
+### Enterprise OIDC mode
+
+The backend can expose a localized “Continue with SSO” button for one generic OpenID Connect
+provider. Configure `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, and `PUBLIC_BASE_URL` in
+backend instance state; optionally set `OIDC_DISPLAY_NAME` and
+`OIDC_ALLOWED_EMAIL_DOMAINS`. Register the exact callback URI
+`<PUBLIC_BASE_URL>/api/auth/oidc/callback` with the provider. The implementation uses the
+Authorization Code flow with PKCE `S256`, requests `openid email profile`, and requires a verified
+email claim. See [the OIDC deployment guide](../../docs/oidc-sso.md) for Keycloak, Entra ID, and Okta
+setup, password-mode rollback, secret rotation, and troubleshooting.

@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react'
 import { DropdownMenu, useKumoToastManager } from '@cloudflare/kumo'
 import { useAuthenticatedApi } from '../AuthContext'
 import {
-  AiChatAuthorInfo,
+  AiModelCatalogItem,
+  AiModelPolicyInfo,
   AiGatewayInfo,
   AiModelProvider,
   SUGGESTED_MODELS,
@@ -18,6 +19,7 @@ import {
 import AddModelModal from '../AddModelModal'
 import { useDocumentTitle } from '../useDocumentTitle'
 import { MENU_CONTENT, MENU_ITEM, MENU_ITEM_DANGER } from '../components/menuStyles'
+import { useTranslation } from 'react-i18next'
 
 export const Route = createFileRoute('/providers')({ component: ProvidersPage })
 
@@ -39,24 +41,25 @@ function ModelRow({
   onDelete,
   onSetQuick,
 }: {
-  model: AiChatAuthorInfo
+  model: AiModelCatalogItem
   isQuick: boolean
   isBuiltIn: boolean
   onDelete: () => void
   onSetQuick: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={onSetQuick}
+      onClick={() => { if (model.enabled) onSetQuick() }}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
-          onSetQuick()
+          if (model.enabled) onSetQuick()
         }
       }}
-      title={isQuick ? 'Quick model. Click to clear' : 'Click to set as quick model'}
+      title={isQuick ? t('management.providers.clearQuick') : t('management.providers.setQuick')}
       className="group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-150 ease-out hover:bg-kumo-tint"
     >
       {/* Neutral monogram — matches the sidebar/workspaces treatment */}
@@ -72,13 +75,22 @@ function ModelRow({
           </span>
           {isBuiltIn && (
             <span className="shrink-0 rounded-full bg-kumo-tint px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.4px] text-kumo-subtle">
-              built-in
+              {t('management.providers.builtIn')}
             </span>
           )}
+          <span className="shrink-0 rounded-full bg-kumo-tint px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.2px] text-kumo-subtle">
+            {model.source === 'organization' ? t('management.providers.organization') : t('management.providers.personal')}
+          </span>
+          <span className="shrink-0 rounded-full bg-kumo-tint px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.2px] text-kumo-subtle">
+            {model.enabled ? t('management.providers.enabled') : t('management.providers.disabled')}
+          </span>
+          {model.isDefault && <span className="shrink-0 rounded-full bg-kumo-tint px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.2px] text-kumo-subtle">
+            {t('management.providers.default')}
+          </span>}
           {isQuick && (
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[rgba(255,72,1,0.10)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.4px] text-kumo-brand">
               <Lightning size={9} weight="fill" />
-              quick
+              {t('management.providers.quick')}
             </span>
           )}
         </div>
@@ -93,7 +105,7 @@ function ModelRow({
           <DropdownMenu.Trigger
             render={
               <button
-                aria-label="Provider actions"
+                aria-label={t('management.providers.actions')}
                 className="cursor-pointer rounded-md p-1.5 text-kumo-subtle transition-colors hover:bg-kumo-fill hover:text-kumo-default focus:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
               >
                 <DotsThreeVertical size={16} />
@@ -101,14 +113,14 @@ function ModelRow({
             }
           />
           <DropdownMenu.Content className={MENU_CONTENT}>
-            <DropdownMenu.Item onClick={onSetQuick} className={MENU_ITEM}>
+            <DropdownMenu.Item onClick={onSetQuick} disabled={!model.enabled} className={MENU_ITEM}>
               <Lightning size={13} className="mr-2" weight={isQuick ? 'fill' : 'regular'} />
-              {isQuick ? 'Clear quick model' : 'Set as quick model'}
+              {isQuick ? t('management.providers.clearQuick') : t('management.providers.setQuick')}
             </DropdownMenu.Item>
-            {!isBuiltIn && (
+            {!isBuiltIn && model.canDelete && (
               <DropdownMenu.Item variant="danger" onClick={onDelete} className={MENU_ITEM_DANGER}>
                 <Trash size={13} className="mr-2" />
-                Delete provider
+                {t('management.providers.delete')}
               </DropdownMenu.Item>
             )}
           </DropdownMenu.Content>
@@ -131,13 +143,15 @@ function Notice({ children }: { children: React.ReactNode }) {
 // ─── main page ────────────────────────────────────────────────────────────────
 
 function ProvidersPage() {
-  useDocumentTitle('AI Providers')
+  const { t } = useTranslation()
+  useDocumentTitle(t('management.providers.title'))
 
   const { authenticatedApi } = useAuthenticatedApi()
   const toasts = useKumoToastManager()
-  const [models, setModels] = useState<AiChatAuthorInfo[]>([])
+  const [models, setModels] = useState<AiModelCatalogItem[]>([])
   const [quickModel, setQuickModel] = useState<string | null>(null)
   const [aiConfig, setAiConfig] = useState<AiGatewayInfo | null>(null)
+  const [modelPolicy, setModelPolicy] = useState<AiModelPolicyInfo>({ allowUserByok: true, defaultModelId: null })
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
@@ -147,12 +161,14 @@ function ProvidersPage() {
   const fetchAll = async () => {
     setLoadError(false)
     try {
-      const [modelList, qm, cfg] = await Promise.all([
-        authenticatedApi.listModels(),
+      const [modelList, policy, qm, cfg] = await Promise.all([
+        authenticatedApi.listModelCatalog(),
+        authenticatedApi.getAiModelPolicy(),
         authenticatedApi.getQuickModel(),
         authenticatedApi.getAiConfig(),
       ])
       setModels(modelList)
+      setModelPolicy(policy)
       setQuickModel(qm)
       setAiConfig(cfg)
     } catch (err) {
@@ -173,15 +189,15 @@ function ProvidersPage() {
     return PROVIDER_ORDER.some((p) => enabled.has(p) && modelId in SUGGESTED_MODELS[p])
   }
 
-  const handleDelete = async (model: AiChatAuthorInfo) => {
-    if (!confirm(`Delete "${model.name}"? This cannot be undone.`)) return
+  const handleDelete = async (model: AiModelCatalogItem) => {
+    if (!confirm(t('management.providers.deleteConfirm', { name: model.name }))) return
     setDeletingId(model.id)
     try {
       await authenticatedApi.deleteModel(model.id)
       await fetchAll()
     } catch (err) {
       console.error('Failed to delete model:', err)
-      toasts.add({ title: 'Failed to delete provider', variant: 'error' })
+      toasts.add({ title: t('management.providers.deleteFailed'), variant: 'error' })
     } finally {
       setDeletingId(null)
     }
@@ -195,7 +211,7 @@ function ProvidersPage() {
     } catch (err) {
       console.error('Failed to set quick model:', err)
       setQuickModel(quickModel) // revert
-      toasts.add({ title: 'Failed to update default model', variant: 'error' })
+      toasts.add({ title: t('management.providers.quickUpdateFailed'), variant: 'error' })
     }
   }
 
@@ -209,15 +225,15 @@ function ProvidersPage() {
     <div className="mx-auto flex h-full w-full max-w-4xl flex-col px-6 sm:px-10">
       <header className="flex items-end justify-between gap-4 px-3 pb-3 pt-10">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight text-kumo-default">AI providers</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-kumo-default">{t('management.providers.title')}</h1>
           <p className="mt-1 text-[13px] leading-[18px] tracking-[-0.25px] text-kumo-subtle">
-            Configure the AI models available to your workspaces.
+            {t('management.providers.description')}
           </p>
         </div>
-        <button type="button" onClick={() => setSheetOpen(true)} className={PRIMARY_BTN}>
+        {modelPolicy.allowUserByok && <button type="button" onClick={() => setSheetOpen(true)} className={PRIMARY_BTN}>
           <Plus size={14} weight="bold" />
-          Add provider
-        </button>
+          {t('management.providers.add')}
+        </button>}
       </header>
 
       {/* Search — hidden when the user has no models */}
@@ -229,7 +245,7 @@ function ProvidersPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search providers…"
+              placeholder={t('management.providers.search')}
               className="h-9 w-full rounded-lg border border-kumo-line bg-kumo-base pl-9 pr-4 text-[13px] tracking-[-0.25px] text-kumo-default placeholder:text-kumo-inactive transition-[border-color,box-shadow] duration-150 ease-out focus:border-kumo-ring focus:outline-none focus:ring-[3px] focus:ring-kumo-ring/15"
             />
           </div>
@@ -244,9 +260,7 @@ function ProvidersPage() {
               <Notice>
                 <Lightning size={15} className="mt-px shrink-0 text-kumo-brand" />
                 <span>
-                  <strong className="font-medium text-kumo-default">AI Gateway mode:</strong> built-in
-                  models are managed by your deployment. You can still add custom models with your own
-                  API tokens.
+                  {t('management.providers.gatewayNotice')}
                 </span>
               </Notice>
             )}
@@ -255,12 +269,14 @@ function ProvidersPage() {
               <Notice>
                 <Lightning size={15} className="mt-px shrink-0 text-kumo-brand" />
                 <span>
-                  <strong className="font-medium text-kumo-default">Quick model:</strong>{' '}
-                  {quickModel
-                    ? `${models.find((m) => m.id === quickModel)?.name ?? quickModel}.`
-                    : 'none set.'}{' '}
-                  Used for fast tasks like generating chat titles. Click a model to set it.
+                  {t('management.providers.quickNotice', { model: quickModel ? models.find((m) => m.id === quickModel)?.name ?? quickModel : t('management.providers.noQuick') })}
                 </span>
+              </Notice>
+            )}
+            {!modelPolicy.allowUserByok && (
+              <Notice>
+                <Lightning size={15} className="mt-px shrink-0 text-kumo-brand" />
+                <span>{t('management.providers.byokDisabled')}</span>
               </Notice>
             )}
           </div>
@@ -275,9 +291,9 @@ function ProvidersPage() {
           </div>
         ) : loadError ? (
           <div className="py-12 text-center text-sm">
-            <p className="text-kumo-danger">Something went wrong loading your providers.</p>
+            <p className="text-kumo-danger">{t('management.providers.loadError')}</p>
             <button type="button" onClick={fetchAll} className="mt-1 cursor-pointer text-kumo-brand underline">
-              Try again
+              {t('management.providers.retry')}
             </button>
           </div>
         ) : models.length === 0 ? (
@@ -286,18 +302,18 @@ function ProvidersPage() {
               <Lightning size={18} />
             </div>
             <div>
-              <p className="text-sm font-medium text-kumo-default">No AI providers yet</p>
+              <p className="text-sm font-medium text-kumo-default">{t('management.providers.empty')}</p>
               <p className="mt-1 text-[13px] leading-[18px] text-kumo-subtle">
-                Add a provider to start building workspaces with AI.
+                {t('management.providers.emptyDescription')}
               </p>
             </div>
-            <button type="button" onClick={() => setSheetOpen(true)} className={PRIMARY_BTN}>
+            {modelPolicy.allowUserByok && <button type="button" onClick={() => setSheetOpen(true)} className={PRIMARY_BTN}>
               <Plus size={14} weight="bold" />
-              Add your first provider
-            </button>
+              {t('management.providers.addFirst')}
+            </button>}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-12 text-center text-sm text-kumo-inactive">No providers found</div>
+          <div className="py-12 text-center text-sm text-kumo-inactive">{t('management.providers.noResults')}</div>
         ) : (
           filtered.map((model) => (
             <div
@@ -326,6 +342,7 @@ function ProvidersPage() {
         }}
         authenticatedApi={authenticatedApi}
         aiConfig={aiConfig}
+        allowUserByok={modelPolicy.allowUserByok}
       />
     </div>
   )

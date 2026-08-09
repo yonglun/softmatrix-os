@@ -28,6 +28,9 @@ import { AccountDescription, ActionKind, ActionDescription, AvatarImage, Gatekee
 import type { UiFeatureFlags } from "./feature-flags.js";
 import { PRODUCT_NAME } from "./product.js";
 
+/** Locales supported by the phase-one Softmatrix UI and Agent language preference. */
+export type SupportedLocale = "en" | "zh-CN";
+
 export const SERVICE_SALT = new Uint8Array([
   0xd9, 0x4e, 0x54, 0x1d, 0x29, 0xc1, 0x03, 0x74, 0x73, 0x7e, 0xb3, 0xe3, 0x34, 0x6d, 0x8f, 0x21
 ]);
@@ -41,11 +44,40 @@ export interface LoginAttempt extends RpcTarget {
   wait(): Promise<string>;
 }
 
+/** Non-secret OIDC metadata shown on login and signup pages. */
+export type OidcPublicConfig = {
+  displayName: string;
+};
+
+/** Stable reasons a generic OIDC login can fail. */
+export type OidcLoginErrorCode =
+  | "OIDC_STATE_INVALID"
+  | "OIDC_TOKEN_INVALID"
+  | "OIDC_EMAIL_UNVERIFIED"
+  | "SIGNUP_NOT_ALLOWED"
+  | "EMAIL_DOMAIN_NOT_ALLOWED"
+  | "OIDC_PROVIDER_UNAVAILABLE";
+
+/** Result delivered to the browser that owns an OIDC login attempt capability. */
+export type OidcLoginResult =
+  | { ok: true; token: string }
+  | { ok: false; error: { code: OidcLoginErrorCode; correlationId: string } };
+
+/** Capability for awaiting exactly one OIDC login result. */
+export interface OidcLoginAttempt extends RpcTarget {
+  /** Wait for success/failure; dispose the stub to abandon the attempt. */
+  wait(): Promise<OidcLoginResult>;
+}
+
 // Public API exposed to the internet.
 export interface PublicApi extends RpcTarget {
   // Returns deployment-level configuration the client needs at boot (auth mode, available sign-in
   // vendors, whether the Cloudflare limits flow is enabled). Contains no secrets.
   getServerConfig(): Promise<ServerConfig>;
+
+  // Begin a generic enterprise OIDC sign-in. The returned URL is opened by the client and the
+  // capability resolves once the callback has completed the one-time login attempt.
+  startOidcLogin(): Promise<{ url: string; attempt: RpcStub<OidcLoginAttempt> }>;
 
   // Begin a sign-in via an authentication gatekeeper (e.g. "google", "github", "cloudflare").
   // Returns a `url` the client opens in a new tab (the gatekeeper's OAuth popup, which self-closes)
@@ -291,6 +323,12 @@ export interface AuthenticatedApi extends RpcTarget {
   // Get profile info for the user who is logged in.
   whoami(): Promise<AiChatAuthorInfo>;
 
+  /** Get the user's persisted locale preference, or null for legacy/unset users. */
+  getLocale(): Promise<SupportedLocale | null>;
+
+  /** Persist the user's locale preference. The server accepts only SupportedLocale values. */
+  setLocale(locale: SupportedLocale): Promise<void>;
+
   // Set the user's own display name, seen in chats, etc.
   setOwnDisplayName(name: string): Promise<void>;
 
@@ -308,6 +346,15 @@ export interface AuthenticatedApi extends RpcTarget {
   // Note that the list returned here could be different from a particular gadget's Overseer,
   // especially if the gadget is owned by someone else.
   listModels(): Promise<AiChatAuthorInfo[]>;
+
+  /** List the authenticated user's secret-free organization and personal model catalog. */
+  listModelCatalog(): Promise<AiModelCatalogItem[]>;
+
+  /** Return the deployment model policy without exposing deployment credentials. */
+  getAiModelPolicy(): Promise<AiModelPolicyInfo>;
+
+  /** Test a submitted personal model connection without persisting its credentials. */
+  testModelConnection(profile: AiChatAuthorInfo, config: AiModelConfig): Promise<ModelConnectionTestResult>;
 
   // Adds a new model to the user's configured set. The ID must be unique among the user's
   // configured models.
@@ -702,6 +749,8 @@ export type AdminSettingsView = {
   banner: BannerConfig;
   // Accent color hex, or "" for the default theme.
   accentColor: string;
+  /** Non-secret organization model enable/default choices. */
+  modelPolicy: AdminModelPolicy;
   // Every bound gatekeeper and its resource types, with enabled state (not hidden when disabled).
   resourceVendors: AdminResourceVendor[];
   // The blueprints promoted as standard output formats, in menu order (including disabled ones).
@@ -751,6 +800,12 @@ export type AdminFormat = {
 export interface AdminApi {
   // Read all admin-managed settings for the admin UI in one call.
   getSettings(): Promise<AdminSettingsView>;
+
+  /** Set the organization model used by default, or empty string to clear it. */
+  setDefaultModel(id: string): Promise<void>;
+
+  /** Enable or disable an organization model. Disabling the current default clears it first. */
+  setOrganizationModelEnabled(id: string, enabled: boolean): Promise<void>;
 
   // Enable or disable new account signups. Existing users can still log in while signups are closed.
   setSignupsEnabled(enabled: boolean): Promise<void>;
@@ -853,6 +908,9 @@ export type ServerConfig = {
   // configured (password-only).
   authVendors: AuthVendorInfo[];
 
+  // Non-secret metadata for the optional generic OIDC provider. Omitted when OIDC is disabled.
+  oidc?: OidcPublicConfig;
+
   // Whether username/password login is available. Defaults to true; an installation can disable it
   // (DISABLE_PASSWORD_AUTH) to be OAuth-only. Forced true if no auth vendor is configured, to avoid
   // locking everyone out.
@@ -919,6 +977,46 @@ export type CloudflareAccountOption = {
 
 // Supported AI providers.
 export type AiModelProvider = "openai" | "anthropic" | "google" | "cloudflare" | "ollama";
+
+/** Ownership boundary for a model displayed in the management UI. */
+export type AiModelSource = "organization" | "personal";
+
+/** Secret-free model metadata returned to the authenticated management UI. */
+export type AiModelCatalogItem = {
+  id: string;
+  name: string;
+  provider: AiModelProvider;
+  source: AiModelSource;
+  enabled: boolean;
+  isDefault: boolean;
+  canDelete: boolean;
+};
+
+/** Deployment model policy visible to an authenticated user. */
+export type AiModelPolicyInfo = {
+  allowUserByok: boolean;
+  defaultModelId: string | null;
+};
+
+/** Non-secret deployment choices maintained by an administrator. */
+export type AdminModelPolicy = {
+  defaultModelId: string;
+  disabledOrganizationModelIds: string[];
+};
+
+/** Stable model failure categories safe to localize. */
+export type ModelErrorCode =
+  | "MODEL_DISABLED"
+  | "MODEL_CREDENTIAL_INVALID"
+  | "MODEL_RATE_LIMITED"
+  | "MODEL_BALANCE_EXHAUSTED"
+  | "MODEL_PROVIDER_UNAVAILABLE"
+  | "BYOK_DISABLED";
+
+/** Secret-free result of testing a user-supplied model connection. */
+export type ModelConnectionTestResult =
+  | { ok: true }
+  | { ok: false; error: { code: ModelErrorCode; correlationId: string } };
 
 // Information about the AI gateway configuration. Returned by `AuthenticatedApi.getAiConfig()`.
 export type AiGatewayInfo = {

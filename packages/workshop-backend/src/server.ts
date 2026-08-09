@@ -1,18 +1,19 @@
 import { RpcStub, RpcTarget, newWorkersRpcResponse } from "capnweb";
 import { validateRpc } from "capnweb-validate";
 import type { JWTPayload } from "jose";
-import { PublicApi, AuthenticatedApi, Overseer, GadgetMetadataWithTimestamps, AiChatAuthorInfo, AiModelConfig, AiGatewayInfo, AiModelProvider, ConnectedAccountsSubscriber, ConnectedAccountsFilter, GatekeeperVendorFilter, ObserverConfigCallback, BlueprintLibrarySummary, BlueprintPublicInfo, BlueprintUserSummary, BlueprintBindingAssignment, AgentSpawnerConfig, WorkpieceId, BLUEPRINT_SCREENSHOT_PATH_PREFIX, BLUEPRINT_SCREENSHOT_R2_PREFIX, blueprintScreenshotUrl, ServerConfig, CloudflareUsageInfo, CloudflareAccountOption, LoginAttempt, GatekeeperAppInfo, AdminApi, GatekeeperVendorInfo, OutputFormatOffer, ListOutputsResult, createOpenGadgetError, getOpenGadgetErrorCode, OPEN_GADGET_ERROR_CODES } from '@gadgets/workshop-shared/api';
+import { PublicApi, AuthenticatedApi, Overseer, GadgetMetadataWithTimestamps, AiChatAuthorInfo, AiModelConfig, AiModelCatalogItem, AiModelPolicyInfo, ModelConnectionTestResult, AiGatewayInfo, AiModelProvider, SupportedLocale, ConnectedAccountsSubscriber, ConnectedAccountsFilter, GatekeeperVendorFilter, ObserverConfigCallback, BlueprintLibrarySummary, BlueprintPublicInfo, BlueprintUserSummary, BlueprintBindingAssignment, AgentSpawnerConfig, WorkpieceId, BLUEPRINT_SCREENSHOT_PATH_PREFIX, BLUEPRINT_SCREENSHOT_R2_PREFIX, blueprintScreenshotUrl, ServerConfig, CloudflareUsageInfo, CloudflareAccountOption, LoginAttempt, OidcLoginAttempt, OidcLoginResult, GatekeeperAppInfo, AdminApi, GatekeeperVendorInfo, OutputFormatOffer, ListOutputsResult, createOpenGadgetError, getOpenGadgetErrorCode, OPEN_GADGET_ERROR_CODES } from '@gadgets/workshop-shared/api';
 import type { UiFeatureFlags } from "@gadgets/workshop-shared/feature-flags";
 import { getServerConfig } from "./deployment-config.js";
-import { isPasswordAuthEnabled, getAuthGatekeeperAllowlist } from "./auth/config.js";
+import { getOidcConfig, isPasswordAuthEnabled, getAuthGatekeeperAllowlist } from "./auth/config.js";
 import { getAuthVendorBinding } from "./auth/auth-vendors.js";
 import { getUsageInfo } from "./ai-gateway-billing/limits/usage-checker.js";
 import { listConnectedAccounts, selectAccount } from "./ai-gateway-billing/cloudflare/connection-service.js";
 import { PendingLogin, LoginConnectCallbackImpl } from "./auth/login-flow.js";
+import { OidcLoginDurableObject } from "./auth/oidc-login.js";
 import { deploymentOutputForBlueprint, listFormatOffers, readAdminConfig } from "./admin-config.js";
 
 // Re-export the optional-feature Durable Objects + entrypoints so they can be bound in wrangler.
-export { PendingLogin, LoginConnectCallbackImpl };
+export { PendingLogin, LoginConnectCallbackImpl, OidcLoginDurableObject };
 import { GatekeeperUiFrame } from "@gadgets/workshop-shared/gatekeeper";
 import { LanguageModelGatekeeper } from "./ai-models";
 import { getAiGatewayConfig } from "./ai-gateway.js";
@@ -25,6 +26,7 @@ import { RpcStub as NativeRpcStub } from "cloudflare:workers";
 import { recordAnalytics } from "./analytics";
 import { handleClientErrorRequest } from "./client-errors.js";
 import { verifyCfAccessJwt } from "./access.js";
+import { normalizeVerifiedEmail } from "./auth/email-identity.js";
 import { resolveUiFeatureFlags } from "./feature-flags";
 import { serveSiteLogo, SITE_LOGO_PATH } from "./site-logo.js";
 import { createWorkshopLogger } from "./observability";
@@ -109,6 +111,12 @@ class AuthenticatedApiImpl extends RpcTarget implements AuthenticatedApi {
   whoami(): Promise<AiChatAuthorInfo> {
     return this.user.whoami();
   }
+  getLocale(): Promise<SupportedLocale | null> {
+    return this.user.getLocale();
+  }
+  setLocale(locale: SupportedLocale): Promise<void> {
+    return this.user.setLocale(locale);
+  }
   setOwnDisplayName(name: string): Promise<void> {
     return this.user.setOwnDisplayName(name);
   }
@@ -120,6 +128,15 @@ class AuthenticatedApiImpl extends RpcTarget implements AuthenticatedApi {
   }
   listModels(): Promise<AiChatAuthorInfo[]> {
     return this.user.listModels();
+  }
+  listModelCatalog(): Promise<AiModelCatalogItem[]> {
+    return this.user.listModelCatalog();
+  }
+  getAiModelPolicy(): Promise<AiModelPolicyInfo> {
+    return this.user.getAiModelPolicy();
+  }
+  testModelConnection(profile: AiChatAuthorInfo, config: AiModelConfig): Promise<ModelConnectionTestResult> {
+    return this.user.testModelConnection(profile, config);
   }
   addModel(profile: AiChatAuthorInfo, config: AiModelConfig): Promise<void> {
     return this.user.addModel(profile, config);
@@ -621,6 +638,17 @@ class LoginAttemptImpl extends RpcTarget implements LoginAttempt {
 }
 
 @validateRpc()
+class OidcLoginAttemptImpl extends RpcTarget implements OidcLoginAttempt {
+  constructor(private attempt: DurableObjectStub<OidcLoginDurableObject>) {
+    super();
+  }
+
+  async wait(): Promise<OidcLoginResult> {
+    return await this.attempt.awaitResult();
+  }
+}
+
+@validateRpc()
 class PublicApiImpl extends RpcTarget implements PublicApi {
   users: DurableObjectNamespace<UserDurableObject>;
 
@@ -633,6 +661,19 @@ class PublicApiImpl extends RpcTarget implements PublicApi {
 
   async getServerConfig(): Promise<ServerConfig> {
     return getServerConfig(this.env);
+  }
+
+  async startOidcLogin(): Promise<{ url: string; attempt: RpcStub<OidcLoginAttempt> }> {
+    if (!getOidcConfig(this.env)) {
+      throw new Error("OIDC sign-in is not enabled on this deployment.");
+    }
+    const oidcAttempts = this.ctx.exports.OidcLoginDurableObject as unknown as DurableObjectNamespace<OidcLoginDurableObject>;
+    const id = oidcAttempts.newUniqueId();
+    const attempt = oidcAttempts.get(id);
+    const { url } = await attempt.begin();
+    // @ts-expect-error Cap'n Web RPC stubs and native RPC targets are compatible but the type
+    //     system doesn't know this.
+    return { url, attempt: new OidcLoginAttemptImpl(attempt) };
   }
 
   async startGatekeeperLogin(vendorId: string): Promise<{ url: string; attempt: RpcStub<LoginAttempt> }> {
@@ -683,7 +724,12 @@ class PublicApiImpl extends RpcTarget implements PublicApi {
       throw new Error("Not authenticated with Access.");
     }
 
-    let email = this.accessPayload.email as string;
+    let email: string;
+    try {
+      email = normalizeVerifiedEmail(String(this.accessPayload.email ?? ""));
+    } catch {
+      throw new Error("Access identity did not contain a valid verified email.");
+    }
     let userId = this.users.idFromName(email);
     let stub = this.users.get(userId);
     let signupsEnabled = (await readAdminConfig(this.env)).signupsEnabled;
@@ -778,6 +824,46 @@ class PublicApiImpl extends RpcTarget implements PublicApi {
   }
 }
 
+const OIDC_CALLBACK_HTML = `<!doctype html><meta charset="utf-8"><title>Sign-in complete</title><script>window.close()</script>`;
+
+function oidcCallbackResponse(status = 200): Response {
+  return new Response(status === 200 ? OIDC_CALLBACK_HTML : "Invalid OIDC callback.", {
+    status,
+    headers: {
+      "Content-Type": status === 200 ? "text/html; charset=utf-8" : "text/plain; charset=utf-8",
+      "Content-Security-Policy": "default-src 'none'; script-src 'unsafe-inline'",
+      "Cache-Control": "no-store",
+      "Referrer-Policy": "no-referrer",
+      "X-Content-Type-Options": "nosniff",
+    },
+  });
+}
+
+/** Complete an OIDC attempt and return a static popup-closing page with no session token. */
+export async function handleOidcCallback(req: Request, _env: Env, ctx: ExecutionContext): Promise<Response> {
+  if (req.method !== "GET") return oidcCallbackResponse(405);
+  const url = new URL(req.url);
+  const state = url.searchParams.getAll("state");
+  const code = url.searchParams.getAll("code");
+  const errors = url.searchParams.getAll("error");
+  if (state.length !== 1 || (!((code.length === 1 && errors.length === 0)
+      || (code.length === 0 && errors.length === 1))) || !state[0]) {
+    return oidcCallbackResponse(400);
+  }
+
+  try {
+    const exports = (ctx as ExecutionContext & {
+      exports: { OidcLoginDurableObject: DurableObjectNamespace<OidcLoginDurableObject> };
+    }).exports;
+    const id = exports.OidcLoginDurableObject.idFromString(state[0]);
+    const attempt = exports.OidcLoginDurableObject.get(id);
+    await attempt.complete(url.href);
+    return oidcCallbackResponse();
+  } catch {
+    return oidcCallbackResponse(400);
+  }
+}
+
 export default {
   async fetch(req: Request, env: Env, ctx: ExecutionContext) {
     let url = new URL(req.url);
@@ -789,6 +875,10 @@ export default {
     if (url.pathname.startsWith(BLUEPRINT_SCREENSHOT_PATH_PREFIX)) {
       let blueprintId = url.pathname.slice(BLUEPRINT_SCREENSHOT_PATH_PREFIX.length);
       return serveBlueprintScreenshot(env, blueprintId);
+    }
+
+    if (url.pathname === "/api/auth/oidc/callback") {
+      return handleOidcCallback(req, env, ctx);
     }
 
     // Sign-in via authentication gatekeepers happens entirely within each gatekeeper Worker (the

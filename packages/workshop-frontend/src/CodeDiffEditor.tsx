@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Editor } from '@monaco-editor/react'
 import { Columns, Rows } from '@phosphor-icons/react'
 import type { editor } from 'monaco-editor'
@@ -53,6 +54,7 @@ export default function CodeDiffEditor({
   readOnly = false,
   height = '100%',
 }: CodeDiffEditorProps) {
+  const { t } = useTranslation()
   const { resolvedThemeMode } = useTheme()
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
   const originalEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
@@ -407,7 +409,7 @@ export default function CodeDiffEditor({
         className="flex items-center justify-center bg-kumo-base text-[13px] leading-[18px] tracking-[-0.25px] text-kumo-subtle"
         style={{ height }}
       >
-        {!filename ? 'Select a file to view changes' : 'Loading diff...'}
+        {!filename ? t('management.misc.selectFile') : t('management.misc.loadingDiff')}
       </div>
     )
   }
@@ -423,8 +425,8 @@ export default function CodeDiffEditor({
             <button
               type="button"
               className={layoutButtonClass(diffLayoutPreference === 'stacked')}
-              title="Stacked diff"
-              aria-label="Use stacked diff layout"
+              title={t('management.misc.stackedDiff')}
+              aria-label={t('management.misc.useStacked')}
               aria-pressed={diffLayoutPreference === 'stacked'}
               onClick={() => setDiffLayoutPreference('stacked')}
             >
@@ -433,8 +435,8 @@ export default function CodeDiffEditor({
             <button
               type="button"
               className={layoutButtonClass(diffLayoutPreference === 'split' && canSplitDiff, !canSplitDiff)}
-              title={canSplitDiff ? 'Split diff' : 'Split diff needs more space'}
-              aria-label="Use split diff layout"
+              title={canSplitDiff ? t('management.misc.splitDiff') : t('management.misc.splitNeedsSpace')}
+              aria-label={t('management.misc.useSplit')}
               aria-pressed={diffLayoutPreference === 'split' && canSplitDiff}
               disabled={!canSplitDiff}
               onClick={() => setDiffLayoutPreference('split')}

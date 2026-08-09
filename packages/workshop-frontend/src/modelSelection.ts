@@ -1,4 +1,4 @@
-import type { AiChatAuthorInfo } from "@gadgets/workshop-shared/api";
+import type { AiChatAuthorInfo, AiModelCatalogItem } from "@gadgets/workshop-shared/api";
 
 const LAST_SELECTED_MODEL_KEY = "lastSelectedModel";
 
@@ -6,7 +6,8 @@ const LAST_SELECTED_MODEL_KEY = "lastSelectedModel";
 export const NO_AGENT_OPTION_VALUE = "__gadgets_no_agent__";
 
 export function getStoredSelectedModel(
-  models: AiChatAuthorInfo[],
+  models: Array<AiChatAuthorInfo | AiModelCatalogItem>,
+  defaultModelId?: string | null,
 ): string | null {
   const storedModel = localStorage.getItem(LAST_SELECTED_MODEL_KEY);
 
@@ -17,6 +18,9 @@ export function getStoredSelectedModel(
   if (storedModel && models.some((model) => model.id === storedModel)) {
     return storedModel;
   }
+
+  if (defaultModelId && models.some((model) => model.id === defaultModelId
+      && (!('enabled' in model) || model.enabled))) return defaultModelId;
 
   // Default: Return the first configured model, or null if none are configured.
   return models[0]?.id ?? null;

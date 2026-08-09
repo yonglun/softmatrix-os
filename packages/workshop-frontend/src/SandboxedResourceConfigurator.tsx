@@ -5,6 +5,7 @@ import { ResourceConfiguratorFrame, ResourceConfiguratorHost, ResourceConfigurat
 import { createRateLimitedCapability } from './rateLimitedCapability'
 import { useTheme } from './ThemeContext'
 import { forwardTrustedFrameError } from './errorReporting'
+import { useTranslation } from 'react-i18next'
 
 // Upper bound on iframe height. Sized to leave room for a typical configurator form plus an open
 // autocomplete popup, while staying within a reasonable viewport even on short screens.
@@ -28,6 +29,7 @@ class ResourceConfiguratorHostImpl extends RpcTarget implements ResourceConfigur
     private readonly onSelectionReady: (ready: boolean) => void,
     private readonly onScroll: (deltaX: number, deltaY: number) => void,
     private readonly getInitialResourceImpl: () => { resourceUrl: string; resourceUrlPattern: string } | null,
+    private readonly label: string,
   ) {
     super()
     // The configurator form is short-lived, so a burst past the per-minute cap is always a bug:
@@ -37,7 +39,7 @@ class ResourceConfiguratorHostImpl extends RpcTarget implements ResourceConfigur
       maxCallsPerMinute: 120,
       maxPendingCalls: 32,
       onRateLimit: 'reject',
-      label: 'Resource configurator',
+      label: this.label,
     }).capability
   }
 
@@ -80,6 +82,7 @@ export default function SandboxedResourceConfigurator({
   initialResourceUrl?: string,
   resourceUrlPattern?: string,
 }) {
+  const { t } = useTranslation()
   const { resolvedThemeMode } = useTheme()
   const placeholderRef = useRef<HTMLDivElement>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
@@ -224,6 +227,7 @@ export default function SandboxedResourceConfigurator({
         clamp(Number(deltaY) || 0, -SCROLL_FORWARD_MAX_DELTA, SCROLL_FORWARD_MAX_DELTA),
       ),
       () => initialResourceRef.current,
+      t('management.misc.resourceConfigurator'),
     ))
     rpcSessionRef.current = iframe
     iframeRpcRef.current?.[Symbol.dispose]?.()
@@ -389,7 +393,7 @@ export default function SandboxedResourceConfigurator({
         srcDoc={frame.iframeHtml}
         onLoad={handleIframeLoad}
         sandbox="allow-scripts"
-        title="Resource configurator"
+        title={t('management.misc.resourceConfigurator')}
         scrolling="no"
         style={{
           position: 'fixed',

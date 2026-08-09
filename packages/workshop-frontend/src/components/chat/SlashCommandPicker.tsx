@@ -1,4 +1,5 @@
 import { RpcStub } from "capnweb";
+import { useTranslation } from "react-i18next";
 import { createPortal } from "react-dom";
 import {
   useCallback, useEffect, useId, useLayoutEffect, useRef, useState,
@@ -69,6 +70,7 @@ export function useSlashCommandPicker({
   // sent to, so starting a new one with it would leave an empty thread and do nothing.
   chatExists: boolean;
 }) {
+  const { t } = useTranslation()
   const [choices, setChoices] = useState<SlashCommandChoice[]>([]);
   const [choicesQuery, setChoicesQuery] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -229,17 +231,17 @@ export function useSlashCommandPicker({
         maxHeight: layout.maxHeight,
       }}
     >
-      <p className={`m-0 shrink-0 px-3.5 pb-1 pt-2.5 ${PICKER_CAPTION}`}>Commands</p>
+      <p className={`m-0 shrink-0 px-3.5 pb-1 pt-2.5 ${PICKER_CAPTION}`}>{t('management.slash.commands')}</p>
       <div
         ref={listRef}
         id={listboxId}
         role="listbox"
-        aria-label="Slash commands"
+        aria-label={t('management.slash.aria')}
         aria-busy={loading}
         className="sidebar-scroll min-h-0 flex-1 overflow-y-auto"
       >
         {loading && choices.length === 0 ? (
-          <p className={PICKER_EMPTY}>Loading commands…</p>
+          <p className={PICKER_EMPTY}>{t('management.slash.loading')}</p>
         ) : choices.length > 0 ? (
           choices.map((choice, optionIndex) => (
             <button
@@ -272,10 +274,10 @@ export function useSlashCommandPicker({
         ) : (
           <p className={PICKER_EMPTY}>
             {error
-              ? `Couldn’t load commands. ${error}`
+              ? t('management.slash.loadFailed', { reason: error })
               : query
-                ? "No commands match your search."
-                : "No commands are available."}
+                ? t('management.slash.noMatch')
+                : t('management.slash.none')}
           </p>
         )}
       </div>
@@ -299,10 +301,10 @@ export function useSlashCommandPicker({
     setIndex: selectIndex,
     status: open
       ? loading
-        ? "Loading slash commands"
+        ? t('management.slash.statusLoading')
         : error
-          ? `Slash commands unavailable: ${error}`
-          : `${choices.length} slash command${choices.length === 1 ? "" : "s"} found`
+          ? t('management.slash.statusUnavailable', { reason: error })
+          : t(choices.length === 1 ? 'management.slash.statusFound_one' : 'management.slash.statusFound_other', { count: choices.length })
       : "",
   };
 }

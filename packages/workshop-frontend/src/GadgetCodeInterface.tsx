@@ -11,6 +11,7 @@ import CodeEditor from './CodeEditor'
 import CodeDiffEditor from './CodeDiffEditor'
 import type { StreamingProposedChanges } from './ChatInterface'
 import { saveTextToFile } from './fileTransfers'
+import { useTranslation } from 'react-i18next'
 
 // RpcTarget implementation for receiving code updates from the server
 class CodeSubscriberImpl extends RpcTarget implements CodeSubscriber {
@@ -134,6 +135,7 @@ type QueuedCodeUpdate = {
 }
 
 export default function GadgetCodeInterface({ overseer, filesRoot, height = '100%', onCodeChange, selectedChatId = null, proposedChanges, draftProposedChanges, streamingProposedChanges, streamingActiveFile, isAgentActive, isVisible = true, onHasCodeChange }: GadgetCodeInterfaceProps) {
+  const { t } = useTranslation()
   const toasts = useKumoToastManager()
   const branchMode = selectedChatId !== null
 
@@ -659,7 +661,7 @@ export default function GadgetCodeInterface({ overseer, filesRoot, height = '100
         console.error('Failed to subscribe to code updates:', error)
         // Only show error if we've never successfully loaded (never reached ready state)
         if (!isReadyRef.current) {
-          toasts.add({ title: 'Failed to load code files', variant: 'error' })
+          toasts.add({ title: t('codeSurface.loadFailed'), variant: 'error' })
           setLoading(false)
         }
         // For reconnection failures after we've loaded, don't show toast - user can keep editing
@@ -718,14 +720,14 @@ export default function GadgetCodeInterface({ overseer, filesRoot, height = '100
 
     // Check if file already exists
     if (filesMap.has(filename)) {
-      toasts.add({ title: `File already exists: ${filename}`, variant: 'error' })
+      toasts.add({ title: t('codeSurface.fileAlreadyExists', { filename }), variant: 'error' })
       return
     }
 
     // Create new Y.Text for the file
     filesMap.set(filename, new Y.Text())
     setActiveFile(filename)
-    toasts.add({ title: `Created file: ${filename}`, variant: 'success' })
+    toasts.add({ title: t('codeSurface.fileCreated', { filename }), variant: 'success' })
   }
 
   // Handle file deletion
@@ -736,7 +738,7 @@ export default function GadgetCodeInterface({ overseer, filesRoot, height = '100
     }
 
     if (!filesMap.has(filename)) {
-      toasts.add({ title: 'File not found', variant: 'error' })
+      toasts.add({ title: t('codeSurface.fileNotFound'), variant: 'error' })
       return
     }
 
@@ -749,7 +751,7 @@ export default function GadgetCodeInterface({ overseer, filesRoot, height = '100
       setActiveFile(remainingFiles.length > 0 ? remainingFiles[0] : null)
     }
 
-    toasts.add({ title: `Deleted file: ${filename}`, variant: 'success' })
+    toasts.add({ title: t('codeSurface.fileDeleted', { filename }), variant: 'success' })
   }
 
   // Handle file renaming
@@ -762,13 +764,13 @@ export default function GadgetCodeInterface({ overseer, filesRoot, height = '100
     // Check if old file exists
     const ytext = filesMap.get(oldName)
     if (!ytext) {
-      toasts.add({ title: 'File not found', variant: 'error' })
+      toasts.add({ title: t('codeSurface.fileNotFound'), variant: 'error' })
       return
     }
 
     // Check if new name already exists
     if (filesMap.has(newName)) {
-      toasts.add({ title: `File already exists: ${newName}`, variant: 'error' })
+      toasts.add({ title: t('codeSurface.fileAlreadyExists', { filename: newName }), variant: 'error' })
       return
     }
 
@@ -783,7 +785,7 @@ export default function GadgetCodeInterface({ overseer, filesRoot, height = '100
       setActiveFile(newName)
     }
 
-    toasts.add({ title: `Renamed file: ${oldName} \u2192 ${newName}`, variant: 'success' })
+    toasts.add({ title: t('codeSurface.fileRenamed', { oldName, newName }), variant: 'success' })
   }
 
   // Get the Y.Text for the active file (original version)
@@ -808,7 +810,7 @@ export default function GadgetCodeInterface({ overseer, filesRoot, height = '100
   const handleFileDownload = useCallback((filename: string) => {
     const ytext = getDownloadYText(filename)
     if (!ytext) {
-      toasts.add({ title: `Could not download ${filename}`, variant: 'error' })
+      toasts.add({ title: t('codeSurface.couldNotDownload', { filename }), variant: 'error' })
       return
     }
 
@@ -831,10 +833,10 @@ export default function GadgetCodeInterface({ overseer, filesRoot, height = '100
   }, [changedFiles, displayedFiles, isDiffMode, previewFilesMap])
   const activeFileDownloadable = activeFile ? displayedFiles.includes(activeFile) : false
   const activeFileModeLabel = isEditingLocked
-    ? 'Reviewing changes in'
+    ? t('codeSurface.reviewingChangesIn')
     : isDiffMode
-      ? 'Editing changes in'
-      : 'Editing'
+      ? t('codeSurface.editingChangesIn')
+      : t('codeSurface.editing')
 
   if (loading) {
     return (
@@ -842,7 +844,7 @@ export default function GadgetCodeInterface({ overseer, filesRoot, height = '100
         className="flex justify-center items-center text-kumo-subtle"
         style={{ height }}
       >
-        Loading code files...
+        {t('codeSurface.loading')}
       </div>
     )
   }
@@ -855,8 +857,8 @@ export default function GadgetCodeInterface({ overseer, filesRoot, height = '100
     <div style={{ display: 'flex', flexDirection: 'column', height, width: '100%' }}>
       {hasUnsavedChanges && (
         <div className="bg-kumo-tint border-b border-kumo-line px-4 py-2 flex items-center gap-2 text-sm text-kumo-warning">
-          <span className="text-base">&#9888;&#65039;</span>
-          <span>Connection issue - changes will be saved when connection is restored</span>
+          <span className="text-base">{t('management.misc.warning')}</span>
+          <span>{t('codeSurface.connectionIssue')}</span>
         </div>
       )}
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
@@ -883,8 +885,8 @@ export default function GadgetCodeInterface({ overseer, filesRoot, height = '100
                 {activeFileModeLabel} <span className="font-mono font-medium text-kumo-default">{activeFile}</span>
               </div>
               <WorkshopIconButton
-                aria-label={`Download ${activeFile}`}
-                title="Download file"
+                aria-label={t('codeSurface.download', { filename: activeFile })}
+                title={t('codeSurface.downloadFile')}
                 onClick={() => handleFileDownload(activeFile)}
                 disabled={!activeFileDownloadable}
                 className="!h-6 !w-6"
@@ -898,10 +900,10 @@ export default function GadgetCodeInterface({ overseer, filesRoot, height = '100
               <div className="flex h-full flex-col items-center justify-center bg-kumo-base px-6 text-center">
                 <div className="max-w-[360px]">
                   <p className="m-0 text-[15px] leading-[22px] font-semibold tracking-[-0.3px] text-kumo-default">
-                    No files yet
+                    {t('codeSurface.noFiles')}
                   </p>
                   <p className="mt-1.5 mb-0 text-[13px] leading-[19px] tracking-[-0.25px] text-kumo-subtle">
-                    Keep building with the agent in chat and files will appear here as it works, or create one yourself.
+                    {t('codeSurface.noFilesDescription')}
                   </p>
                   <div className="mt-4 flex justify-center">
                     <WorkshopButton
@@ -910,7 +912,7 @@ export default function GadgetCodeInterface({ overseer, filesRoot, height = '100
                       tone="primary"
                       className="!h-8"
                     >
-                      New file
+                      {t('codeSurface.newFile')}
                     </WorkshopButton>
                   </div>
                 </div>

@@ -8,6 +8,7 @@ import { useTheme } from './ThemeContext'
 import type { ResolvedThemeMode } from './theme'
 import { forwardTrustedFrameError } from './errorReporting'
 import { useAuthenticatedApi } from './AuthContext'
+import { useTranslation } from 'react-i18next'
 import {
   normalizeGatekeeperAppPrompt,
   parseGatekeeperAppWorkspaceTarget,
@@ -97,6 +98,7 @@ class GatekeeperAppHostImpl extends RpcTarget {
     openTarget: OpenTarget,
     openPrompt: OpenPrompt,
     resolveWorkspaceTitles: ResolveWorkspaceTitles,
+    label: string,
   ) {
     super()
     this.#themeMode = themeMode
@@ -105,7 +107,7 @@ class GatekeeperAppHostImpl extends RpcTarget {
       maxCallsPerMinute: 600,
       maxPendingCalls: 128,
       onRateLimit: 'throttle',
-      label: 'Gatekeeper app',
+      label,
     })
     this.#ui = ui
     this.#disposeRateLimiter = dispose
@@ -215,6 +217,7 @@ export default function SandboxedGatekeeperApp({ frame, gatekeeperVendorId }: {
   frame: GatekeeperUiFrame,
   gatekeeperVendorId: string,
 }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { authenticatedApi } = useAuthenticatedApi()
   const iframeRef = useRef<HTMLIFrameElement>(null)
@@ -316,6 +319,7 @@ export default function SandboxedGatekeeperApp({ frame, gatekeeperVendorId }: {
         openTarget,
         openPrompt,
         resolveWorkspaceTitles,
+        t('management.misc.gatekeeperApp'),
       )
       hostRef.current = host
       sessionRef.current = newMessagePortRpcSession(port, host)
@@ -359,7 +363,7 @@ export default function SandboxedGatekeeperApp({ frame, gatekeeperVendorId }: {
       // allow-same-origin (the frame stays an opaque origin), and the app's CSP keeps connect-src 'none'.
       sandbox="allow-scripts allow-modals"
       allow="clipboard-write"
-      title="Gatekeeper app"
+      title={t('management.misc.gatekeeperApp')}
       style={iframeStyleForOverlay(overlay)}
     />
   )

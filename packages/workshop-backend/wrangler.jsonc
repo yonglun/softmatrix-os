@@ -56,6 +56,11 @@
       // login back to the waiting browser.
       "tag": "v2",
       "new_sqlite_classes": [ "PendingLogin" ]
+    },
+    {
+      // One short-lived authorization-code attempt stores only PKCE state and its one-time result.
+      "tag": "v3",
+      "new_sqlite_classes": [ "OidcLoginDurableObject" ]
     }
   ],
 

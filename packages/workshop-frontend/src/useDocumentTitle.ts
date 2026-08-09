@@ -9,7 +9,7 @@ export function useDocumentTitle(title: string | null | undefined) {
   const siteName = useSiteName()
 
   useEffect(() => {
-    if (title == null) return
+    if (title == null || typeof document === 'undefined') return
 
     const previousTitle = document.title
     document.title = title ? `${title} - ${siteName}` : siteName
