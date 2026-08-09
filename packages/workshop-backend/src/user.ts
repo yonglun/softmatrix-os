@@ -13,7 +13,7 @@ import type { AdminSettings } from "./admin-settings.js";
 import { isReservedBlueprintKey, readBlueprintKvRecord } from "./blueprint-archive.js";
 import { DEFAULT_ADMIN_CONFIG, filterEnabledResources, isResourceDisabled, readAdminConfig } from "./admin-config.js";
 import { buildGatekeeperVendorMap } from "./auth/auth-vendors.js";
-import { getOrganizationModels, isUserByokAllowed } from "./model-policy/organization-models.js";
+import { getOrganizationModels, isUserByokAllowed, validateModelConfig } from "./model-policy/organization-models.js";
 import { ModelPolicyError } from "./model-policy/types.js";
 import { ModelPolicy } from "./model-policy/model-policy.js";
 import type { CatalogModelRecord } from "./model-policy/types.js";
@@ -569,6 +569,13 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
       return { ok: false as const, error: { code: "BYOK_DISABLED" as const,
         correlationId: crypto.randomUUID() } };
     }
+    try {
+      validateModelConfig(config, this.env);
+      if (profile.id.trim() === "" || profile.id !== config.model) throw new Error("Model profile ID must match model config.");
+    } catch {
+      return { ok: false as const, error: { code: "MODEL_CREDENTIAL_INVALID" as const,
+        correlationId: crypto.randomUUID() } };
+    }
     return runModelConnectionTest(this.env, profile, config);
   }
 
@@ -576,6 +583,8 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
     if (!isUserByokAllowed(this.env)) {
       throw new ModelPolicyError("BYOK_DISABLED", crypto.randomUUID());
     }
+    validateModelConfig(config, this.env);
+    if (profile.id.trim() === "" || profile.id !== config.model) throw new Error("Model profile ID must match model config.");
     let gwConfig = getAiGatewayConfig(this.env);
     if (gwConfig && !gwConfig.providers.has(config.provider)) {
       throw new Error(`Provider "${config.provider}" is not available in AI Gateway mode.`);

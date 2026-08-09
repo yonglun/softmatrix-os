@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getOrganizationModels, isUserByokAllowed } from "../src/model-policy/organization-models.js";
+import { getOrganizationModels, isUserByokAllowed, validateModelConfig } from "../src/model-policy/organization-models.js";
 
 function envWithModels(models: unknown[], extra: Record<string, unknown> = {}): Cloudflare.Env {
   return { ORG_AI_MODELS: JSON.stringify(models), ALLOW_USER_BYOK: "true", ...extra } as Cloudflare.Env;
@@ -47,5 +47,14 @@ describe("organization model secret parser", () => {
       .toThrow(/5 KiB/);
     expect(isUserByokAllowed({} as Cloudflare.Env)).toBe(true);
     expect(isUserByokAllowed({ ALLOW_USER_BYOK: "false" } as Cloudflare.Env)).toBe(false);
+  });
+
+  it("validates personal configs without echoing credential values", () => {
+    expect(() => validateModelConfig({ provider: "openai", model: "gpt", apiToken: "" }, {} as Cloudflare.Env))
+      .toThrow(/credentials/);
+    expect(() => validateModelConfig({ provider: "openai", model: "gpt", apiToken: "secret", apiUrl: "http://remote.test" }, {} as Cloudflare.Env))
+      .toThrow(/HTTPS/);
+    expect(() => validateModelConfig({ provider: "ollama", model: "llama", apiToken: "", apiUrl: "http://localhost:11434" }, {} as Cloudflare.Env))
+      .not.toThrow();
   });
 });

@@ -11,6 +11,26 @@ export type OrganizationModelRecord = {
   outputLimit?: number;
 };
 
+/** Validate a user-supplied model config at the RPC boundary without echoing secrets. */
+export function validateModelConfig(config: AiModelConfig, env: Cloudflare.Env): void {
+  if (!PROVIDERS.has(config.provider)) throw new Error(`Unsupported model provider: ${config.provider}.`);
+  if (typeof config.model !== "string" || config.model.trim() === "") throw new Error("Model ID is required.");
+  if (config.provider !== "ollama" && (typeof config.apiToken !== "string" || config.apiToken === "")) {
+    throw new Error("Model credentials are required.");
+  }
+  if (config.provider === "cloudflare" && (!config.accountId || config.accountId.trim() === "")) {
+    throw new Error("Cloudflare account ID is required.");
+  }
+  if (config.apiUrl === undefined) return;
+  let url: URL;
+  try { url = new URL(config.apiUrl); } catch { throw new Error("Model apiUrl must be a valid URL."); }
+  let dev = !!(env as Cloudflare.Env & { DEV?: boolean }).DEV;
+  let localOllama = config.provider === "ollama" && url.hostname === "localhost";
+  if (url.username || url.password || (url.protocol !== "https:" && !(dev && url.protocol === "http:") && !localOllama)) {
+    throw new Error("Model apiUrl must use HTTPS outside local development.");
+  }
+}
+
 function object(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error("ORG_AI_MODELS must contain model objects.");
