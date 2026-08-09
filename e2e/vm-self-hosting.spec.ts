@@ -18,6 +18,14 @@ for (const locale of ["en", "zh-CN"] as const satisfies FixtureLocale[]) {
     await expect(page.locator("html")).toHaveAttribute("lang", locale);
     await expect(page.getByRole("heading", { name: labels.homeTitle })).toBeVisible();
 
+    await page.goto("/providers");
+    await expect(page.getByText("Fixture Model", { exact: true })).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("button", { name: locale === "zh-CN" ? "添加模型" : /Add model/i })).toHaveCount(0);
+    await page.goto("/gatekeepers");
+    await expect(page.getByRole("heading", { name: locale === "zh-CN" ? "连接器" : "Gatekeepers", exact: true }))
+      .toBeVisible({ timeout: 30_000 });
+    await page.goto("/");
+
     const restart = await request.post(`${controlUrl}/restart`);
     expect(restart.ok()).toBeTruthy();
     await page.reload();
