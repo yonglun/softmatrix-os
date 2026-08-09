@@ -21,6 +21,16 @@ export interface Env {
   [key: string]: unknown;
 }
 
+function assetRequest(req: Request): Request {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return req;
+  const url = new URL(req.url);
+  const lastSegment = url.pathname.slice(url.pathname.lastIndexOf('/') + 1);
+  // Cloudflare's SPA asset mode performs this fallback for us. Native DiskDirectory only
+  // serves exact files, so mirror the same contract for document routes in the VM profile.
+  if (url.pathname === '/' || !lastSegment.includes('.')) url.pathname = '/index.html';
+  return new Request(url, req);
+}
+
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
@@ -45,7 +55,7 @@ export default {
     // callbacks.
 
     if (env.ASSETS) {
-      return env.ASSETS.fetch(req);
+      return env.ASSETS.fetch(assetRequest(req));
     }
 
     // Dev only: with no assets binding here, everything else goes to the backend.

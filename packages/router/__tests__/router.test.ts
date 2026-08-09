@@ -74,6 +74,21 @@ describe('router fetch', () => {
     expect(await route(env, '/gatekeeper/not-installed')).toBe('assets');
   });
 
+  it('rewrites VM document routes to the SPA entrypoint while preserving asset paths', async () => {
+    const paths: string[] = [];
+    const assets = {
+      fetch: async (request: Request) => {
+        paths.push(new URL(request.url).pathname);
+        return new Response('assets');
+      },
+    } as unknown as Fetcher;
+    const env = makeEnv({ ASSETS: assets });
+    await route(env, '/');
+    await route(env, '/workspace/123');
+    await route(env, '/assets/index.js');
+    expect(paths).toEqual(['/index.html', '/index.html', '/assets/index.js']);
+  });
+
   // Dev has no ASSETS binding: the backend serves the frontend from its own assets binding in
   // `run-local` mode, and in normal dev mode you open the Vite server on :3000 directly.
   it('falls through to the backend when ASSETS is absent', async () => {
