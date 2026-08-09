@@ -14,7 +14,9 @@ import { isReservedBlueprintKey, readBlueprintKvRecord } from "./blueprint-archi
 import { filterEnabledResources, isResourceDisabled, readAdminConfig } from "./admin-config.js";
 import { buildGatekeeperVendorMap } from "./auth/auth-vendors.js";
 import { getOrganizationModels, isUserByokAllowed } from "./model-policy/organization-models.js";
-import { toCatalogItem } from "./model-policy/types.js";
+import { ModelPolicyError } from "./model-policy/types.js";
+import { ModelPolicy } from "./model-policy/model-policy.js";
+import type { CatalogModelRecord } from "./model-policy/types.js";
 
 const logger = createWorkshopLogger("workshop.user");
 
@@ -524,53 +526,31 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
     this.storage.profile.put(profile);
   }
 
+  async #modelPolicy(options: { additionalPersonal?: CatalogModelRecord[] } = {}): Promise<ModelPolicy> {
+    let organization: CatalogModelRecord[] = [...getOrganizationModels(this.env).values()];
+    let gateway = getAiGatewayConfig(this.env);
+    if (gateway) {
+      for (let profile of gateway.getModelList()) {
+        let record = gateway.resolveModel(profile.id);
+        if (record) organization.push({...record, source: "organization"});
+      }
+    }
+    let personal: CatalogModelRecord[] = Array.from(this.storage.aiModels.list())
+      .map(record => ({...record, source: "personal" as const}));
+    personal.push(...(options.additionalPersonal ?? []));
+    let admin = await readAdminConfig(this.env);
+    return new ModelPolicy(organization, personal, {
+      disabledOrganizationModelIds: admin.modelPolicy.disabledOrganizationModelIds,
+      defaultModelId: admin.modelPolicy.defaultModelId,
+    });
+  }
+
   async listModels(): Promise<AiChatAuthorInfo[]> {
-    let result: AiChatAuthorInfo[] = [];
-
-    // When AI Gateway mode is active, include all suggested models for enabled providers.
-    let gwConfig = getAiGatewayConfig(this.env);
-    let gwModelIds = new Set<string>();
-    if (gwConfig) {
-      for (let entry of gwConfig.getModelList()) {
-        result.push(entry);
-        gwModelIds.add(entry.id);
-      }
-    }
-
-    // Also include user-configured models, skipping any that duplicate a gateway model.
-    for (let model of this.storage.aiModels.list()) {
-      if (!gwModelIds.has(model.profile.id)) {
-        result.push(model.profile);
-      }
-    }
-    return result;
+    return (await this.#modelPolicy()).listModels().map(model => model.profile);
   }
 
   async listModelCatalog(): Promise<AiModelCatalogItem[]> {
-    let result: AiModelCatalogItem[] = [];
-    let organization = getOrganizationModels(this.env);
-    let admin = await readAdminConfig(this.env);
-    let defaultModelId = admin.modelPolicy.defaultModelId || null;
-    let disabled = new Set(admin.modelPolicy.disabledOrganizationModelIds);
-    for (let model of organization.values()) {
-      result.push(toCatalogItem(model, !disabled.has(model.profile.id), model.profile.id === defaultModelId));
-    }
-    let organizationIds = new Set(result.map(model => model.id));
-    let gateway = getAiGatewayConfig(this.env);
-    if (gateway) {
-      for (let record of gateway.getModelList()) {
-        if (!organizationIds.has(record.id)) {
-          let model = gateway.resolveModel(record.id);
-          if (model) result.push(toCatalogItem({...model, source: "organization"}, true, record.id === defaultModelId));
-        }
-      }
-    }
-    for (let model of this.storage.aiModels.list()) {
-      if (!organizationIds.has(model.profile.id)) {
-        result.push(toCatalogItem({...model, source: "personal"}, true, model.profile.id === defaultModelId));
-      }
-    }
-    return result;
+    return (await this.#modelPolicy()).listCatalog();
   }
 
   async getAiModelPolicy(): Promise<AiModelPolicyInfo> {
@@ -582,16 +562,25 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
   }
 
   async addModel(profile: AiChatAuthorInfo, config: AiModelConfig): Promise<void> {
+    if (!isUserByokAllowed(this.env)) {
+      throw new ModelPolicyError("BYOK_DISABLED", crypto.randomUUID());
+    }
     let gwConfig = getAiGatewayConfig(this.env);
     if (gwConfig && !gwConfig.providers.has(config.provider)) {
       throw new Error(`Provider "${config.provider}" is not available in AI Gateway mode.`);
     }
 
     profile.type = "agent";
+    // Constructing the policy rejects collisions with organization and gateway IDs before any
+    // credential-bearing record is persisted.
+    await this.#modelPolicy({ additionalPersonal: [{ profile, config }] });
     this.storage.aiModels.put({profile, config});
   }
 
   async deleteModel(id: string): Promise<void> {
+    if (getOrganizationModels(this.env).has(id)) {
+      throw new Error(`Cannot delete organization model "${id}".`);
+    }
     // In AI Gateway mode, don't allow deleting built-in suggested models.
     let gwConfig = getAiGatewayConfig(this.env);
     if (gwConfig) {
@@ -624,12 +613,7 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
 
   async setPreferredModel(id: string | null): Promise<void> {
     if (id !== null) {
-      // Validate that the model exists in the user's configured models or as a gateway model.
-      let gwConfig = getAiGatewayConfig(this.env);
-      let exists = !!this.storage.aiModels.get(id) || !!gwConfig?.resolveModel(id);
-      if (!exists) {
-        throw new Error(`No such model: ${id}`);
-      }
+      (await this.#modelPolicy()).resolve(id);
     }
     this.storage.preferredModel.put(id);
   }
@@ -721,6 +705,7 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
 
   // DO NOT MAKE PUBLIC -- returns API keys.
   async getChatContext(modelId: string | null): Promise<UserChatContext> {
+    let policy = await this.#modelPolicy();
     let gwConfig = getAiGatewayConfig(this.env);
 
     let result: UserChatContext = {
@@ -728,14 +713,7 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
       locale: this.storage.locale.get() === "zh-CN" ? "zh-CN" : "en",
     };
     if (modelId) {
-      // In AI Gateway mode, resolve gateway models first.
-      if (gwConfig) {
-        result.aiModel = gwConfig.resolveModel(modelId);
-      }
-      if (!result.aiModel) {
-        result.aiModel = this.storage.aiModels.get(modelId);
-      }
-      if (!result.aiModel) throw new Error(`No such model: ${modelId}`);
+      result.aiModel = policy.resolve(modelId).record;
     }
 
     // Resolve the quick model (used for lightweight tasks like title generation).
@@ -745,10 +723,7 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
     } else {
       let quickModelId = this.storage.quickModel.get();
       if (quickModelId) {
-        let quickModel = this.storage.aiModels.get(quickModelId);
-        if (quickModel) {
-          result.quickModel = quickModel.config;
-        }
+        result.quickModel = policy.resolve(quickModelId).record.config;
       }
     }
     return result;
