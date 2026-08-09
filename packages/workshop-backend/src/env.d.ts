@@ -66,6 +66,14 @@ declare global {
       // no gatekeeper sign-in (password / CF Access only).
       AUTH_GATEKEEPERS?: string;
 
+      // Generic enterprise OIDC configuration. The three OIDC credentials and PUBLIC_BASE_URL
+      // must be supplied together; the client secret is never included in ServerConfig.
+      OIDC_ISSUER?: string;
+      OIDC_CLIENT_ID?: string;
+      OIDC_CLIENT_SECRET?: string;
+      OIDC_DISPLAY_NAME?: string;
+      OIDC_ALLOWED_EMAIL_DOMAINS?: string; // comma-separated exact domains, case-insensitive
+
       // Set to "true" to disable username/password login + signup (gatekeeper sign-in only). Only
       // takes effect when at least one auth gatekeeper is allowlisted (otherwise password auth stays
       // on to avoid locking everyone out).

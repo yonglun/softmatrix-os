@@ -44,11 +44,40 @@ export interface LoginAttempt extends RpcTarget {
   wait(): Promise<string>;
 }
 
+/** Non-secret OIDC metadata shown on login and signup pages. */
+export type OidcPublicConfig = {
+  displayName: string;
+};
+
+/** Stable reasons a generic OIDC login can fail. */
+export type OidcLoginErrorCode =
+  | "OIDC_STATE_INVALID"
+  | "OIDC_TOKEN_INVALID"
+  | "OIDC_EMAIL_UNVERIFIED"
+  | "SIGNUP_NOT_ALLOWED"
+  | "EMAIL_DOMAIN_NOT_ALLOWED"
+  | "OIDC_PROVIDER_UNAVAILABLE";
+
+/** Result delivered to the browser that owns an OIDC login attempt capability. */
+export type OidcLoginResult =
+  | { ok: true; token: string }
+  | { ok: false; error: { code: OidcLoginErrorCode; correlationId: string } };
+
+/** Capability for awaiting exactly one OIDC login result. */
+export interface OidcLoginAttempt extends RpcTarget {
+  /** Wait for success/failure; dispose the stub to abandon the attempt. */
+  wait(): Promise<OidcLoginResult>;
+}
+
 // Public API exposed to the internet.
 export interface PublicApi extends RpcTarget {
   // Returns deployment-level configuration the client needs at boot (auth mode, available sign-in
   // vendors, whether the Cloudflare limits flow is enabled). Contains no secrets.
   getServerConfig(): Promise<ServerConfig>;
+
+  // Begin a generic enterprise OIDC sign-in. The returned URL is opened by the client and the
+  // capability resolves once the callback has completed the one-time login attempt.
+  startOidcLogin(): Promise<{ url: string; attempt: RpcStub<OidcLoginAttempt> }>;
 
   // Begin a sign-in via an authentication gatekeeper (e.g. "google", "github", "cloudflare").
   // Returns a `url` the client opens in a new tab (the gatekeeper's OAuth popup, which self-closes)
@@ -861,6 +890,9 @@ export type ServerConfig = {
   // Auth-capable, allowlisted gatekeeper vendors offered as sign-in methods. Empty when none are
   // configured (password-only).
   authVendors: AuthVendorInfo[];
+
+  // Non-secret metadata for the optional generic OIDC provider. Omitted when OIDC is disabled.
+  oidc?: OidcPublicConfig;
 
   // Whether username/password login is available. Defaults to true; an installation can disable it
   // (DISABLE_PASSWORD_AUTH) to be OAuth-only. Forced true if no auth vendor is configured, to avoid
