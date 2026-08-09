@@ -362,7 +362,7 @@ export default function CommandPalette({
             className="h-12 w-full bg-transparent text-[14px] leading-5 tracking-[-0.25px] text-kumo-default placeholder:text-kumo-inactive focus:outline-none"
           />
           <kbd className="shrink-0 rounded border border-kumo-line px-1.5 py-0.5 font-sans text-[10px] leading-none text-kumo-inactive">
-            ESC
+            {t('management.misc.escape')}
           </kbd>
         </div>
 
@@ -420,7 +420,7 @@ export default function CommandPalette({
             {t('shell.open')}
           </span>
           <span className="flex items-center gap-1">
-            <kbd className="rounded border border-kumo-line px-1 py-0.5 font-sans leading-none">esc</kbd>
+            <kbd className="rounded border border-kumo-line px-1 py-0.5 font-sans leading-none">{t('management.misc.escape')}</kbd>
             {t('shell.close')}
           </span>
         </div>

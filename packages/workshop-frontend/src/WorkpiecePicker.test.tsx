@@ -5,6 +5,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import WorkpiecePicker from './WorkpiecePicker'
+import { LocaleProvider } from './i18n/LocaleProvider'
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
@@ -17,20 +18,22 @@ describe('WorkpiecePicker', () => {
     const container = document.createElement('div')
     root = createRoot(container)
     await act(async () => root!.render(
-      <WorkpiecePicker
-        gadgets={[
-          { id: 1, type: 'gadget', title: 'Hooked' },
-          { id: 2, type: 'gadget', title: 'Ordinary' },
-        ]}
-        selectedId={null}
-        expanded={expanded}
-        hookedGadgetIds={new Set([1])}
-        onExpandedChange={vi.fn<(expanded: boolean) => void>()}
-        onSelect={vi.fn<(id: number) => void>()}
-        onRename={vi.fn<(id: number, title: string) => void>()}
-        pendingActivityCount={0}
-        onOpenActivity={vi.fn<() => void>()}
-      />,
+      <LocaleProvider>
+        <WorkpiecePicker
+          gadgets={[
+            { id: 1, type: 'gadget', title: 'Hooked' },
+            { id: 2, type: 'gadget', title: 'Ordinary' },
+          ]}
+          selectedId={null}
+          expanded={expanded}
+          hookedGadgetIds={new Set([1])}
+          onExpandedChange={vi.fn<(expanded: boolean) => void>()}
+          onSelect={vi.fn<(id: number) => void>()}
+          onRename={vi.fn<(id: number, title: string) => void>()}
+          pendingActivityCount={0}
+          onOpenActivity={vi.fn<() => void>()}
+        />
+      </LocaleProvider>,
     ))
     return container
   }

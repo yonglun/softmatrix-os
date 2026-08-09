@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Tooltip, useKumoToastManager } from '@cloudflare/kumo'
 import { DownloadSimple } from '@phosphor-icons/react'
 import type { RpcStub } from 'capnweb'
@@ -14,6 +15,7 @@ type Props = {
 }
 
 export default function GadgetExportMenu({ gadget, gadgetTitle, chatId, disabled }: Props) {
+  const { t } = useTranslation()
   const [exporting, setExporting] = useState(false)
   const toasts = useKumoToastManager()
 
@@ -33,17 +35,17 @@ export default function GadgetExportMenu({ gadget, gadgetTitle, chatId, disabled
       )
     } catch (error) {
       console.error('Failed to export Gadget as PDF:', error)
-      toasts.add({ title: 'Failed to export PDF', variant: 'error' })
+      toasts.add({ title: t('management.misc.exportPdfFailed'), variant: 'error' })
     } finally {
       setExporting(false)
     }
   }
 
   return (
-    <Tooltip content={exporting ? 'Exporting to PDF' : 'Export to PDF'} asChild>
+    <Tooltip content={exporting ? t('management.misc.exportingPdf') : t('management.misc.exportPdf')} asChild>
       <span className="relative inline-flex">
         <WorkshopIconButton
-          aria-label="Export to PDF"
+          aria-label={t('management.misc.exportPdf')}
           disabled={disabled || !gadget || exporting}
           onClick={() => { void download() }}
         >

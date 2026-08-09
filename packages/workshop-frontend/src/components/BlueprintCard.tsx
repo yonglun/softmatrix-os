@@ -10,6 +10,7 @@ import {
   BlueprintMetadata,
 } from "@gadgets/workshop-shared/api";
 import { VendorDescription } from "@gadgets/workshop-shared/gatekeeper";
+import { useTranslation } from 'react-i18next';
 
 const gradients = [
   "from-[#4A154B] to-[#7C3085]",
@@ -115,6 +116,7 @@ export function BlueprintCard({
   featured?: boolean;
   vendorDescriptions?: Map<string, VendorDescription>;
 }) {
+  const { t } = useTranslation();
   const badges = uniqueBindingBadges(metadata.bindings);
 
   return (
@@ -129,7 +131,7 @@ export function BlueprintCard({
       <Link
         to="/blueprint/$id"
         params={{ id }}
-        aria-label={`Open blueprint ${metadata.title}`}
+        aria-label={t('blueprintsSurface.openBlueprint', { title: metadata.title })}
         className="absolute inset-0 z-10 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kumo-brand"
       />
       <div className="pointer-events-none relative z-20 flex flex-1 flex-col p-4">
@@ -144,7 +146,7 @@ export function BlueprintCard({
               {metadata.title}
             </p>
             <p className={`mt-1.5 line-clamp-2 min-h-8 text-[12px] leading-4 font-normal tracking-[-0.2px] ${metadata.description ? "text-kumo-subtle" : "text-kumo-inactive italic"}`}>
-              {metadata.description || "No description"}
+              {metadata.description || t('blueprintsSurface.noDescription')}
             </p>
           </div>
         </div>

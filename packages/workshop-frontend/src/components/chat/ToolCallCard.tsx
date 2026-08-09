@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Loader } from '@cloudflare/kumo'
 import {
   Code as CodeIcon,
@@ -42,6 +43,7 @@ function StatusIndicator({ status }: { status: string }) {
 }
 
 export default function ToolCallCard({ tool }: { tool: ToolCall }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const Icon = iconMap[tool.icon] || Lightning
 
@@ -57,8 +59,8 @@ export default function ToolCallCard({ tool }: { tool: ToolCall }) {
         {tool.duration != null && (
           <span className="font-mono text-[11px] text-kumo-subtle tabular-nums flex-shrink-0">
             {tool.duration >= 1000
-              ? `${(tool.duration / 1000).toFixed(1)}s`
-              : `${tool.duration}ms`}
+              ? `${(tool.duration / 1000).toFixed(1)}${t('management.misc.seconds')}`
+              : `${tool.duration}${t('management.misc.milliseconds')}`}
           </span>
         )}
         <StatusIndicator status={tool.status} />
@@ -78,7 +80,7 @@ export default function ToolCallCard({ tool }: { tool: ToolCall }) {
         <div className="px-3 pb-3 pt-1 border-t border-kumo-line space-y-2">
           {tool.input && (
             <div>
-              <span className="font-mono text-[10px] text-kumo-subtle uppercase tracking-wider">Input</span>
+              <span className="font-mono text-[10px] text-kumo-subtle uppercase tracking-wider">{t('management.misc.input')}</span>
               <pre className="text-xs font-mono text-kumo-subtle whitespace-pre-wrap leading-relaxed mt-1 bg-kumo-tint rounded-md px-2 py-1.5">
                 {JSON.stringify(tool.input, null, 2)}
               </pre>
@@ -86,7 +88,7 @@ export default function ToolCallCard({ tool }: { tool: ToolCall }) {
           )}
           {tool.output && (
             <div>
-              <span className="font-mono text-[10px] text-kumo-subtle uppercase tracking-wider">Output</span>
+              <span className="font-mono text-[10px] text-kumo-subtle uppercase tracking-wider">{t('management.misc.output')}</span>
               <p className="text-xs text-kumo-subtle mt-1">{tool.output}</p>
             </div>
           )}

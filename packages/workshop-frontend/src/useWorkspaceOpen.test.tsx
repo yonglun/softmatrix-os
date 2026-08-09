@@ -15,6 +15,7 @@ import {
 } from '@gadgets/workshop-shared/api'
 import WorkspaceOpenErrorPage from './components/WorkspaceOpenErrorPage'
 import { useWorkspaceOpen } from './useWorkspaceOpen'
+import { LocaleProvider } from './i18n/LocaleProvider'
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
@@ -131,11 +132,11 @@ describe('useWorkspaceOpen', () => {
     container = document.createElement('div')
     document.body.append(container)
     root = createRoot(container)
-    await act(async () => root!.render(<WorkspaceProbe authenticatedApi={api(firstOverseer)} />))
+    await act(async () => root!.render(<LocaleProvider><WorkspaceProbe authenticatedApi={api(firstOverseer)} /></LocaleProvider>))
     expect(container.textContent).toContain('Quarterly planning')
     expect(document.title).toBe(`Quarterly planning - ${DEFAULT_SITE_NAME}`)
 
-    await act(async () => root!.render(<WorkspaceProbe authenticatedApi={api(deniedOverseer)} />))
+    await act(async () => root!.render(<LocaleProvider><WorkspaceProbe authenticatedApi={api(deniedOverseer)} /></LocaleProvider>))
     expect(container.textContent).toContain("You don't have access to this workspace")
     expect(container.textContent).not.toContain('Quarterly planning')
     expect(document.title).toBe(DEFAULT_SITE_NAME)

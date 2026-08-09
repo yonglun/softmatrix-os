@@ -120,7 +120,7 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
       setBindings(loaded.filter((b): b is BindingCardData => b !== null))
     } catch (err) {
       console.error('Failed to load bindings:', err)
-      setBindingsError('Could not load connections.')
+      setBindingsError(t('blueprintsSurface.configuratorFailed'))
     } finally {
       setBindingsLoading(false)
     }
@@ -218,7 +218,7 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
       setClearScreenshot(false)
       await loadBlueprints()
     } catch (err: any) {
-      setCreateError(err.message || 'Could not create blueprint.')
+      setCreateError(err.message || t('blueprintsSurface.createFailed'))
     } finally {
       setCreating(false)
     }
@@ -256,7 +256,7 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
       setClearScreenshot(false)
       await loadBlueprints()
     } catch (err: any) {
-      setCreateError(err.message || 'Could not update blueprint.')
+      setCreateError(err.message || t('blueprintsSurface.updateBlueprintFailed'))
     } finally {
       setCreating(false)
     }
@@ -349,7 +349,7 @@ export default function BlueprintModal({ open, onClose, overseer, gadget, metada
                           </p>
                           <p className="m-0 mt-0.5 text-[12px] leading-4 font-normal tracking-[-0.2px] text-kumo-subtle">
                             {t('blueprintsSurface.screenshotDescription')}
-                            {formMode === 'edit' && !newScreenshotUrl && editingBlueprint?.screenshotUrl && !clearScreenshot ? ' The current screenshot will stay unless you upload a new one.' : ''}
+                            {formMode === 'edit' && !newScreenshotUrl && editingBlueprint?.screenshotUrl && !clearScreenshot ? ` ${t('blueprintsSurface.screenshotWillStay')}` : ''}
                           </p>
                         </div>
                         <div className="flex shrink-0 items-center gap-1.5">
@@ -598,10 +598,10 @@ function BlueprintRow({
         <div className="flex w-full flex-wrap items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="m-0 truncate text-[14px] leading-5 font-semibold tracking-[-0.3px] text-kumo-danger">
-              Delete "{bp.title}"?
+              {t('blueprintsSurface.deleteConfirmTitle', { title: bp.title })}
             </p>
             <p className="m-0 mt-0.5 text-[12px] leading-4 font-normal tracking-[-0.2px] text-kumo-subtle">
-              People who started a gadget from this blueprint won't be affected, but the link will stop working.
+              {t('blueprintsSurface.deleteImpact')}
             </p>
           </div>
           <button
@@ -610,7 +610,7 @@ function BlueprintRow({
             disabled={isDeleting}
             className="inline-flex h-7 shrink-0 cursor-pointer items-center rounded-md bg-kumo-danger px-2.5 text-[12px] leading-4 font-medium tracking-[-0.2px] text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            {isDeleting ? t('blueprintsSurface.deleting') : t('blueprintsSurface.deleteAction')}
           </button>
           <button
             type="button"
@@ -618,7 +618,7 @@ function BlueprintRow({
             disabled={isDeleting}
             className="inline-flex h-7 shrink-0 cursor-pointer items-center rounded-md bg-transparent px-2.5 text-[12px] leading-4 font-medium tracking-[-0.2px] text-kumo-subtle transition-colors hover:bg-kumo-tint hover:text-kumo-default disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Cancel
+            {t('blueprintsSurface.cancel')}
           </button>
         </div>
       </div>
@@ -648,7 +648,7 @@ function BlueprintRow({
               aria-hidden="true"
             />
           )}
-          v{bp.version} · {formatDate(bp.codeVersionDate, locale)}
+          {t('blueprintsSurface.versionLabel', { version: bp.version, date: formatDate(bp.codeVersionDate, locale) })}
         </span>
       </div>
 
@@ -659,7 +659,7 @@ function BlueprintRow({
           </p>
         ) : (
           <p className="m-0 text-[13px] leading-[18px] font-normal tracking-[-0.25px] text-kumo-inactive">
-            No description
+            {t('blueprintsSurface.noDescriptionShort')}
           </p>
         )}
       </div>
@@ -667,7 +667,7 @@ function BlueprintRow({
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
         <div className="-ml-[7px] flex flex-wrap items-center gap-1">
           <GhostButton onClick={onUpdateCode} icon={<ArrowsClockwise size={13} />}>
-            Update code
+            {t('blueprintsSurface.updateCode')}
           </GhostButton>
           {bp.dirty && (
             <GhostButton onClick={onRetryPublish} icon={<ArrowsClockwise size={13} />}>

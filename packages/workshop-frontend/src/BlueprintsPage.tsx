@@ -152,12 +152,13 @@ export default function BlueprintsPage() {
 }
 
 function BlueprintThumbnail({ blueprint }: { blueprint: BlueprintPublicInfo }) {
+  const { t } = useTranslation();
   return (
     <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-kumo-line bg-kumo-tint">
       {blueprint.screenshotUrl ? (
         <img
           src={blueprint.screenshotUrl}
-          alt={`Screenshot of ${blueprint.metadata.title}`}
+          alt={t('blueprintsSurface.screenshotOf', { title: blueprint.metadata.title })}
           className="h-full w-full object-cover"
           loading="lazy"
         />
@@ -175,6 +176,7 @@ function FeaturedBlueprintCard({
   blueprint: BlueprintPublicInfo;
   vendorDescriptions: VendorMap;
 }) {
+  const { t } = useTranslation();
   const badges = uniqueBindingBadges(blueprint.metadata.bindings).slice(0, 2);
 
   return (
@@ -182,7 +184,7 @@ function FeaturedBlueprintCard({
       <Link
         to="/blueprint/$id"
         params={{ id: blueprint.id }}
-        aria-label={`Open featured blueprint ${blueprint.metadata.title}`}
+        aria-label={t('blueprintsSurface.openFeatured', { title: blueprint.metadata.title })}
         className="absolute inset-0 z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kumo-brand"
       />
 
@@ -201,7 +203,7 @@ function FeaturedBlueprintCard({
               blueprint.metadata.description ? "text-kumo-subtle" : "italic text-kumo-inactive"
             }`}
           >
-            {blueprint.metadata.description || "No description"}
+            {blueprint.metadata.description || t('blueprintsSurface.noDescription')}
           </p>
           {badges.length > 0 && (
             <div className="relative z-20 mt-2 flex flex-wrap gap-1">
@@ -227,6 +229,7 @@ function FeaturedBlueprintRow({
   blueprint: BlueprintPublicInfo;
   vendorDescriptions: VendorMap;
 }) {
+  const { t } = useTranslation();
   const badges = uniqueBindingBadges(blueprint.metadata.bindings).slice(0, 3);
 
   return (
@@ -247,7 +250,7 @@ function FeaturedBlueprintRow({
             blueprint.metadata.description ? "text-kumo-subtle" : "italic text-kumo-inactive"
           }`}
         >
-          {blueprint.metadata.description || "No description"}
+          {blueprint.metadata.description || t('blueprintsSurface.noDescription')}
         </p>
       </div>
       {badges.length > 0 && (

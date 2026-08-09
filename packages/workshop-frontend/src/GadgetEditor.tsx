@@ -223,6 +223,7 @@ function PaneWorkpieceTabs({
   activeId: WorkpieceId | null
   onSelect: (id: WorkpieceId) => void
 }) {
+  const { t } = useTranslation()
   const scrollerRef = useRef<HTMLDivElement>(null)
   const activeRef = useRef<HTMLButtonElement>(null)
 
@@ -286,7 +287,7 @@ function PaneWorkpieceTabs({
             <span className="truncate">{gadget.title}</span>
             {gadget.chatId !== undefined && (
               <span className="flex-shrink-0 rounded-full bg-kumo-fill px-1.5 py-0.5 text-[10px] font-medium leading-none text-kumo-subtle">
-                Draft
+                {t('management.misc.draft')}
               </span>
             )}
           </button>
@@ -400,14 +401,15 @@ function getInitialAppRailExpanded(): boolean {
 }
 
 function NoGadgetPlaceholder({ height }: { height: string }) {
+  const { t } = useTranslation()
   return (
     <div className="flex items-center justify-center px-6 text-center" style={{ height }}>
       <div className="max-w-[360px]">
         <p className="m-0 text-[15px] leading-[22px] font-semibold tracking-[-0.3px] text-kumo-default">
-          No gadgets yet
+          {t('management.misc.noGadgets')}
         </p>
         <p className="mt-1.5 mb-0 text-[13px] leading-[19px] tracking-[-0.25px] text-kumo-subtle">
-          Ask the agent in chat to build something, and it will appear here.
+          {t('management.misc.buildPrompt')}
         </p>
       </div>
     </div>

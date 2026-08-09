@@ -210,7 +210,7 @@ export default function FileSidebar({
             <WorkshopInput
               ref={createInputRef}
               autoFocus
-              placeholder="filename.ts"
+              placeholder={t('management.misc.filenamePlaceholder')}
               aria-label={t('filesSurface.filename')}
               value={newFileName}
               onChange={(e) => setNewFileName(e.target.value)}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@cloudflare/kumo'
 import { Badge } from '@cloudflare/kumo'
 import { Text } from '@cloudflare/kumo'
@@ -15,6 +16,7 @@ function PermissionCard({
   onGrant: () => void
   onDeny: () => void
 }) {
+  const { t } = useTranslation()
   const [showScopes, setShowScopes] = useState(false)
   const Logo = logoComponents[perm.connectionLogo]
 
@@ -28,10 +30,10 @@ function PermissionCard({
           <Shield size={14} className="text-kumo-brand" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold text-kumo-default">Permission requested</div>
+          <div className="text-sm font-semibold text-kumo-default">{t('management.permission.requested')}</div>
           <div className="mt-0.5">
             <Text variant="secondary" size="xs" as="span">
-              Workshop wants to access <strong>{perm.connectionName}</strong>
+              {t('management.permission.wantsAccess')} <strong>{perm.connectionName}</strong>
             </Text>
           </div>
         </div>
@@ -52,7 +54,7 @@ function PermissionCard({
         <Text variant="body" size="sm" bold as="span">{perm.connectionName}</Text>
         <div className="ml-auto flex items-center gap-1.5">
           <Badge variant="secondary">
-            {perm.scopes.length} {perm.scopes.length === 1 ? 'scope' : 'scopes'}
+            {perm.scopes.length} {t(perm.scopes.length === 1 ? 'management.permission.scope_one' : 'management.permission.scope_other')}
           </Badge>
           <svg
             className={`w-3.5 h-3.5 text-kumo-subtle transition-transform ${showScopes ? 'rotate-180' : ''}`}
@@ -73,7 +75,7 @@ function PermissionCard({
           {perm.resources && perm.resources.length > 0 && (
             <div className="px-3 py-2 rounded-md bg-kumo-tint/50">
               <span className="font-mono text-[10px] text-kumo-subtle uppercase tracking-wider block mb-1">
-                Resources
+                {t('management.permission.resources')}
               </span>
               {perm.resources.map((res) => (
                 <div key={res} className="flex items-center gap-1.5 mt-0.5">
@@ -86,7 +88,7 @@ function PermissionCard({
           {/* API scopes */}
           <div className="px-3 py-2 rounded-md bg-kumo-tint/50">
             <span className="font-mono text-[10px] text-kumo-subtle uppercase tracking-wider block mb-1">
-              API scopes
+              {t('management.permission.apiScopes')}
             </span>
             {perm.scopes.map((scope) => (
               <div key={scope} className="font-mono text-xs text-kumo-subtle">{scope}</div>
@@ -98,10 +100,10 @@ function PermissionCard({
       {/* Actions */}
       <div className="grid grid-cols-2 gap-2 p-3 pt-2">
         <Button variant="outline" size="sm" onClick={onDeny} className="w-full justify-center">
-          Deny
+          {t('management.permission.deny')}
         </Button>
         <Button variant="primary" size="sm" onClick={onGrant} className="w-full justify-center">
-          Allow access
+          {t('management.permission.allow')}
         </Button>
       </div>
     </div>
@@ -109,6 +111,7 @@ function PermissionCard({
 }
 
 export default function PermissionToasts() {
+  const { t } = useTranslation()
   const [permissions, setPermissions] = useState<PermissionRequest[]>([])
   const [grantedToast, setGrantedToast] = useState<string | null>(null)
 
@@ -151,7 +154,7 @@ export default function PermissionToasts() {
             <Check size={11} className="text-kumo-success" />
           </div>
           <span className="text-xs text-kumo-default">
-            <strong>{grantedToast}</strong> access granted
+            <strong>{grantedToast}</strong> {t('management.permission.granted')}
           </span>
         </div>
       )}

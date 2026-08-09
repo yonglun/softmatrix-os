@@ -626,7 +626,7 @@ export default function BlueprintLandingPage({ rpcStub }: Props) {
     } catch (err: any) {
       console.error('Failed to update featured status:', err)
       toasts.add({
-        title: nextFeatured ? 'Failed to feature blueprint' : 'Failed to unfeature blueprint',
+        title: nextFeatured ? t('blueprintsSurface.featureFailed') : t('blueprintsSurface.unfeatureFailed'),
         variant: 'error',
       })
     } finally {
@@ -703,7 +703,7 @@ export default function BlueprintLandingPage({ rpcStub }: Props) {
     } catch (err) {
       console.error('Failed to remove blueprint from library:', err)
       toasts.add({
-        title: isUploadedBlueprint ? 'Failed to delete blueprint' : 'Failed to remove blueprint from library',
+        title: isUploadedBlueprint ? t('blueprintsSurface.deleteFailed') : t('blueprintsSurface.removeFromLibraryFailed'),
         variant: 'error',
       })
     } finally {
@@ -1008,7 +1008,7 @@ export default function BlueprintLandingPage({ rpcStub }: Props) {
           {error && (
             <div className="flex items-center justify-between gap-3 rounded-2xl border border-kumo-danger/30 bg-kumo-danger-tint px-4 py-3 text-[13px] leading-[18px] text-kumo-danger">
               <span>{error}</span>
-              <button onClick={() => setError(null)} className="cursor-pointer text-kumo-danger hover:text-kumo-default">&times;</button>
+              <button onClick={() => setError(null)} aria-label={t('common.close')} className="cursor-pointer text-kumo-danger hover:text-kumo-default"><X size={14} aria-hidden="true" /></button>
             </div>
           )}
         </main>
@@ -1433,7 +1433,7 @@ function BindingField({
         </Select>
         {models.length === 0 && (
           <p className="text-xs text-kumo-subtle mt-1">
-            No AI models are available yet. Add a model from AI Providers first.
+            {t('management.misc.noModels')}
           </p>
         )}
       </div>

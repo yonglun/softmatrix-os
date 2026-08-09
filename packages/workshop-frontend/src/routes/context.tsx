@@ -3,6 +3,7 @@ import { BookOpen, Sparkle, type Icon as PhosphorIcon } from '@phosphor-icons/re
 import { useDocumentTitle } from '../useDocumentTitle'
 import ComingSoonPreview from '../components/ComingSoonPreview'
 import { useSiteName } from '../ServerConfigContext'
+import { useTranslation } from 'react-i18next'
 
 // Context & Skills. The knowledge/skills surface isn't built into the rail yet — agents read
 // curated collections of documents (context) and reusable skills. Until then this page shows a
@@ -56,20 +57,21 @@ function ContextRow({ item }: { item: ContextItem }) {
 }
 
 function ContextPage() {
-  useDocumentTitle('Context & Skills')
+  const { t } = useTranslation()
+  useDocumentTitle(t('management.misc.contextSkills'))
   const siteName = useSiteName()
   return (
     <div className="mx-auto flex h-full w-full max-w-4xl flex-col px-6 sm:px-10">
       <header className="px-3 pb-4 pt-10">
-        <h1 className="text-2xl font-semibold tracking-tight text-kumo-default">Context &amp; Skills</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-kumo-default">{t('management.misc.contextSkills')}</h1>
         <p className="mt-1 text-[13px] leading-[18px] tracking-[-0.25px] text-kumo-subtle">
-          Curated collections of knowledge your agents read, plus reusable skills they can apply.
+          {t('management.misc.contextDescription')}
         </p>
       </header>
 
       <ComingSoonPreview
         icon={BookOpen}
-        title={`Context & Skills are coming soon to ${siteName}`}
+        title={t('management.misc.contextSoon', { site: siteName })}
         description="A preview of how you'll author knowledge collections and skills for your agents to draw on."
       >
         <div className="chat-panel min-h-0 flex-1 overflow-y-auto pb-8 pt-1">

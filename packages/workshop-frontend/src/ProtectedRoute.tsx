@@ -5,6 +5,7 @@ import { useAuth, CF_ACCESS_MODE } from './useAuth'
 import { AuthProvider } from './AuthContext'
 import LoginPage from './LoginPage'
 import { Loader, Banner, Button } from '@cloudflare/kumo'
+import { useTranslation } from 'react-i18next'
 
 interface ProtectedRouteProps {
   children: ReactNode
@@ -12,6 +13,7 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, rpcStub }: ProtectedRouteProps) {
+  const { t } = useTranslation()
   const { isAuthenticated, authenticatedApi, isLoading, error, logout, login } = useAuth(rpcStub)
 
   const handleLoginSuccess = () => {
@@ -36,7 +38,7 @@ export default function ProtectedRoute({ children, rpcStub }: ProtectedRouteProp
       >
         <Loader size="lg" />
         <div style={{ textAlign: 'center' }}>
-          Loading...
+          {t('management.misc.loading')}
         </div>
       </div>
     )
@@ -57,11 +59,11 @@ export default function ProtectedRoute({ children, rpcStub }: ProtectedRouteProp
       >
         <Banner
           variant="error"
-          title={`Authentication error: ${error}`}
+          title={`${t('management.misc.authError')} ${error}`}
           className="mb-4"
         />
         <Button variant="primary" onClick={() => window.location.reload()}>
-          Retry
+          {t('management.misc.retry')}
         </Button>
       </div>
     )
@@ -85,7 +87,7 @@ export default function ProtectedRoute({ children, rpcStub }: ProtectedRouteProp
         >
           <Loader size="lg" />
           <div style={{ textAlign: 'center' }}>
-            Authenticating...
+            {t('management.misc.authenticating')}
           </div>
         </div>
       )

@@ -857,7 +857,7 @@ export default function GadgetCodeInterface({ overseer, filesRoot, height = '100
     <div style={{ display: 'flex', flexDirection: 'column', height, width: '100%' }}>
       {hasUnsavedChanges && (
         <div className="bg-kumo-tint border-b border-kumo-line px-4 py-2 flex items-center gap-2 text-sm text-kumo-warning">
-          <span className="text-base">&#9888;&#65039;</span>
+          <span className="text-base">{t('management.misc.warning')}</span>
           <span>{t('codeSurface.connectionIssue')}</span>
         </div>
       )}
