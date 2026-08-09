@@ -17,16 +17,21 @@ afterEach(() => {
 
 describe("OidcButton", () => {
   it("localizes a domain rejection and includes the correlation id", async () => {
-    const dispose = vi.fn();
+    const dispose = vi.fn<() => void>();
     const attempt = {
-      wait: vi.fn(async () => ({
+      wait: vi.fn<() => Promise<{
+        ok: false;
+        error: { code: "EMAIL_DOMAIN_NOT_ALLOWED"; correlationId: string };
+      }>>(async () => ({
         ok: false as const,
         error: { code: "EMAIL_DOMAIN_NOT_ALLOWED" as const, correlationId: "auth-123" },
       })),
       [Symbol.dispose]: dispose,
     } as unknown as RpcStub<OidcLoginAttempt>;
     const rpcStub = {
-      startOidcLogin: vi.fn(async () => ({ url: "https://id.example.com/authorize", attempt })),
+      startOidcLogin: vi.fn<() => Promise<{ url: string; attempt: RpcStub<OidcLoginAttempt> }>>(
+        async () => ({ url: "https://id.example.com/authorize", attempt }),
+      ),
     } as unknown as RpcStub<PublicApi>;
     vi.spyOn(window, "open").mockReturnValue({ closed: false } as Window);
     const rendered = renderWithLocale(
@@ -47,12 +52,16 @@ describe("OidcButton", () => {
 
   it("stores a successful session token", async () => {
     const attempt = {
-      wait: vi.fn(async () => ({ ok: true as const, token: "alice:secret" })),
-      [Symbol.dispose]: vi.fn(),
+      wait: vi.fn<() => Promise<{ ok: true; token: string }>>(
+        async () => ({ ok: true as const, token: "alice:secret" }),
+      ),
+      [Symbol.dispose]: vi.fn<() => void>(),
     } as unknown as RpcStub<OidcLoginAttempt>;
-    const onSuccess = vi.fn();
+    const onSuccess = vi.fn<() => void>();
     const rpcStub = {
-      startOidcLogin: vi.fn(async () => ({ url: "https://id.example.com/authorize", attempt })),
+      startOidcLogin: vi.fn<() => Promise<{ url: string; attempt: RpcStub<OidcLoginAttempt> }>>(
+        async () => ({ url: "https://id.example.com/authorize", attempt }),
+      ),
     } as unknown as RpcStub<PublicApi>;
     vi.spyOn(window, "open").mockReturnValue({ closed: false } as Window);
     const rendered = renderWithLocale(
