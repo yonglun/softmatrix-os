@@ -130,6 +130,24 @@ describe("handleClientErrorRequest", () => {
     await Promise.all(waits);
   });
 
+  it("drops prompt, response, and credential fields from untrusted reports", async () => {
+    const { env, ctx, report } = setup();
+    const response = await handleClientErrorRequest(request({
+      ...validReport,
+      prompt: "private prompt fixture",
+      response: "private response fixture",
+      apiToken: "byok-secret-fixture",
+      organizationSecret: "org-model-secret-fixture",
+    }), env, ctx);
+
+    expect(response.status).toBe(204);
+    const serialized = JSON.stringify(report.mock.calls[0]?.[0] ?? {});
+    expect(serialized).not.toContain("private prompt fixture");
+    expect(serialized).not.toContain("private response fixture");
+    expect(serialized).not.toContain("byok-secret-fixture");
+    expect(serialized).not.toContain("org-model-secret-fixture");
+  });
+
   it("rate-limits distinct verified Access users independently behind one IP", async () => {
     const { env, ctx, limit } = setup();
     const verifyAccess = vi.fn()

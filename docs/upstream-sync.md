@@ -53,3 +53,11 @@ After merging, verify that the root `LICENSE` is unchanged, `NOTICE` still ident
 derivative relationship, tenant branding overrides still work, and the complete lint, test,
 and build commands pass. Record the upstream commit in the merge or release notes so every
 Softmatrix release has a reproducible provenance point.
+
+## Release rehearsal evidence
+
+Before a release, perform the merge in a disposable worktree and record the upstream SHA,
+conflicts, resolution rules, and verification output. The latest rehearsal is recorded in
+[`docs/softmatrix/upstream-sync-report.md`](softmatrix/upstream-sync-report.md). The rehearsal
+must be removed after the report is written; it must never be merged merely to satisfy the
+exercise.

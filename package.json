@@ -6,6 +6,8 @@
   "packageManager": "pnpm@11.17.0+sha512.cca3cea332ad254bb84145f966d19f4879615210346fc92c79a047f23a0d7b3cca3c3792f0076ba1f1831d277efbcf0a9119b31a9a60eca7fb3d6231f331ef72",
   "scripts": {
     "build": "pnpm run --recursive build",
+    "verify:softmatrix": "pnpm lint && pnpm test && pnpm build && pnpm licenses list --json",
+    "test:e2e": "playwright test",
     "run-local": "node scripts/run-local.mjs",
     "test": "node --test scripts/*.test.js && pnpm run --recursive --if-present test",
     "test:branding": "node --test scripts/softmatrix-branding.test.js scripts/softmatrix-compliance.test.js",
@@ -19,6 +21,7 @@
     "types:generate": "node scripts/generate-worker-types.mjs"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "aws4fetch": "^1.0.20",
     "jsonc-parser": "^3.3.1",
     "oxlint": "^1.76.0",

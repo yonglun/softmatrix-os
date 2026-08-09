@@ -25,6 +25,7 @@
 
 import { pathToFileURL } from "node:url";
 import { AwsClient } from "aws4fetch";
+import { LEGAL_FILENAMES, LEGAL_MANIFEST_FILENAME, assertLegalManifest } from "./legal-artifacts.mjs";
 
 /** The CI run number of an `r<run#>-<sha>` release id, or null for any other id shape
  *  (dev-<ts> releases carry no ordering claim). */
@@ -43,6 +44,31 @@ export function supersededBy(candidateId, publishedIds) {
     if (run !== null && run > candidateRun) return id;
   }
   return null;
+}
+
+async function getObjectBytes(client, keyUrl, key) {
+  const response = await client.fetch(keyUrl(key), { method: "GET" });
+  if (response.status === 404) throw new Error(`required candidate object not found: ${key}`);
+  if (!response.ok) throw new Error(`GET ${key}: ${response.status} ${await response.text()}`);
+  return new Uint8Array(await response.arrayBuffer());
+}
+
+async function copyOrPut(client, keyUrl, bucket, sourceKey, targetKey, body, contentType) {
+  const copy = await client.fetch(keyUrl(targetKey), {
+    method: "PUT",
+    headers: {
+      "x-amz-copy-source": `/${bucket}/${sourceKey}`,
+      "Content-Type": contentType,
+    },
+  });
+  if (copy.ok && (await copy.text()).includes("<CopyObjectResult")) return "copy";
+  const put = await client.fetch(keyUrl(targetKey), {
+    method: "PUT",
+    body,
+    headers: { "Content-Type": contentType },
+  });
+  if (!put.ok) throw new Error(`PUT ${targetKey}: ${put.status} ${await put.text()}`);
+  return "put";
 }
 
 function requireEnv(name) {
@@ -82,22 +108,21 @@ async function listPublishedReleaseIds(client, keyUrl) {
   return ids;
 }
 
-async function main() {
-  const args = parseArgs(process.argv.slice(2));
-  const endpoint = requireEnv("R2_ENDPOINT").replace(/\/$/, "");
-  const bucket = requireEnv("R2_BUCKET");
-  const client = new AwsClient({
+export async function promoteRelease({ releaseId, client, endpoint, bucket }) {
+  const targetEndpoint = (endpoint ?? requireEnv("R2_ENDPOINT")).replace(/\/$/, "");
+  const targetBucket = bucket ?? requireEnv("R2_BUCKET");
+  const r2 = client ?? new AwsClient({
     accessKeyId: requireEnv("R2_ACCESS_KEY_ID"),
     secretAccessKey: requireEnv("R2_SECRET_ACCESS_KEY"),
     service: "s3",
     region: "auto",
   });
-  const keyUrl = (key) => `${endpoint}/${bucket}/${key}`;
+  const keyUrl = (key) => `${targetEndpoint}/${targetBucket}/${key}`;
 
-  const publishedKey = `releases/${args.releaseId}/manifest.json`;
-  const candidateKey = `candidates/${args.releaseId}/manifest.json`;
+  const publishedKey = `releases/${releaseId}/manifest.json`;
+  const candidateKey = `candidates/${releaseId}/manifest.json`;
 
-  const publishedHead = await client.fetch(keyUrl(publishedKey), { method: "HEAD" });
+  const publishedHead = await r2.fetch(keyUrl(publishedKey), { method: "HEAD" });
   if (publishedHead.status === 200) {
     console.log(`already promoted: ${publishedKey}`);
     return;
@@ -106,7 +131,7 @@ async function main() {
     throw new Error(`HEAD ${publishedKey}: unexpected status ${publishedHead.status}`);
   }
 
-  const candidate = await client.fetch(keyUrl(candidateKey), { method: "GET" });
+  const candidate = await r2.fetch(keyUrl(candidateKey), { method: "GET" });
   if (candidate.status === 404) {
     throw new Error(`candidate not found: ${candidateKey} — was the release uploaded ` +
       "with --candidate?");
@@ -116,40 +141,63 @@ async function main() {
   }
   const manifestBody = new Uint8Array(await candidate.arrayBuffer());
 
-  const superseder = supersededBy(args.releaseId, await listPublishedReleaseIds(client, keyUrl));
+  const candidatePrefix = `candidates/${releaseId}`;
+  const legalManifestKey = `${candidatePrefix}/${LEGAL_MANIFEST_FILENAME}`;
+  const legalManifestBody = await getObjectBytes(r2, keyUrl, legalManifestKey);
+  let legalManifest;
+  try {
+    legalManifest = JSON.parse(new TextDecoder().decode(legalManifestBody));
+  } catch {
+    throw new Error(`invalid candidate legal manifest: ${legalManifestKey}`);
+  }
+  const legalBodies = new Map();
+  for (const name of LEGAL_FILENAMES) {
+    legalBodies.set(name, await getObjectBytes(r2, keyUrl, `${candidatePrefix}/legal/${name}`));
+  }
+  assertLegalManifest(legalManifest, legalBodies);
+
+  const superseder = supersededBy(releaseId, await listPublishedReleaseIds(r2, keyUrl));
   if (superseder) {
-    console.warn(`WARNING: not promoting ${args.releaseId} — a newer release ` +
+    console.warn(`WARNING: not promoting ${releaseId} — a newer release ` +
       `(${superseder}) is already published; promoting now would roll the deploy ` +
       "service back to this older candidate.");
     return;
   }
 
-  // Server-side CopyObject first (no second body transfer); the buffered GET above doubles as
-  // the fallback PUT body if the copy path is ever unavailable.
-  const copy = await client.fetch(keyUrl(publishedKey), {
-    method: "PUT",
-    headers: {
-      "x-amz-copy-source": `/${bucket}/${candidateKey}`,
-      "Content-Type": "application/json",
-    },
-  });
-  // S3 copies can answer 200 with an error document; a real copy answers with CopyObjectResult.
-  if (copy.ok && (await copy.text()).includes("<CopyObjectResult")) {
-    console.log(`promoted (copy): ${candidateKey} -> ${publishedKey}`);
-    return;
+  let mode = "copy";
+  for (const name of LEGAL_FILENAMES) {
+    mode = await copyOrPut(
+      r2,
+      keyUrl,
+      targetBucket,
+      `${candidatePrefix}/legal/${name}`,
+      `releases/${releaseId}/legal/${name}`,
+      legalBodies.get(name),
+      "text/plain",
+    );
   }
-  console.warn(`CopyObject unavailable (status ${copy.status}); falling back to PUT`);
-  const put = await client.fetch(keyUrl(publishedKey), {
-    method: "PUT",
-    body: manifestBody,
-    headers: { "Content-Type": "application/json" },
-  });
-  if (!put.ok) {
-    throw new Error(`PUT ${publishedKey}: ${put.status} ${await put.text()}`);
-  }
-  console.log(`promoted (put): ${candidateKey} -> ${publishedKey}`);
+  mode = await copyOrPut(
+    r2,
+    keyUrl,
+    targetBucket,
+    legalManifestKey,
+    `releases/${releaseId}/${LEGAL_MANIFEST_FILENAME}`,
+    legalManifestBody,
+    "application/json",
+  );
+  mode = await copyOrPut(
+    r2,
+    keyUrl,
+    targetBucket,
+    candidateKey,
+    publishedKey,
+    manifestBody,
+    "application/json",
+  );
+  console.log(`promoted (${mode}): ${candidateKey} -> ${publishedKey}`);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  await main();
+  const args = parseArgs(process.argv.slice(2));
+  await promoteRelease({ releaseId: args.releaseId });
 }

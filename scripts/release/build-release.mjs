@@ -24,6 +24,7 @@ import {
 import {
   findDeployablePackages, generateManifest, readDeployInputs, readWranglerConfig,
 } from "./manifest-lib.mjs";
+import { buildLegalArtifacts } from "./legal-artifacts.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const PACKAGES_DIR = join(ROOT, "packages");
@@ -88,6 +89,9 @@ function main() {
   rmSync(args.out, { recursive: true, force: true });
   mkdirSync(join(args.out, "modules"), { recursive: true });
   mkdirSync(join(args.out, "assets"), { recursive: true });
+  // Legal material is copied before any release manifest is written. The sidecar is validated
+  // again by upload/promote, so a release can never become visible without matching notices.
+  buildLegalArtifacts({ rootDir: ROOT, outDir: args.out });
 
   // 1. Frontend first: the router's wrangler.jsonc points its assets directory at
   //    workshop-frontend/dist, so it must exist before the router's dry-run.
