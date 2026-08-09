@@ -19,6 +19,35 @@ function writeJson(response, status, body) {
   response.end(JSON.stringify(body));
 }
 
+function writeResponsesStream(response, text) {
+  const message = {
+    id: "fixture-message",
+    type: "message",
+    role: "assistant",
+    content: [{ type: "output_text", text, annotations: [] }],
+  };
+  const completed = {
+    id: "fixture-response",
+    status: "completed",
+    output: [message],
+    usage: { input_tokens: 1, output_tokens: 2, total_tokens: 3 },
+  };
+  const events = [
+    { type: "response.created", response: { id: completed.id, status: "in_progress", output: [] } },
+    { type: "response.output_item.added", output_index: 0, item: { ...message, content: [] } },
+    { type: "response.output_text.delta", output_index: 0, content_index: 0, delta: text },
+    { type: "response.output_item.done", output_index: 0, item: message },
+    { type: "response.completed", response: completed },
+  ];
+  response.writeHead(200, {
+    "content-type": "text/event-stream",
+    "cache-control": "no-cache",
+    connection: "keep-alive",
+  });
+  for (const event of events) response.write(`data: ${JSON.stringify(event)}\n\n`);
+  response.end();
+}
+
 function startProvider() {
   return new Promise((resolveProvider) => {
     provider = createServer((request, response) => {
@@ -36,13 +65,11 @@ function startProvider() {
       request.on("end", () => {
         let parsed;
         try { parsed = JSON.parse(body); } catch { parsed = {}; }
-        const prompt = parsed.messages?.at(-1)?.content ?? "hello";
-        writeJson(response, 200, {
-          id: "fixture-response",
-          object: "chat.completion",
-          choices: [{ index: 0, message: { role: "assistant", content: `Fixture response: ${prompt}` }, finish_reason: "stop" }],
-          usage: { prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 },
-        });
+        const input = parsed.input?.at(-1);
+        const prompt = typeof input === "string"
+          ? input
+          : input?.content?.find((part) => part.type === "input_text")?.text ?? "hello";
+        writeResponsesStream(response, `Fixture response: ${prompt}`);
       });
     });
     provider.listen(0, "127.0.0.1", () => resolveProvider(provider.address().port));

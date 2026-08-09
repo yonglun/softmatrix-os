@@ -9,12 +9,13 @@ const copy = {
     username: "Username",
     password: "Password",
     confirmPassword: "Confirm password",
-    send: "Send",
+    send: "Send message",
     selectModel: "Select model",
     createWorkspace: "Create workspace",
     next: "Next",
     finish: "Let's build",
     homeTitle: "What are we working on?",
+    composer: "Start a new conversation…",
   },
   "zh-CN": {
     signUp: "创建账户",
@@ -22,12 +23,13 @@ const copy = {
     username: "用户名",
     password: "密码",
     confirmPassword: "确认密码",
-    send: "发送",
+    send: "发送消息",
     selectModel: "选择模型",
     createWorkspace: "创建工作区",
     next: "下一步",
     finish: "开始构建",
     homeTitle: "我们要一起做什么？",
+    composer: "开始新对话…",
   },
 } as const;
 
@@ -73,18 +75,22 @@ export async function selectModelIfAvailable(page: Page, locale: FixtureLocale):
   const labels = localeCopy(locale);
   const picker = page.getByRole("button", { name: labels.selectModel, exact: true });
   if (await picker.count() === 0) return;
+  const selected = await picker.innerText();
+  if (selected === "No agent" || selected === "无智能体" || selected === "Fixture Model") return;
   await picker.click();
-  const model = page.getByRole("button", { name: "Fixture Model", exact: true });
+  const model = page.getByRole("menuitem", { name: "Fixture Model", exact: true });
   if (await model.count() > 0) await model.click();
+  await page.keyboard.press("Escape");
 }
 
 export async function createWorkspace(page: Page, locale: FixtureLocale, prompt: string): Promise<void> {
   const labels = localeCopy(locale);
   await selectModelIfAvailable(page, locale);
-  await page.getByRole("textbox").fill(prompt);
+  await page.getByRole("combobox", { name: labels.composer, exact: true }).fill(prompt);
   await page.getByRole("button", { name: labels.send, exact: true }).click();
   await expect(page).toHaveURL(/\/workspace\//, { timeout: 30_000 });
   await expect(page.getByText(prompt, { exact: true })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText(`Fixture response: ${prompt}`, { exact: true })).toBeVisible({ timeout: 30_000 });
 }
 
 export async function assertNoFixtureSecrets(page: Page): Promise<void> {
