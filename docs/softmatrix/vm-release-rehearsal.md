@@ -68,6 +68,23 @@ The RC artifact contains 18 workers, 84 modules, and 31 asset blobs. Its generat
 `bfedaaa192e03ca40cca5e6e0c483436b6a400daa54a706dc3b5a66286ad953c`. The immutable package
 also includes the systemd fail-closed preflight at `tools/vm-config.mjs`.
 
+## Latest clean-checkout CI gate
+
+The release builder has since been hardened to generate every ignored worker input before Wrangler
+collects modules (`build:app`, `build:configurator`, and `build:format-blueprints`). The current
+feature head is `5b4cdb8`; the Ubuntu VM Smoke run for that head passed all of the following:
+
+| Check | Result | Evidence |
+|---|---|---|
+| VM configuration contract | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31341837661/job/93316793086) |
+| Native workerd persistence | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31341837661/job/93316793086) |
+| Clean immutable release build (18 workers / 84 modules) | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31341837661/job/93316793086) |
+| English and Simplified Chinese browser journeys | PASS | [GitHub job](https://github.com/yonglun/softmatrix-os/actions/runs/31341837661/job/93316793086) |
+
+This is CI evidence on an ephemeral Ubuntu runner, not production VM sign-off. Keep the status below
+as `PENDING OPERATOR EXECUTION` until the real VM, TLS proxy, OIDC provider, backup destination,
+logs, reboot, rollback, and operator signatures have been recorded.
+
 ## Manual acceptance matrix
 
 Mark each item only after attaching a timestamped log, screenshot, or checksum reference.
