@@ -23,6 +23,7 @@ const EXCLUDED_DIRECTORY_NAMES = new Set([
 // file/kind/text tuple and includes a reason. Existing entries are migration backlog; any new copy
 // must be translated or added through review with an explicit reason.
 const JSX_LITERAL_ALLOWLIST = new Map();
+const matchedBaselineKeys = new Set();
 
 function sourceFile(path, text) {
   return ts.createSourceFile(path, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
@@ -129,7 +130,8 @@ function scanSurfaceLiterals(fileName, text) {
     if (!isPlatformLiteral(value)) return;
     const line = lineNumber(file, node);
     const key = `${fileName}|${kind}|${value}`;
-    if (!JSX_LITERAL_ALLOWLIST.has(key)) findings.push({ fileName, line, kind, value });
+    if (JSX_LITERAL_ALLOWLIST.has(key)) matchedBaselineKeys.add(key);
+    else findings.push({ fileName, line, kind, value });
   }
   function visit(node) {
     if (ts.isJsxText(node)) {
@@ -199,6 +201,7 @@ test("migrated production surfaces contain no unreviewed platform literals", asy
     assert.equal(typeof entry.reason, "string");
     JSX_LITERAL_ALLOWLIST.set(`${entry.fileName}|${entry.kind}|${entry.text}`, entry.reason);
   }
+  matchedBaselineKeys.clear();
   const findings = [];
   for (const relativeName of await productionSurfaceFiles()) {
     const path = resolve(FRONTEND, relativeName);
@@ -206,4 +209,7 @@ test("migrated production surfaces contain no unreviewed platform literals", asy
     findings.push(...scanSurfaceLiterals(relativeName, text));
   }
   assert.deepEqual(findings, []);
+  const staleBaseline = [...JSX_LITERAL_ALLOWLIST.keys()]
+    .filter(key => !matchedBaselineKeys.has(key));
+  assert.deepEqual(staleBaseline, [], "i18n baseline contains stale entries");
 });
