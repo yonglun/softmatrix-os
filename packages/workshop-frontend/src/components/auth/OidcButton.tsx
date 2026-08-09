@@ -78,7 +78,13 @@ export default function OidcButton({ rpcStub, config, onSuccess }: OidcButtonPro
       if (onSuccess) onSuccess();
       else window.location.reload();
     } catch (reason) {
-      if (mountedRef.current) setError(reason instanceof Error ? reason.message : t("auth.signInFailed"));
+      if (mountedRef.current) {
+        const popupBlocked = t("auth.popupBlocked");
+        const signInCancelled = t("auth.signInCancelled");
+        setError(reason instanceof Error && (reason.message === popupBlocked || reason.message === signInCancelled)
+          ? reason.message
+          : t("auth.signInFailed"));
+      }
     } finally {
       if (mountedRef.current) setPending(false);
     }
