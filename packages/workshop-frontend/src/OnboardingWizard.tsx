@@ -89,6 +89,7 @@ export default function OnboardingWizard({
   const [models, setModels] = useState<AiChatAuthorInfo[]>([])
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null)
   const [aiConfig, setAiConfig] = useState<AiGatewayInfo | null>(null)
+  const [allowUserByok, setAllowUserByok] = useState(true)
   const [addModelOpen, setAddModelOpen] = useState(false)
   const [modelsLoading, setModelsLoading] = useState(true)
 
@@ -121,11 +122,13 @@ export default function OnboardingWizard({
   // Load models + AI config
   const fetchModels = useCallback(async () => {
     try {
-      const [modelList, cfg] = await Promise.all([
+      const [modelList, policy, cfg] = await Promise.all([
         authenticatedApi.listModels(),
+        authenticatedApi.getAiModelPolicy(),
         authenticatedApi.getAiConfig(),
       ])
       setModels(modelList)
+      setAllowUserByok(policy.allowUserByok)
       setAiConfig(cfg)
       // Default to the first model in the list
       if (modelList.length > 0) {
@@ -737,6 +740,7 @@ export default function OnboardingWizard({
       }}
       authenticatedApi={authenticatedApi}
       aiConfig={aiConfig}
+      allowUserByok={allowUserByok}
     />
     </>
   )

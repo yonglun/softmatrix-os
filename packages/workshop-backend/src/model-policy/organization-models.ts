@@ -42,6 +42,10 @@ function parseUrl(value: unknown, dev: boolean): string | undefined {
 
 function parseModel(value: unknown, dev: boolean): OrganizationModelRecord {
   let raw = object(value);
+  let allowedFields = new Set(["id", "name", "provider", "model", "contextWindow", "outputLimit", "apiToken", "accountId", "apiUrl"]);
+  for (let field of Object.keys(raw)) {
+    if (!allowedFields.has(field)) throw new Error(`ORG_AI_MODELS model contains unknown field: ${field}.`);
+  }
   let id = requiredString(raw.id, "id");
   let name = requiredString(raw.name, "name");
   let providerValue = requiredString(raw.provider, "provider");

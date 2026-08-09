@@ -606,16 +606,15 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
   }
 
   async setQuickModel(id: string | null): Promise<void> {
+    if (id !== null) await (await this.modelPolicy()).resolve(id);
     this.storage.quickModel.put(id);
   }
 
   async getQuickModel(): Promise<null | string> {
     let result = this.storage.quickModel.get();
-    if (result && this.storage.aiModels.get(result)) {
-      return result;
-    } else {
-      return null;
-    }
+    if (!result) return null;
+    try { await (await this.modelPolicy()).resolve(result); return result; }
+    catch { return null; }
   }
 
   async getPreferredModel(): Promise<string | null> {
