@@ -368,21 +368,34 @@ const MAX_CHAT_ATTACHMENT_TOTAL_BYTES = 5 * 1024 * 1024;
 const MAX_CHAT_ATTACHMENT_SOURCE_IMAGE_BYTES = 25 * 1024 * 1024;
 const CHAT_ATTACHMENT_IMAGE_MAX_EDGE = 1568;
 
+type AttachmentPreparationErrorCode =
+  | "encodeImage"
+  | "attachmentTooLarge"
+  | "imageTooLarge"
+  | "canvasContext";
+
+class AttachmentPreparationError extends Error {
+  constructor(readonly code: AttachmentPreparationErrorCode) {
+    super(code);
+    this.name = "AttachmentPreparationError";
+  }
+}
+
 function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality?: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("Failed to encode image.")), type, quality);
+    canvas.toBlob((blob) => blob ? resolve(blob) : reject(new AttachmentPreparationError("encodeImage")), type, quality);
   });
 }
 
-async function prepareChatAttachment(file: File): Promise<{blob: Blob, mimeType: string}> {
+export async function prepareChatAttachment(file: File): Promise<{blob: Blob, mimeType: string}> {
   if (!file.type.startsWith("image/")) {
     if (file.size > MAX_CHAT_ATTACHMENT_BYTES) {
-      throw new Error(`Attachments must be ${formatAttachmentSize(MAX_CHAT_ATTACHMENT_BYTES)} or smaller.`);
+      throw new AttachmentPreparationError("attachmentTooLarge");
     }
     return { blob: file, mimeType: file.type || "application/octet-stream" };
   }
   if (file.size > MAX_CHAT_ATTACHMENT_SOURCE_IMAGE_BYTES) {
-    throw new Error(`Images must be ${formatAttachmentSize(MAX_CHAT_ATTACHMENT_SOURCE_IMAGE_BYTES)} or smaller before resizing.`);
+    throw new AttachmentPreparationError("imageTooLarge");
   }
 
   const bitmap = await createImageBitmap(file);
@@ -399,7 +412,7 @@ async function prepareChatAttachment(file: File): Promise<{blob: Blob, mimeType:
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Failed to get 2D canvas context.");
+    if (!ctx) throw new AttachmentPreparationError("canvasContext");
     ctx.drawImage(bitmap, 0, 0, width, height);
 
     // Preserve supported source formats when resizing. In particular, converting PNG to JPEG would
@@ -409,11 +422,34 @@ async function prepareChatAttachment(file: File): Promise<{blob: Blob, mimeType:
     const quality = outputMimeType === "image/png" ? undefined : 0.85;
     const blob = await canvasToBlob(canvas, outputMimeType, quality);
     if (blob.size > MAX_CHAT_ATTACHMENT_BYTES) {
-      throw new Error(`Attachments must be ${formatAttachmentSize(MAX_CHAT_ATTACHMENT_BYTES)} or smaller.`);
+      throw new AttachmentPreparationError("attachmentTooLarge");
     }
     return { blob, mimeType: outputMimeType };
   } finally {
     bitmap.close();
+  }
+}
+
+export function attachmentPreparationErrorMessage(
+  error: unknown,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string {
+  if (!(error instanceof AttachmentPreparationError)) {
+    return error instanceof Error ? error.message : t("management.chat.processFailed");
+  }
+  switch (error.code) {
+    case "encodeImage":
+      return t("management.chat.encodeImageFailed");
+    case "attachmentTooLarge":
+      return t("management.chat.attachmentTooLarge", {
+        size: formatAttachmentSize(MAX_CHAT_ATTACHMENT_BYTES),
+      });
+    case "imageTooLarge":
+      return t("management.chat.imageTooLarge", {
+        size: formatAttachmentSize(MAX_CHAT_ATTACHMENT_SOURCE_IMAGE_BYTES),
+      });
+    case "canvasContext":
+      return t("management.chat.canvasContextFailed");
   }
 }
 
@@ -631,7 +667,7 @@ export function resolveToolCallOutput(
   return typeof gadgetId === "number" ? outputOfWorkpiece(gadgetId) : undefined;
 }
 
-function getToolCallSummary(
+export function getToolCallSummary(
   tc: AiToolCall,
   outputOf?: ToolOutputResolver,
 ): { verb: string; target?: string } {
@@ -662,7 +698,10 @@ function getToolCallSummary(
     case "createGadget": {
 
       const output = outputOf?.(tc);
-      return { verb: `Created ${output?.noun ?? "gadget"}`, target: tc.input.title };
+      return {
+        verb: chatText("tool.created", { output: output?.noun ?? chatText("tool.gadget") }),
+        target: tc.input.title,
+      };
     }
     case "executeCode": {
       // Prefer the first non-empty line as a preview. `code` may be absent while the tool call's
@@ -1594,7 +1633,7 @@ const NestedObservationRow = memo(function NestedObservationRow({
   const key = `observation-${observation.chatId}-${observation.sequence}`;
   const log = observation.actionLog;
   const label = chatText("tool.readResource", {
-    resource: log.description.title || log.resourceTitle || "resource",
+    resource: log.description.title || log.resourceTitle || chatText("tool.resource"),
   });
 
   return (
@@ -2091,7 +2130,7 @@ export const ChatInput = ({
     for (const result of prepared) {
       if (result.status === "rejected") {
         console.error("Failed to process chat attachment:", result.reason);
-        toasts.add({ title: result.reason?.message || t('management.chat.processFailed'), variant: "error" });
+        toasts.add({ title: attachmentPreparationErrorMessage(result.reason, t), variant: "error" });
         continue;
       }
 
@@ -3068,7 +3107,10 @@ export const ChatInput = ({
           <div className="sr-only" aria-live="polite">
             {slashCommandPicker.status ||
               (selectedSlashCommand
-                ? `Slash command /${selectedSlashCommand.choice.name} from ${selectedSlashCommand.choice.providerLabel} is ready to send`
+                ? t('management.chat.slashCommandReady', {
+                  name: selectedSlashCommand.choice.name,
+                  provider: selectedSlashCommand.choice.providerLabel,
+                })
                 : "")}
           </div>
           <div ref={wrapperRef} className={styles.capsuleInputWrapper}>
@@ -5463,7 +5505,7 @@ function ChatInterface({
   // chat list (with explicit chatId/title).
   const handleDeleteChat = (chatId?: number, chatTitle?: string) => {
     const id = chatId ?? selectedChatId;
-    const title = chatTitle ?? currentChatMetadata?.title ?? "this chat";
+    const title = chatTitle ?? currentChatMetadata?.title ?? t('management.chat.thisChat');
     if (id === null || id === undefined) return;
     setDeleteTarget({ id, title });
   };
@@ -6587,7 +6629,7 @@ function ChatInterface({
                         <DropdownMenu.Trigger
                           render={
                             <WorkshopIconButton
-                              aria-label={`Actions for ${chat.title}`}
+                              aria-label={t('management.chat.chatActions', { title: chat.title })}
                               onClick={(e) => e.stopPropagation()}
                               className="!h-7 !w-7 flex-shrink-0 text-kumo-inactive opacity-0 focus:opacity-100 group-hover:opacity-100 data-[popup-open]:opacity-100"
                             >

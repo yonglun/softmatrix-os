@@ -9,7 +9,13 @@ import { useTranslation } from "react-i18next";
 import ConnectAccountModal from "../ConnectAccountModal";
 import AdminPage from "../AdminPage";
 import { AuthProvider } from "../AuthContext";
-import { ChatInput } from "../ChatInterface";
+import ChatInterface, {
+  attachmentPreparationErrorMessage,
+  ChatInput,
+  getToolCallSummary,
+  prepareChatAttachment,
+} from "../ChatInterface";
+import i18n from "./i18n";
 import type { AdminApi, AuthenticatedApi, Overseer } from "@gadgets/workshop-shared/api";
 import type { RpcStub } from "capnweb";
 
@@ -97,6 +103,48 @@ describe("chat and management surface localization", () => {
     expect(chat.container.querySelector('[aria-label="选择模型"]')).not.toBeNull();
     expect(chat.container.querySelector('[aria-label="Select model"]')).toBeNull();
     chat.unmount();
+
+    const overseer = {
+      subscribeToChat: () => ({ [Symbol.dispose]() {} }),
+      subscribeToActions: async () => ({ [Symbol.dispose]() {} }),
+      listChats: async () => [],
+      listModels: async () => [],
+    } as unknown as RpcStub<Overseer>;
+    const chatList = renderWithLocale(
+      <Toasty>
+        <AuthProvider authenticatedApi={authenticatedApi} onLogout={() => {}}>
+          <ChatInterface
+            overseer={overseer}
+            selectedChatId={null}
+            onNavigateToChat={() => {}}
+            pendingConsoleLogCount={0}
+            consoleLogPreview=""
+            consoleLogSeverity="info"
+            onConsumeConsoleLogs={() => ""}
+            onDiscardConsoleLogs={() => {}}
+            onOpenGadget={() => {}}
+            outputOfWorkpiece={() => undefined}
+          />
+        </AuthProvider>
+      </Toasty>,
+      "zh-CN",
+    );
+    await act(async () => {});
+    expect(chatList.container.textContent).toContain("暂无对话");
+    expect(chatList.container.querySelector('[aria-label="筛选对话"]')).not.toBeNull();
+    expect(chatList.container.textContent).not.toContain("No conversations yet");
+    const summary = getToolCallSummary(
+      { toolName: "createGadget", input: { title: "Report" } } as never,
+      () => ({ noun: "Document" } as never),
+    );
+    expect(summary.verb).toBe("已创建 Document");
+    const attachmentError = await prepareChatAttachment(
+      new File([new Uint8Array(1024 * 1024 + 1)], "large.txt", { type: "text/plain" }),
+    ).catch((error: unknown) => error);
+    expect(attachmentPreparationErrorMessage(attachmentError, (key, options) =>
+      i18n.t(key, options),
+    )).toContain("附件大小必须不超过 1.0 MB");
+    chatList.unmount();
   });
 
   it("renders a real management modal in Chinese with an empty typed API", async () => {
