@@ -72,10 +72,10 @@ test("Softmatrix distribution retains the exact Apache-2.0 license and attributi
   ]) {
     assert.deepEqual(headingSignature(english), headingSignature(chinese));
   }
-  const documentedVars = new Set([
-    ...[deploymentEn, deploymentZh, operationsEn, operationsZh, upgradeEn, upgradeZh]
+  const documentedVars = new Set(
+    [deploymentEn, deploymentZh, operationsEn, operationsZh, upgradeEn, upgradeZh]
       .flatMap((doc) => [...doc.matchAll(/`([A-Z][A-Z0-9_]{2,})`/g)].map((match) => match[1])),
-  ]);
+  );
   for (const code of ["MODEL_CREDENTIAL_INVALID", "OIDC_DOMAIN_NOT_ALLOWED", "OIDC_PROVIDER_UNAVAILABLE"]) {
     documentedVars.delete(code);
   }

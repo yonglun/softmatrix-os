@@ -36,6 +36,23 @@ const EXPECTED_UPSTREAM_REFERENCES = new Map([
     "# Synchronizing with Cloudflare OS",
     "Softmatrix OS is derived from [Cloudflare OS](https://github.com/cloudflare/cloudflare-os)",
   ]],
+  ["THIRD_PARTY_NOTICES.md", [
+    "Cloudflare OS attribution and notice remain in [`NOTICE`](NOTICE). This file records the",
+  ]],
+  ["docs/softmatrix/deployment.en.md", [
+    "It does not use Cloudflare OS hosted deployment links.",
+    "Softmatrix OS is an independent Apache-2.0 project derived from Cloudflare OS. Cloudflare does",
+  ]],
+  ["docs/softmatrix/deployment.zh-CN.md", [
+    "本手册用于从经过审查的候选版本部署独立的 Softmatrix OS 实例，不使用 Cloudflare OS 的托管部署链接。",
+    "Softmatrix OS 是从 Cloudflare OS 衍生的独立 Apache-2.0 项目。Cloudflare 不运营此发行版，也不提供其",
+  ]],
+  ["docs/softmatrix/upgrade.en.md", [
+    "Upgrades are maintained by Softmatrix release owners. Upstream Cloudflare OS changes require a",
+  ]],
+  ["docs/softmatrix/upgrade.zh-CN.md", [
+    "升级由 Softmatrix release owner 维护。Cloudflare OS 上游变更必须单独进行同步审查，不会静默进入生产版本。",
+  ]],
 ]);
 
 const PRODUCTION_SITE_LOGO_FILES = [
