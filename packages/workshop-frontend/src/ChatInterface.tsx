@@ -435,7 +435,7 @@ export function attachmentPreparationErrorMessage(
   t: (key: string, options?: Record<string, unknown>) => string,
 ): string {
   if (!(error instanceof AttachmentPreparationError)) {
-    return error instanceof Error ? error.message : t("management.chat.processFailed");
+    return t("management.chat.processFailed");
   }
   switch (error.code) {
     case "encodeImage":

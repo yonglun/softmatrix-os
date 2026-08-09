@@ -144,6 +144,9 @@ describe("chat and management surface localization", () => {
     expect(attachmentPreparationErrorMessage(attachmentError, (key, options) =>
       i18n.t(key, options),
     )).toContain("附件大小必须不超过 1.0 MB");
+    expect(attachmentPreparationErrorMessage(new Error("browser decode text"), (key, options) =>
+      i18n.t(key, options),
+    )).toBe("处理附件失败");
     chatList.unmount();
   });
 
