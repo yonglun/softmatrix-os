@@ -57,6 +57,7 @@ test("Softmatrix distribution retains the exact Apache-2.0 license and attributi
   assert.match(readmeZh, /Apache License 2\.0/);
   assert.doesNotMatch(readme, /cloudflare\/cloudflare-os\/discussions/);
   assert.doesNotMatch(contributing, /cloudflare\/cloudflare-os\/discussions/);
+  assert.doesNotMatch(contributing, /cloudflare\.com\/cla/i);
   assert.match(compliance, /THIRD_PARTY_NOTICES\.md/);
   assert.match(compliance, /release-blocking/i);
   assert.match(upstreamSync, /first business day of every month/i);
