@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react'
 import { DropdownMenu, useKumoToastManager } from '@cloudflare/kumo'
 import { useAuthenticatedApi } from '../AuthContext'
 import {
-  AiChatAuthorInfo,
+  AiModelCatalogItem,
+  AiModelPolicyInfo,
   AiGatewayInfo,
   AiModelProvider,
   SUGGESTED_MODELS,
@@ -40,7 +41,7 @@ function ModelRow({
   onDelete,
   onSetQuick,
 }: {
-  model: AiChatAuthorInfo
+  model: AiModelCatalogItem
   isQuick: boolean
   isBuiltIn: boolean
   onDelete: () => void
@@ -77,6 +78,9 @@ function ModelRow({
               {t('management.providers.builtIn')}
             </span>
           )}
+          <span className="shrink-0 rounded-full bg-kumo-tint px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.2px] text-kumo-subtle">
+            {model.source === 'organization' ? t('management.providers.organization') : t('management.providers.personal')}
+          </span>
           {isQuick && (
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[rgba(255,72,1,0.10)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.4px] text-kumo-brand">
               <Lightning size={9} weight="fill" />
@@ -107,7 +111,7 @@ function ModelRow({
               <Lightning size={13} className="mr-2" weight={isQuick ? 'fill' : 'regular'} />
               {isQuick ? t('management.providers.clearQuick') : t('management.providers.setQuick')}
             </DropdownMenu.Item>
-            {!isBuiltIn && (
+            {!isBuiltIn && model.canDelete && (
               <DropdownMenu.Item variant="danger" onClick={onDelete} className={MENU_ITEM_DANGER}>
                 <Trash size={13} className="mr-2" />
                 {t('management.providers.delete')}
@@ -138,9 +142,10 @@ function ProvidersPage() {
 
   const { authenticatedApi } = useAuthenticatedApi()
   const toasts = useKumoToastManager()
-  const [models, setModels] = useState<AiChatAuthorInfo[]>([])
+  const [models, setModels] = useState<AiModelCatalogItem[]>([])
   const [quickModel, setQuickModel] = useState<string | null>(null)
   const [aiConfig, setAiConfig] = useState<AiGatewayInfo | null>(null)
+  const [modelPolicy, setModelPolicy] = useState<AiModelPolicyInfo>({ allowUserByok: true, defaultModelId: null })
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
@@ -150,12 +155,14 @@ function ProvidersPage() {
   const fetchAll = async () => {
     setLoadError(false)
     try {
-      const [modelList, qm, cfg] = await Promise.all([
-        authenticatedApi.listModels(),
+      const [modelList, policy, qm, cfg] = await Promise.all([
+        authenticatedApi.listModelCatalog(),
+        authenticatedApi.getAiModelPolicy(),
         authenticatedApi.getQuickModel(),
         authenticatedApi.getAiConfig(),
       ])
       setModels(modelList)
+      setModelPolicy(policy)
       setQuickModel(qm)
       setAiConfig(cfg)
     } catch (err) {
@@ -176,7 +183,7 @@ function ProvidersPage() {
     return PROVIDER_ORDER.some((p) => enabled.has(p) && modelId in SUGGESTED_MODELS[p])
   }
 
-  const handleDelete = async (model: AiChatAuthorInfo) => {
+  const handleDelete = async (model: AiModelCatalogItem) => {
     if (!confirm(t('management.providers.deleteConfirm', { name: model.name }))) return
     setDeletingId(model.id)
     try {
@@ -217,10 +224,10 @@ function ProvidersPage() {
             {t('management.providers.description')}
           </p>
         </div>
-        <button type="button" onClick={() => setSheetOpen(true)} className={PRIMARY_BTN}>
+        {modelPolicy.allowUserByok && <button type="button" onClick={() => setSheetOpen(true)} className={PRIMARY_BTN}>
           <Plus size={14} weight="bold" />
           {t('management.providers.add')}
-        </button>
+        </button>}
       </header>
 
       {/* Search — hidden when the user has no models */}
@@ -260,6 +267,12 @@ function ProvidersPage() {
                 </span>
               </Notice>
             )}
+            {!modelPolicy.allowUserByok && (
+              <Notice>
+                <Lightning size={15} className="mt-px shrink-0 text-kumo-brand" />
+                <span>{t('management.providers.byokDisabled')}</span>
+              </Notice>
+            )}
           </div>
         )}
 
@@ -288,10 +301,10 @@ function ProvidersPage() {
                 {t('management.providers.emptyDescription')}
               </p>
             </div>
-            <button type="button" onClick={() => setSheetOpen(true)} className={PRIMARY_BTN}>
+            {modelPolicy.allowUserByok && <button type="button" onClick={() => setSheetOpen(true)} className={PRIMARY_BTN}>
               <Plus size={14} weight="bold" />
               {t('management.providers.addFirst')}
-            </button>
+            </button>}
           </div>
         ) : filtered.length === 0 ? (
           <div className="py-12 text-center text-sm text-kumo-inactive">{t('management.providers.noResults')}</div>
@@ -323,6 +336,7 @@ function ProvidersPage() {
         }}
         authenticatedApi={authenticatedApi}
         aiConfig={aiConfig}
+        allowUserByok={modelPolicy.allowUserByok}
       />
     </div>
   )

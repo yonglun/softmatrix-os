@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Dialog, Button, Input, Select, SensitiveInput, Collapsible, useKumoToastManager } from '@cloudflare/kumo'
-import { AiChatAuthorInfo, AiModelConfig, AiModelProvider, AiGatewayInfo, SUGGESTED_MODELS } from '@gadgets/workshop-shared/api'
+import { AiChatAuthorInfo, AiModelConfig, AiModelProvider, AiGatewayInfo, ModelErrorCode, SUGGESTED_MODELS } from '@gadgets/workshop-shared/api'
 import { RpcStub } from 'capnweb'
 import { AuthenticatedApi } from '@gadgets/workshop-shared/api'
 import { useTranslation } from 'react-i18next'
@@ -11,6 +11,7 @@ interface AddModelModalProps {
   onSuccess: () => void
   authenticatedApi: RpcStub<AuthenticatedApi>
   aiConfig: AiGatewayInfo | null
+  allowUserByok?: boolean
 }
 
 type SelectionType =
@@ -90,7 +91,7 @@ function buildOptions(gatewayMode: boolean, enabledProviders: Set<string> | null
   return options
 }
 
-export default function AddModelModal({ visible, onCancel, onSuccess, authenticatedApi, aiConfig }: AddModelModalProps) {
+export default function AddModelModal({ visible, onCancel, onSuccess, authenticatedApi, aiConfig, allowUserByok = true }: AddModelModalProps) {
   const { t } = useTranslation()
   const toasts = useKumoToastManager()
 
@@ -204,11 +205,26 @@ export default function AddModelModal({ visible, onCancel, onSuccess, authentica
         ...(!gatewayMode && apiUrl.trim() && { apiUrl: apiUrl.trim() }),
       }
 
+      const connection = await authenticatedApi.testModelConnection(profile, config)
+      if (!connection.ok) {
+        const messageKey: Record<ModelErrorCode, string> = {
+          MODEL_DISABLED: 'management.models.connectionDisabled',
+          MODEL_CREDENTIAL_INVALID: 'management.models.connectionCredentialInvalid',
+          MODEL_RATE_LIMITED: 'management.models.connectionRateLimited',
+          MODEL_BALANCE_EXHAUSTED: 'management.models.connectionBalanceExhausted',
+          MODEL_PROVIDER_UNAVAILABLE: 'management.models.connectionUnavailable',
+          BYOK_DISABLED: 'management.models.byokDisabled',
+        }
+        toasts.add({
+          title: t(messageKey[connection.error.code], { correlationId: connection.error.correlationId }),
+          variant: 'error',
+        })
+        return
+      }
       await authenticatedApi.addModel(profile, config)
       toasts.add({ title: t('management.models.added'), variant: 'success' })
       onSuccess()
-    } catch (error: any) {
-      console.error('Failed to add model:', error)
+    } catch {
       toasts.add({ title: t('management.models.addFailed'), variant: 'error' })
     } finally {
       setLoading(false)
@@ -377,7 +393,7 @@ export default function AddModelModal({ visible, onCancel, onSuccess, authentica
             variant="primary"
             onClick={handleSubmit}
             loading={loading}
-            disabled={!selection}
+            disabled={!selection || !allowUserByok}
           >
             {t('management.models.add')}
           </Button>

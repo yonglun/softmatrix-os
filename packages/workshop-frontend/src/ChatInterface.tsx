@@ -69,6 +69,7 @@ import {
   AiChatSubscriber,
   ActionLogEntry,
   AiChatAuthorInfo,
+  ModelErrorCode,
   CapsuleSpecifier,
   AiChatStreamEvent,
   AiToolCall,
@@ -4061,6 +4062,11 @@ function inferSelectedModelFromMessages(messages: AiChatMessage[]): string | nul
   return null;
 }
 
+function parseModelError(message: string): { code: ModelErrorCode; correlationId: string } | null {
+  const match = /^(MODEL_DISABLED|MODEL_CREDENTIAL_INVALID|MODEL_RATE_LIMITED|MODEL_BALANCE_EXHAUSTED|MODEL_PROVIDER_UNAVAILABLE|BYOK_DISABLED) \(([^)]+)\)$/.exec(message);
+  return match ? { code: match[1] as ModelErrorCode, correlationId: match[2] } : null;
+}
+
 function fallbackToStoredModelSelection(
   modelId: string | null,
   availableModels: AiChatAuthorInfo[],
@@ -4296,7 +4302,7 @@ function ChatInterface({
   const toasts = useKumoToastManager();
   const { t } = useTranslation();
   const { locale } = useLocale();
-  const { currentUser } = useAuthenticatedApi();
+  const { authenticatedApi, currentUser } = useAuthenticatedApi();
   const getOverseer = useCallback(() => overseer, [overseer]);
   const cacheRef = useRef<ChatCache>({
     chats: new Map(),
@@ -4378,6 +4384,7 @@ function ChatInterface({
     [],
   );
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [defaultModelId, setDefaultModelId] = useState<string | null>(null);
   const [sidebarActiveTab, setSidebarActiveTab] = useState<
     "chat" | "connections"
   >("chat");
@@ -4870,7 +4877,7 @@ function ChatInterface({
   // Update selected model when switching chats
   useEffect(() => {
     if (selectedChatId === null) {
-      setSelectedModel(getStoredSelectedModel(availableModels));
+      setSelectedModel(getStoredSelectedModel(availableModels, defaultModelId));
     } else {
       // For existing threads:
       // 1. If an AI agent is currently active, use that agent's model
@@ -4886,7 +4893,7 @@ function ChatInterface({
         );
       }
     }
-  }, [selectedChatId, availableModels, currentMessages, activeAgent]);
+  }, [selectedChatId, availableModels, currentMessages, activeAgent, defaultModelId]);
 
   // Keep the ref in sync with selectedChatId state
   useEffect(() => {
@@ -5251,9 +5258,10 @@ function ChatInterface({
 
           // After subscribing, load the list of chats and models
           // This is safe because subscription will catch any new activity
-          const [chats, models] = await Promise.all([
+          const [chats, models, policy] = await Promise.all([
             overseer.listChats(),
             overseer.listModels(),
+            authenticatedApi.getAiModelPolicy?.() ?? Promise.resolve({ allowUserByok: true, defaultModelId: null }),
           ]);
 
           chats.forEach((chat) => {
@@ -5263,8 +5271,9 @@ function ChatInterface({
           setChatListReady(true);
 
           setAvailableModels(models);
+          setDefaultModelId(policy.defaultModelId);
 
-          setSelectedModel(getStoredSelectedModel(models));
+          setSelectedModel(getStoredSelectedModel(models, policy.defaultModelId));
 
           forceUpdate();
         }
@@ -5291,7 +5300,7 @@ function ChatInterface({
       }
       // Note: subscriberRef.current stays alive for potential resubscription
     };
-  }, [overseer]);
+  }, [authenticatedApi, overseer]);
 
   // Patch cached chat messages on action upserts.
   useActionEntries(overseer, (record) => {
@@ -7349,6 +7358,18 @@ function ChatInterface({
                             const isLast =
                               msg.sequence === lastMessageSequence &&
                               !isAgentActive;
+                            const modelError = parseModelError(msg.message);
+                            const modelErrorMessageKey: Record<ModelErrorCode, string> = {
+                              MODEL_DISABLED: 'management.chat.modelDisabled',
+                              MODEL_CREDENTIAL_INVALID: 'management.chat.modelCredentialInvalid',
+                              MODEL_RATE_LIMITED: 'management.chat.modelRateLimited',
+                              MODEL_BALANCE_EXHAUSTED: 'management.chat.modelBalanceExhausted',
+                              MODEL_PROVIDER_UNAVAILABLE: 'management.chat.modelUnavailable',
+                              BYOK_DISABLED: 'management.chat.modelByokDisabled',
+                            };
+                            const visibleError = modelError
+                              ? t(modelErrorMessageKey[modelError.code], { correlationId: modelError.correlationId })
+                              : msg.message;
                             const expanded = expandedErrors.has(key);
                             return (
                               <div className="group/work max-w-[860px] text-[14px] leading-5 tracking-[-0.25px] text-kumo-subtle">
@@ -7367,7 +7388,7 @@ function ChatInterface({
                                         <span className="flex min-w-0 flex-1 items-center gap-1">
                                           <span className="min-w-0 truncate">
                                             <span className="font-medium text-kumo-danger">{t('management.chat.errorPrefix')}: </span>
-                                            <span className="text-kumo-subtle">{msg.message}</span>
+                                            <span className="text-kumo-subtle">{visibleError}</span>
                                           </span>
                                           <CaretRight
                                             size={13}
@@ -7402,6 +7423,20 @@ function ChatInterface({
                                         {t('management.chat.retry')}
                                       </button>
                                     </Tooltip>
+                                  )}
+                                  {isLast && modelError && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const next = availableModels.find((model) => model.id !== selectedModel)?.id ?? null;
+                                        handleModelChange(next);
+                                      }}
+                                      disabled={!availableModels.some((model) => model.id !== selectedModel)}
+                                      className="flex flex-shrink-0 cursor-pointer items-center gap-1 rounded-md px-1 py-0.5 text-[13px] leading-4 font-medium text-kumo-default transition-[color,opacity,transform] duration-150 ease-out hover:text-kumo-default-hover focus-visible:text-kumo-default-hover focus-visible:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                                    >
+                                      <Swap size={12} weight="bold" />
+                                      {t('management.chat.switchModel')}
+                                    </button>
                                   )}
                                 </div>
                                 {expanded && (
