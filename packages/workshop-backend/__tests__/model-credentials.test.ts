@@ -15,9 +15,31 @@ describe("model credential testing", () => {
   it("returns only a stable redacted result when model setup fails", async () => {
     let result = await testModelConnection({} as Cloudflare.Env,
       { type: "agent", id: "mine", name: "Mine" },
-      { provider: "cloudflare", model: "@cf/test", accountId: "account", apiToken: "top-secret" });
+      {
+        provider: "cloudflare",
+        model: "@cf/test",
+        accountId: "org-model-secret-fixture",
+        apiToken: "byok-secret-fixture",
+      });
     expect(result.ok).toBe(false);
-    expect(JSON.stringify(result)).not.toContain("top-secret");
+    expect(JSON.stringify(result)).not.toContain("org-model-secret-fixture");
+    expect(JSON.stringify(result)).not.toContain("byok-secret-fixture");
     if (!result.ok) expect(result.error.correlationId).toBeTruthy();
+  });
+
+  it("keeps provider failures to a stable code and correlation id", async () => {
+    const result = await testModelConnection(
+      {} as Cloudflare.Env,
+      { type: "agent", id: "fixture-agent", name: "Fixture Agent" },
+      { provider: "openai", model: "fixture-model", apiUrl: "https://provider.invalid", apiToken: "fixture-model-secret" },
+    );
+    expect(result).toMatchObject({
+      ok: false,
+      error: {
+        code: expect.stringMatching(/^MODEL_/),
+        correlationId: expect.any(String),
+      },
+    });
+    expect(JSON.stringify(result)).not.toContain("fixture-model-secret");
   });
 });

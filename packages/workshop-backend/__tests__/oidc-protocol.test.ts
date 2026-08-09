@@ -63,8 +63,13 @@ async function fixtureFetch(invalid?: string) {
       const claims = {
         iss: invalid === "issuer" ? "https://other.example.com" : ISSUER,
         sub: "subject-123",
-        aud: invalid === "audience" ? "different-client" : config.clientId,
-        iat: now - 10,
+        aud: invalid === "audience"
+          ? "different-client"
+          : invalid === "multiple-audience"
+            ? [config.clientId, "another-client"]
+            : config.clientId,
+        azp: invalid === "multiple-audience" ? undefined : config.clientId,
+        iat: invalid === "not-yet-valid" ? now + 120 : now - 10,
         exp: invalid === "expired" ? now - 1 : now + 300,
         nonce: invalid === "nonce" ? "different-nonce" : expectedNonce,
         email: " Alice@Example.COM ",
@@ -129,7 +134,7 @@ describe("OIDC authorization-code protocol", () => {
     )).rejects.toMatchObject({ code: "OIDC_PROVIDER_UNAVAILABLE" });
   });
 
-  it.each(["issuer", "audience", "nonce", "expired"])(
+  it.each(["issuer", "audience", "multiple-audience", "nonce", "expired", "not-yet-valid"])(
     "rejects an invalid %s ID Token claim",
     async (invalid) => {
       const { fetchImpl, setExpectedNonce } = await fixtureFetch(invalid);
@@ -150,5 +155,31 @@ describe("OIDC authorization-code protocol", () => {
     expect(error).toBeInstanceOf(OidcProtocolError);
     expect(error).toMatchObject({ code: "OIDC_EMAIL_UNVERIFIED" });
     expect(JSON.stringify(error)).not.toContain("fixture-secret");
+  });
+
+  it("rejects duplicate callback state or code parameters", async () => {
+    const { fetchImpl } = await fixtureFetch();
+    const { stored } = await createAuthorizationRequest(config, "state-123", { fetch: fetchImpl });
+
+    await expect(exchangeAuthorizationCode(
+      config,
+      stored,
+      `${config.redirectUri}?code=one&code=two&state=state-123`,
+      { fetch: fetchImpl },
+    )).rejects.toMatchObject({ code: "OIDC_STATE_INVALID" });
+    await expect(exchangeAuthorizationCode(
+      config,
+      stored,
+      `${config.redirectUri}?code=one&state=state-123&state=state-123`,
+      { fetch: fetchImpl },
+    )).rejects.toMatchObject({ code: "OIDC_STATE_INVALID" });
+  });
+
+  it("rejects an attempt created in the future", async () => {
+    const { fetchImpl } = await fixtureFetch();
+    const { stored } = await createAuthorizationRequest(config, "state-123", { fetch: fetchImpl });
+    const future: StoredOidcRequest = { ...stored, createdAt: Date.now() + 61_000 };
+    await expect(exchangeAuthorizationCode(config, future, callback("state-123"), { fetch: fetchImpl }))
+      .rejects.toMatchObject({ code: "OIDC_STATE_INVALID" });
   });
 });

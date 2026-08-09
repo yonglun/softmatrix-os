@@ -189,7 +189,8 @@ This differs from most agent harnesses, where MCP servers are configured upfront
 Cloudflare's [hosted deployment flow](https://os.cloudflare.app/deploy) and
 [deployment starter](https://github.com/cloudflare/cloudflare-os-starter) target the upstream
 Cloudflare OS project, not this Softmatrix OS fork. Softmatrix-specific production deployment
-instructions will be published before the first release. Do not use those upstream flows expecting
+instructions are available in the bilingual [deployment runbook](docs/softmatrix/deployment.en.md)
+and [部署手册](docs/softmatrix/deployment.zh-CN.md). Do not use those upstream flows expecting
 them to deploy the changes in this repository.
 
 ### Run locally
@@ -206,7 +207,8 @@ Your data will be stored in a subdirectory named `.wrangler`.
 
 ### Deploy to your own server using `workerd`
 
-**COMING SOON**
+See the [operations](docs/softmatrix/operations.en.md) / [运维](docs/softmatrix/operations.zh-CN.md)
+and [upgrade](docs/softmatrix/upgrade.en.md) / [升级](docs/softmatrix/upgrade.zh-CN.md) runbooks.
 
 Softmatrix OS can run entirely on `workerd`, Cloudflare's open source runtime for Workers. In fact, the "run locally" instructions above use `workerd` under the hood. We are still working on documentation and tooling to help you smoothly deploy the OS on top of `workerd` on your own servers. If you are feeling adventurous, [read the low-level documentation for workerd config](https://github.com/cloudflare/workerd/blob/main/src/workerd/server/workerd.capnp) (or point your agent at it) and have a go.
 

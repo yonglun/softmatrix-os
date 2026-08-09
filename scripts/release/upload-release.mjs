@@ -17,8 +17,12 @@
 
 import { readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { AwsClient } from "aws4fetch";
 import { assetR2Key, moduleR2Key } from "./manifest-lib.mjs";
+import {
+  LEGAL_FILENAMES, LEGAL_MANIFEST_FILENAME, validateLegalArtifacts,
+} from "./legal-artifacts.mjs";
 
 const UPLOAD_CONCURRENCY = 8;
 
@@ -39,28 +43,32 @@ function parseArgs(argv) {
   return args;
 }
 
-async function main() {
-  const args = parseArgs(process.argv.slice(2));
-  const endpoint = requireEnv("R2_ENDPOINT").replace(/\/$/, "");
-  const bucket = requireEnv("R2_BUCKET");
-  const client = new AwsClient({
+function createClient() {
+  return new AwsClient({
     accessKeyId: requireEnv("R2_ACCESS_KEY_ID"),
     secretAccessKey: requireEnv("R2_SECRET_ACCESS_KEY"),
     service: "s3",
     region: "auto",
   });
-  const keyUrl = (key) => `${endpoint}/${bucket}/${key}`;
+}
 
-  const manifest = JSON.parse(readFileSync(join(args.release, "manifest.json"), "utf8"));
+export async function uploadRelease({ release, candidate = false, client, endpoint, bucket }) {
+  const releaseDir = resolve(release);
+  validateLegalArtifacts(releaseDir);
+  const manifest = JSON.parse(readFileSync(join(releaseDir, "manifest.json"), "utf8"));
+  const targetEndpoint = (endpoint ?? requireEnv("R2_ENDPOINT")).replace(/\/$/, "");
+  const targetBucket = bucket ?? requireEnv("R2_BUCKET");
+  const r2 = client ?? createClient();
+  const keyUrl = (key) => `${targetEndpoint}/${targetBucket}/${key}`;
 
   const blobs = [
-    ...readdirSync(join(args.release, "modules")).map((sha256) => ({
+    ...readdirSync(join(releaseDir, "modules")).map((sha256) => ({
       key: moduleR2Key(sha256),
-      path: join(args.release, "modules", sha256),
+      path: join(releaseDir, "modules", sha256),
     })),
-    ...readdirSync(join(args.release, "assets")).map((hash) => ({
+    ...readdirSync(join(releaseDir, "assets")).map((hash) => ({
       key: assetR2Key(hash),
-      path: join(args.release, "assets", hash),
+      path: join(releaseDir, "assets", hash),
     })),
   ];
 
@@ -71,7 +79,7 @@ async function main() {
     for (;;) {
       const blob = queue.shift();
       if (!blob) return;
-      const head = await client.fetch(keyUrl(blob.key), { method: "HEAD" });
+      const head = await r2.fetch(keyUrl(blob.key), { method: "HEAD" });
       if (head.status === 200) {
         skipped++;
         continue;
@@ -79,7 +87,7 @@ async function main() {
       if (head.status !== 404) {
         throw new Error(`HEAD ${blob.key}: unexpected status ${head.status}`);
       }
-      const put = await client.fetch(keyUrl(blob.key), {
+      const put = await r2.fetch(keyUrl(blob.key), {
         method: "PUT",
         body: readFileSync(blob.path),
       });
@@ -92,19 +100,42 @@ async function main() {
   await Promise.all(Array.from({ length: UPLOAD_CONCURRENCY }, worker));
   console.log(`blobs: ${uploaded} uploaded, ${skipped} already present`);
 
-  const manifestKey =
-    `${args.candidate ? "candidates" : "releases"}/${manifest.releaseId}/manifest.json`;
-  const put = await client.fetch(keyUrl(manifestKey), {
+  const prefix = `${candidate ? "candidates" : "releases"}/${manifest.releaseId}`;
+  // Legal objects are deliberately sequential and precede the release manifest. This keeps
+  // manifest-last visibility while making every candidate self-contained for audit/rollback.
+  for (const name of LEGAL_FILENAMES) {
+    const key = `${prefix}/legal/${name}`;
+    const putLegal = await r2.fetch(keyUrl(key), {
+      method: "PUT",
+      body: readFileSync(join(releaseDir, "legal", name)),
+    });
+    if (!putLegal.ok) throw new Error(`PUT ${key}: ${putLegal.status} ${await putLegal.text()}`);
+  }
+  const legalManifestKey = `${prefix}/${LEGAL_MANIFEST_FILENAME}`;
+  const putLegalManifest = await r2.fetch(keyUrl(legalManifestKey), {
     method: "PUT",
-    body: readFileSync(join(args.release, "manifest.json")),
+    body: readFileSync(join(releaseDir, LEGAL_MANIFEST_FILENAME)),
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!putLegalManifest.ok) {
+    throw new Error(`PUT ${legalManifestKey}: ${putLegalManifest.status} ${await putLegalManifest.text()}`);
+  }
+
+  const manifestKey = `${prefix}/manifest.json`;
+  const put = await r2.fetch(keyUrl(manifestKey), {
+    method: "PUT",
+    body: readFileSync(join(releaseDir, "manifest.json")),
     headers: { "Content-Type": "application/json" },
   });
   if (!put.ok) {
     throw new Error(`PUT ${manifestKey}: ${put.status} ${await put.text()}`);
   }
-  console.log(args.candidate
+  console.log(candidate
     ? `candidate uploaded (not yet visible to the deploy service): ${manifestKey}`
     : `release complete: ${manifestKey}`);
 }
 
-await main();
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const args = parseArgs(process.argv.slice(2));
+  await uploadRelease({ release: args.release, candidate: args.candidate });
+}

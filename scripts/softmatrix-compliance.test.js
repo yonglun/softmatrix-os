@@ -19,7 +19,8 @@ centralized product metadata, and compliance controls. The Git history records t
 `;
 
 test("Softmatrix distribution retains the exact Apache-2.0 license and attribution", async () => {
-  const [license, notice, readme, readmeZh, contributing, compliance, upstreamSync, releasePlan] =
+  const [license, notice, readme, readmeZh, contributing, compliance, upstreamSync, releasePlan,
+    envDts, deploymentEn, deploymentZh, operationsEn, operationsZh, upgradeEn, upgradeZh] =
     await Promise.all([
       readFile(new URL("../LICENSE", import.meta.url)),
       readFile(new URL("../NOTICE", import.meta.url), "utf8"),
@@ -32,6 +33,13 @@ test("Softmatrix distribution retains the exact Apache-2.0 license and attributi
         new URL("../docs/superpowers/plans/2026-08-07-softmatrix-release-hardening.md", import.meta.url),
         "utf8",
       ),
+      readFile(new URL("../packages/workshop-backend/src/env.d.ts", import.meta.url), "utf8"),
+      readFile(new URL("../docs/softmatrix/deployment.en.md", import.meta.url), "utf8"),
+      readFile(new URL("../docs/softmatrix/deployment.zh-CN.md", import.meta.url), "utf8"),
+      readFile(new URL("../docs/softmatrix/operations.en.md", import.meta.url), "utf8"),
+      readFile(new URL("../docs/softmatrix/operations.zh-CN.md", import.meta.url), "utf8"),
+      readFile(new URL("../docs/softmatrix/upgrade.en.md", import.meta.url), "utf8"),
+      readFile(new URL("../docs/softmatrix/upgrade.zh-CN.md", import.meta.url), "utf8"),
     ]);
 
   assert.equal(createHash("sha256").update(license).digest("hex"), APACHE_2_LICENSE_SHA256);
@@ -51,4 +59,28 @@ test("Softmatrix distribution retains the exact Apache-2.0 license and attributi
   assert.match(releasePlan, /scripts\/release\/upload-release\.mjs/);
   assert.match(releasePlan, /scripts\/release\/promote-release\.mjs/);
   assert.match(releasePlan, /scripts\/release-legal-artifacts\.test\.js/);
+
+  function headingSignature(markdown) {
+    return markdown.split("\n")
+      .filter((line) => /^#{1,6} [^#]/.test(line))
+      .map((line) => line.replace(/^(#+)\s+/, "$1 ").trim());
+  }
+  for (const [english, chinese] of [
+    [deploymentEn, deploymentZh],
+    [operationsEn, operationsZh],
+    [upgradeEn, upgradeZh],
+  ]) {
+    assert.deepEqual(headingSignature(english), headingSignature(chinese));
+  }
+  const documentedVars = new Set([
+    ...[deploymentEn, deploymentZh, operationsEn, operationsZh, upgradeEn, upgradeZh]
+      .flatMap((doc) => [...doc.matchAll(/`([A-Z][A-Z0-9_]{2,})`/g)].map((match) => match[1])),
+  ]);
+  for (const code of ["MODEL_CREDENTIAL_INVALID", "OIDC_DOMAIN_NOT_ALLOWED", "OIDC_PROVIDER_UNAVAILABLE"]) {
+    documentedVars.delete(code);
+  }
+  for (const variable of documentedVars) {
+    assert.match(envDts, new RegExp(`\\b${variable}\\b`),
+      `${variable} is documented but missing from workshop-backend/src/env.d.ts`);
+  }
 });
