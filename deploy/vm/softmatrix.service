@@ -1,0 +1,24 @@
+[Unit]
+Description=Softmatrix OS standalone workerd
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=softmatrix
+Group=softmatrix
+WorkingDirectory=/opt/softmatrix/current
+EnvironmentFile=-/etc/softmatrix/softmatrix.env
+ExecStart=/usr/local/bin/workerd serve /opt/softmatrix/current/runtime/workerd.capnp config --directory-path data=/var/lib/softmatrix/data --directory-path objects=/var/lib/softmatrix/objects --socket-addr http=127.0.0.1:8787
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/softmatrix /opt/softmatrix
+LockPersonality=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=multi-user.target
