@@ -1,0 +1,6 @@
+# Create the persistent directories consumed by the standalone workerd profile.
+d /var/lib/softmatrix 0750 softmatrix softmatrix -
+d /var/lib/softmatrix/data 0750 softmatrix softmatrix -
+d /var/lib/softmatrix/data/kv 0750 softmatrix softmatrix -
+d /var/lib/softmatrix/objects 0750 softmatrix softmatrix -
+d /var/lib/softmatrix/objects/r2 0750 softmatrix softmatrix -
