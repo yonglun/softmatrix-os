@@ -6,6 +6,7 @@ import { isEmailDomainAllowed, normalizeVerifiedEmail } from "./email-identity.j
 import {
   createAuthorizationRequest,
   exchangeAuthorizationCode,
+  OIDC_ATTEMPT_TTL_MS,
   OidcProtocolError,
   type StoredOidcRequest,
 } from "./oidc-protocol.js";
@@ -43,6 +44,7 @@ export class OidcLoginDurableObject extends DurableObject<Cloudflare.Env> {
         request: stored,
         completed: false,
       });
+      await this.ctx.storage.setAlarm(stored.createdAt + OIDC_ATTEMPT_TTL_MS);
       return { url: url.toString() };
     });
   }
@@ -50,6 +52,7 @@ export class OidcLoginDurableObject extends DurableObject<Cloudflare.Env> {
   async awaitResult(): Promise<OidcLoginResult> {
     const state = await this.ctx.storage.get<OidcAttemptState>(STORAGE_KEY);
     if (state?.result) return state.result;
+    if (!state) return failure("OIDC_STATE_INVALID");
     return await new Promise<OidcLoginResult>(resolve => {
       this.#waiters.push(resolve);
     });
@@ -105,5 +108,16 @@ export class OidcLoginDurableObject extends DurableObject<Cloudflare.Env> {
       for (const resolve of waiters) resolve(result);
       return result;
     });
+  }
+
+  async alarm(): Promise<void> {
+    const state = await this.ctx.storage.get<OidcAttemptState>(STORAGE_KEY);
+    if (state && !state.result) {
+      const result = failure("OIDC_STATE_INVALID");
+      const waiters = this.#waiters;
+      this.#waiters = [];
+      for (const resolve of waiters) resolve(result);
+    }
+    await this.ctx.storage.deleteAll();
   }
 }
