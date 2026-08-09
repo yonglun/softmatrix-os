@@ -52,11 +52,11 @@ function ModelRow({
     <div
       role="button"
       tabIndex={0}
-      onClick={onSetQuick}
+      onClick={() => { if (model.enabled) onSetQuick() }}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
-          onSetQuick()
+          if (model.enabled) onSetQuick()
         }
       }}
       title={isQuick ? t('management.providers.clearQuick') : t('management.providers.setQuick')}
@@ -81,6 +81,12 @@ function ModelRow({
           <span className="shrink-0 rounded-full bg-kumo-tint px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.2px] text-kumo-subtle">
             {model.source === 'organization' ? t('management.providers.organization') : t('management.providers.personal')}
           </span>
+          <span className="shrink-0 rounded-full bg-kumo-tint px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.2px] text-kumo-subtle">
+            {model.enabled ? t('management.providers.enabled') : t('management.providers.disabled')}
+          </span>
+          {model.isDefault && <span className="shrink-0 rounded-full bg-kumo-tint px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.2px] text-kumo-subtle">
+            {t('management.providers.default')}
+          </span>}
           {isQuick && (
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[rgba(255,72,1,0.10)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.4px] text-kumo-brand">
               <Lightning size={9} weight="fill" />
@@ -107,7 +113,7 @@ function ModelRow({
             }
           />
           <DropdownMenu.Content className={MENU_CONTENT}>
-            <DropdownMenu.Item onClick={onSetQuick} className={MENU_ITEM}>
+            <DropdownMenu.Item onClick={onSetQuick} disabled={!model.enabled} className={MENU_ITEM}>
               <Lightning size={13} className="mr-2" weight={isQuick ? 'fill' : 'regular'} />
               {isQuick ? t('management.providers.clearQuick') : t('management.providers.setQuick')}
             </DropdownMenu.Item>

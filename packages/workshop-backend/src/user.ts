@@ -557,7 +557,7 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
   }
 
   async getAiModelPolicy(): Promise<AiModelPolicyInfo> {
-    let config = await readAdminConfig(this.env);
+    let config = this.env.BLUEPRINTS ? await readAdminConfig(this.env) : DEFAULT_ADMIN_CONFIG;
     return {
       allowUserByok: isUserByokAllowed(this.env),
       defaultModelId: config.modelPolicy.defaultModelId || null,
