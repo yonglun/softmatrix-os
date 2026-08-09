@@ -1,4 +1,4 @@
-import { accessSync, constants, existsSync, statSync } from "node:fs";
+import { accessSync, constants, existsSync, realpathSync, statSync } from "node:fs";
 import { isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -159,7 +159,7 @@ export function validateVmConfig(config) {
   return config;
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   const configPath = process.argv[2];
   if (configPath !== "--check") {
     console.error("Usage: node scripts/vm/vm-config.mjs --check");

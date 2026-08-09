@@ -79,6 +79,7 @@ test("VM release records commit, worker hashes, legal files, and runtime config"
     assert.match(runtimeConfig, /durableObjectStorage/);
     assert.ok(runtimeConfig.indexOf('name = "index.js"') < runtimeConfig.indexOf('name = "types.txt"'));
     assert.match(await readFile(join(outDir, "checksums.sha256"), "utf8"), /runtime\/workerd\.capnp/);
+    assert.match(await readFile(join(outDir, "tools", "vm-config.mjs"), "utf8"), /loadVmConfig/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

@@ -464,6 +464,11 @@ export async function buildVmRelease({
     mkdirSync(join(output, "modules"), { recursive: true });
     mkdirSync(join(output, "assets"), { recursive: true });
     mkdirSync(join(output, "runtime", "miniflare"), { recursive: true });
+    mkdirSync(join(output, "tools"), { recursive: true });
+    cpSync(
+      join(resolve(rootDir), "scripts", "vm", "vm-config.mjs"),
+      join(output, "tools", "vm-config.mjs"),
+    );
     const miniflareFiles = miniflareWorkerFiles(rootDir);
     for (const [name, sourcePath] of Object.entries(miniflareFiles)) {
       const destinationName = {

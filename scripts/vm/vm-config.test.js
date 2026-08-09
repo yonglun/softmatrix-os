@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { mkdir, mkdtemp, rm, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { loadVmConfig, validateVmConfig } from "./vm-config.mjs";
 
@@ -92,6 +94,22 @@ test("rejects missing, identical, and relative persistent paths", async () => {
     assert.throws(
         () => validateVmConfig(loadVmConfig(fixture.env)),
         error => error.code === "VM_CONFIG_INVALID" && error.message.includes("must differ"));
+  } finally {
+    await rm(fixture.root, { recursive: true, force: true });
+  }
+});
+
+test("runs the packaged CLI through a symlinked temporary path", async () => {
+  const fixture = await validEnvironment();
+  try {
+    const entrypoint = join(fixture.root, "vm-config.mjs");
+    await symlink(fileURLToPath(new URL("./vm-config.mjs", import.meta.url)), entrypoint);
+    const result = spawnSync(process.execPath, [entrypoint, "--check"], {
+      env: fixture.env,
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /"modelCount": 0/);
   } finally {
     await rm(fixture.root, { recursive: true, force: true });
   }

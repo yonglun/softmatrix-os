@@ -21,7 +21,7 @@ centralized product metadata, and compliance controls. The Git history records t
 test("Softmatrix distribution retains the exact Apache-2.0 license and attribution", async () => {
   const [license, notice, readme, readmeZh, contributing, compliance, upstreamSync, releasePlan,
     envDts, deploymentEn, deploymentZh, operationsEn, operationsZh, upgradeEn, upgradeZh,
-    vmDeploymentEn, vmDeploymentZh, vmOperationsEn, vmOperationsZh] =
+    vmDeploymentEn, vmDeploymentZh, vmOperationsEn, vmOperationsZh, vmService] =
     await Promise.all([
       readFile(new URL("../LICENSE", import.meta.url)),
       readFile(new URL("../NOTICE", import.meta.url), "utf8"),
@@ -45,6 +45,7 @@ test("Softmatrix distribution retains the exact Apache-2.0 license and attributi
       readFile(new URL("../docs/softmatrix/vm-deployment.zh-CN.md", import.meta.url), "utf8"),
       readFile(new URL("../docs/softmatrix/vm-operations.en.md", import.meta.url), "utf8"),
       readFile(new URL("../docs/softmatrix/vm-operations.zh-CN.md", import.meta.url), "utf8"),
+      readFile(new URL("../deploy/vm/softmatrix.service", import.meta.url), "utf8"),
     ]);
 
   assert.equal(createHash("sha256").update(license).digest("hex"), APACHE_2_LICENSE_SHA256);
@@ -89,6 +90,8 @@ test("Softmatrix distribution retains the exact Apache-2.0 license and attributi
   for (const command of ["build:vm", "install:vm", "healthcheck:vm", "test:e2e:vm"]) {
     assert.ok(vmDocumentation.includes(command), `VM documentation is missing ${command}`);
   }
+  assert.match(vmService, /ExecStartPre=.*tools\/vm-config\.mjs --check/);
+  assert.match(vmService, /ExecStart=.*workerd/);
 
   function headingSignature(markdown) {
     return markdown.split("\n")

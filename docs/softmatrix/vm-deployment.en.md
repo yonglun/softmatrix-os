@@ -66,6 +66,10 @@ sudo systemctl enable --now softmatrix
 pnpm healthcheck:vm -- --base-url https://softmatrix.example
 ```
 
+The systemd unit runs `tools/vm-config.mjs --check` before `workerd`. A missing required secret,
+invalid model JSON, non-HTTPS public URL, forbidden Cloudflare binding, or unwritable data path
+leaves the service stopped instead of starting a misconfigured runtime.
+
 Set `PUBLIC_BASE_URL` to the public HTTPS origin. `ORG_AI_MODELS` is a JSON catalog; keep API
 tokens in the VM secret manager or a root-readable environment file. Set `ALLOW_USER_BYOK=false`
 for a governed deployment. The backend has a dedicated model-network service that permits public,

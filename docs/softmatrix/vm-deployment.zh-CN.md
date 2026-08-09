@@ -65,6 +65,10 @@ sudo systemctl enable --now softmatrix
 pnpm healthcheck:vm -- --base-url https://softmatrix.example
 ```
 
+systemd 单元会在启动 `workerd` 前执行 `tools/vm-config.mjs --check`。如果缺少必需密钥、模型 JSON
+无效、公开地址不是 HTTPS、存在禁止的 Cloudflare binding 或数据目录不可写，服务会保持停止，避免
+启动配置错误的运行时。
+
 将 `PUBLIC_BASE_URL` 设置为公网 HTTPS 地址。`ORG_AI_MODELS` 是 JSON 模型目录；API token 应放在
 VM secret manager 或仅 root 可读的环境文件中。受治理部署设置 `ALLOW_USER_BYOK=false`。后端有
 专用的模型网络服务，可访问 public/private/local；Gatekeeper worker 仍只允许 public 出站。
