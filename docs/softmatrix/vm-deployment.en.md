@@ -122,14 +122,18 @@ pnpm collect:vm:evidence -- \
   --report /secure/release-records/softmatrix-v1.0.0.json \
   --out /secure/release-records/softmatrix-v1.0.0.collected.json \
   --base-url https://softmatrix.example \
+  --log-since "2026-08-10 00:00:00" \
+  --log-unit softmatrix \
   --workerd /usr/local/bin/workerd \
   --proxy-name Caddy \
   --proxy-version 2.9.1
 ```
 
 `--allow-http-loopback` is for local harness tests only; HTTP/WS results are never recorded as
-production HTTPS/WSS passes. Review the collected report, complete every remaining check and
-sign-off, then run `validate:vm:evidence`.
+production HTTPS/WSS passes. When `--log-file` or `--log-since` is supplied, the collector writes
+only the log-audit status and safe line numbers into the report; unreadable sources and unredacted
+patterns remain `FAIL`. Review the collected report, complete every remaining check and sign-off,
+then run `validate:vm:evidence`.
 
 The log-redaction audit never prints log content; it emits only a pass/fail result and matching line
 numbers. During production acceptance, cover the journal window for this release:

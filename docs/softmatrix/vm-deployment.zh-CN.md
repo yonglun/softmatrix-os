@@ -115,12 +115,15 @@ pnpm collect:vm:evidence -- \
   --report /secure/release-records/softmatrix-v1.0.0.json \
   --out /secure/release-records/softmatrix-v1.0.0.collected.json \
   --base-url https://softmatrix.example \
+  --log-since "2026-08-10 00:00:00" \
+  --log-unit softmatrix \
   --workerd /usr/local/bin/workerd \
   --proxy-name Caddy \
   --proxy-version 2.9.1
 ```
 
 `--allow-http-loopback` 仅用于本机测试，绝不会把 HTTP/WS 结果记录为生产 HTTPS/WSS 通过证据。
+传入 `--log-file` 或 `--log-since` 后，收集器只把日志审计状态和安全的行号写入报告；日志源不可读或发现未脱敏模式时仍保持 `FAIL`。
 请人工复核收集结果、补齐所有剩余检查和签署后，再运行 `validate:vm:evidence`。
 
 日志脱敏审计不会输出日志内容，只输出结果和命中行号。生产验收时应覆盖与本次发布相关的 journal 时间窗：

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { auditLogText } from "./log-redaction-audit.mjs";
 import { assessLoopbackListeners, collectVmEvidence } from "./release-evidence-collect.mjs";
 
 const draft = () => ({
@@ -158,4 +159,28 @@ test("does not treat an HTTP loopback fixture as production HTTPS/WSS evidence",
   assert.equal(result.checks.loopbackOnly.status, "PASS");
   assert.equal(result.vm.proxy.tlsEvidence, "PENDING");
   assert.equal(result.vm.proxy.websocketEvidence, "PENDING");
+});
+
+test("records a passing log audit without copying log content into the report", () => {
+  const result = collectVmEvidence({
+    report: draft(),
+    logAudit: auditLogText("authorization: [redacted]\nprompt: <omitted>"),
+  });
+
+  assert.deepEqual(result.checks.logsRedacted, {
+    status: "PASS",
+    evidence: "log audit: no unredacted credential, prompt, or provider-body patterns",
+  });
+});
+
+test("records an audit failure without copying an unredacted secret into the report", () => {
+  const secret = "collector-secret-never-return-this";
+  const result = collectVmEvidence({
+    report: draft(),
+    logAudit: auditLogText(`authorization: Bearer ${secret}`),
+  });
+
+  assert.equal(result.checks.logsRedacted.status, "FAIL");
+  assert.match(result.checks.logsRedacted.evidence, /unredacted sensitive pattern line; lines: 1/u);
+  assert.equal(JSON.stringify(result).includes(secret), false);
 });

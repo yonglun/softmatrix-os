@@ -6,6 +6,7 @@ import { hostname as systemHostname, release as systemKernel } from "node:os";
 import { dirname, resolve } from "node:path";
 
 import { sha256Hex } from "../release/hash-lib.mjs";
+import { auditLogText, readLogSource } from "./log-redaction-audit.mjs";
 import { probePublicEndpoints } from "./operator-probe.mjs";
 import { validateReleaseEvidence } from "./release-evidence.mjs";
 
@@ -64,12 +65,23 @@ function updateAutomatedCheck(report, name, result) {
   report.checks[name] = result;
 }
 
+function logAuditCheck(logAudit) {
+  if (!logAudit) return undefined;
+  const lines = Array.isArray(logAudit.lines)
+    ? logAudit.lines.filter(line => Number.isInteger(line) && line > 0).join(",")
+    : "";
+  return {
+    status: logAudit.ok === true ? "PASS" : "FAIL",
+    evidence: `${logAudit.evidence || "log audit: source unavailable or unredacted patterns found"}${lines ? `; lines: ${lines}` : ""}`,
+  };
+}
+
 /**
  * Merge facts that are directly observable on the VM into an existing draft.
  * This function intentionally accepts only a draft NO-GO report and never
  * changes the decision or any manual acceptance/sign-off fields.
  */
-export function collectVmEvidence({ report, capturedAt = new Date().toISOString(), probe, secure = true, loopback, vmFacts = {} } = {}) {
+export function collectVmEvidence({ report, capturedAt = new Date().toISOString(), probe, secure = true, loopback, logAudit, vmFacts = {} } = {}) {
   if (!report || report.draft !== true || report.decision !== "NO-GO") {
     throw new Error("VM_EVIDENCE_DRAFT_REQUIRED: collector only accepts a draft NO-GO report");
   }
@@ -92,6 +104,7 @@ export function collectVmEvidence({ report, capturedAt = new Date().toISOString(
         : "ss: workerd listener is publicly bound or unverified",
     });
   }
+  updateAutomatedCheck(result, "logsRedacted", logAuditCheck(logAudit));
 
   copyString(result.vm, "hostname", vmFacts.hostname);
   copyString(result.vm, "os", vmFacts.os);
@@ -139,6 +152,9 @@ function parseArgs(argv) {
     proxyName: undefined,
     proxyVersion: undefined,
     origin: undefined,
+    logFile: undefined,
+    logSince: undefined,
+    logUnit: "softmatrix",
   };
   for (let index = 0; index < argv.length; index++) {
     const arg = argv[index];
@@ -150,10 +166,13 @@ function parseArgs(argv) {
     else if (arg === "--proxy-name") args.proxyName = argv[++index];
     else if (arg === "--proxy-version") args.proxyVersion = argv[++index];
     else if (arg === "--origin") args.origin = argv[++index];
+    else if (arg === "--log-file") args.logFile = resolve(argv[++index]);
+    else if (arg === "--log-since") args.logSince = argv[++index];
+    else if (arg === "--log-unit") args.logUnit = argv[++index];
     else throw new Error(`unknown argument: ${arg}`);
   }
   if (!args.report || !args.out || !args.baseUrl) {
-    throw new Error("Usage: node scripts/vm/release-evidence-collect.mjs --report <draft> --out <report> --base-url <url> [--allow-http-loopback] [--workerd <path>] [--proxy-name <name>] [--proxy-version <version>]");
+    throw new Error("Usage: node scripts/vm/release-evidence-collect.mjs --report <draft> --out <report> --base-url <url> [--allow-http-loopback] [--workerd <path>] [--proxy-name <name>] [--proxy-version <version>] [--log-file <path> | --log-since <journal-time> --log-unit <unit>]");
   }
   if (args.allowHttpLoopback) {
     const parsed = new URL(args.baseUrl);
@@ -161,7 +180,29 @@ function parseArgs(argv) {
       throw new Error("--allow-http-loopback is restricted to http loopback URLs");
     }
   }
+  if (args.logFile && args.logSince) throw new Error("--log-file and --log-since are mutually exclusive");
+  if (args.logUnit && !/^[A-Za-z0-9_.@:-]+$/u.test(args.logUnit)) {
+    throw new Error("--log-unit must be a safe systemd unit name");
+  }
   return args;
+}
+
+async function collectLogAudit(args) {
+  if (!args.logFile && !args.logSince) return undefined;
+  try {
+    return auditLogText(await readLogSource({
+      file: args.logFile,
+      since: args.logSince,
+      unit: args.logUnit,
+    }));
+  } catch {
+    return {
+      ok: false,
+      findingCount: 0,
+      lines: [],
+      evidence: "log audit: unable to read the requested source",
+    };
+  }
 }
 
 async function collectFromCli(args) {
@@ -172,11 +213,13 @@ async function collectFromCli(args) {
   });
   const loopback = assessLoopbackListeners(commandOutput("ss", ["-ltnp"]));
   const workerdVersion = await workerdFact(args.workerd);
+  const logAudit = await collectLogAudit(args);
   const result = collectVmEvidence({
     report,
     probe,
     secure: !args.allowHttpLoopback,
     loopback,
+    logAudit,
     vmFacts: {
       hostname: systemHostname(),
       os: await readOsRelease(),

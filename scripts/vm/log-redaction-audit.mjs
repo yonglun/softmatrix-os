@@ -65,10 +65,13 @@ function parseArgs(argv) {
   return args;
 }
 
-async function readSource(args) {
-  if (args.file) return readFile(args.file, "utf8");
+export async function readLogSource({ file, unit = "softmatrix", since } = {}) {
+  if (file && since) throw new Error("VM_LOG_AUDIT_SOURCE: file and journal time window are mutually exclusive");
+  if (!/^[A-Za-z0-9_.@:-]+$/u.test(unit)) throw new Error("VM_LOG_AUDIT_SOURCE: unsafe systemd unit name");
+  if (file) return readFile(file, "utf8");
+  if (!since) throw new Error("VM_LOG_AUDIT_SOURCE: a journal time window is required");
   try {
-    return execFileSync("journalctl", ["--unit", args.unit, "--since", args.since, "--no-pager", "--output=cat"], {
+    return execFileSync("journalctl", ["--unit", unit, "--since", since, "--no-pager", "--output=cat"], {
       encoding: "utf8",
       maxBuffer: 8 * 1024 * 1024,
       stdio: ["ignore", "pipe", "ignore"],
@@ -80,7 +83,7 @@ async function readSource(args) {
 
 if (process.argv[1]?.endsWith("log-redaction-audit.mjs")) {
   try {
-    const result = auditLogText(await readSource(parseArgs(process.argv.slice(2))));
+    const result = auditLogText(await readLogSource(parseArgs(process.argv.slice(2))));
     console.log(JSON.stringify(result, null, 2));
     if (!result.ok) process.exitCode = 1;
   } catch (error) {
