@@ -57,6 +57,9 @@ jobs:
       - name: Validate VM network contract
         run: pnpm test:vm:network
 
+      - name: Validate VM public endpoint probe
+        run: pnpm test:vm:probe
+
       - name: Validate VM release evidence schema
         run: pnpm test:vm:evidence
 

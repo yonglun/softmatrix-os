@@ -6,6 +6,7 @@
 
 ```sh
 node scripts/vm/healthcheck.mjs --base-url https://softmatrix.example
+node scripts/vm/operator-probe.mjs --base-url https://softmatrix.example
 systemctl is-active softmatrix
 ```
 

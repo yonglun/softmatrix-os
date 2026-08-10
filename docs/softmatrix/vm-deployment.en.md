@@ -86,6 +86,13 @@ and reload Caddy. For Nginx, replace the hostname and certificate paths in
 The templates deliberately proxy only to loopback; the network-contract test protects this
 boundary and the WebSocket upgrade headers.
 
+After the proxy is live, run the read-only public probe (it sends no cookies or credentials) and
+attach its JSON output to the acceptance record:
+
+```sh
+pnpm probe:vm -- --base-url https://softmatrix.example
+```
+
 Keep the production acceptance record outside the release directory. Start from
 `docs/softmatrix/vm-acceptance-report.example.json` and validate the filled record with
 `pnpm validate:vm:evidence -- --report <record.json>` before recording a `GO` decision. The
