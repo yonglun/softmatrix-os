@@ -71,8 +71,9 @@ also includes the systemd fail-closed preflight at `tools/vm-config.mjs`.
 ## Latest clean-checkout CI gate
 
 The release builder has since been hardened to generate every ignored worker input before Wrangler
-collects modules (`build:app`, `build:configurator`, and `build:format-blueprints`). The current
-feature head is `5b4cdb8`; the Ubuntu VM Smoke run for that head passed all of the following:
+collects modules (`build:app`, `build:configurator`, and `build:format-blueprints`). The release
+builder fix is `5b4cdb8`; the current feature head (including this record) is `27b8d0d`. The Ubuntu
+VM Smoke run for that head passed all of the following:
 
 | Check | Result | Evidence |
 |---|---|---|
