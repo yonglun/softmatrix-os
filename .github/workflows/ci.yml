@@ -56,6 +56,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Collect dependency license inventory
+        run: pnpm licenses list --json > license-inventory.json
+
+      - name: Upload dependency license inventory
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dependency-license-inventory
+          path: license-inventory.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Build
         run: pnpm build
 
