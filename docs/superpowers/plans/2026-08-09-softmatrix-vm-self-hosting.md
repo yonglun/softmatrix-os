@@ -20,6 +20,18 @@
 - Release artifacts include Apache-2.0 `LICENSE`, `NOTICE`, `THIRD_PARTY_NOTICES.md`, checksums, and the exact source commit.
 - Every task ends with a focused test and an atomic commit; do not stage `.superpowers/` reports.
 
+## Current execution status (2026-08-10)
+
+Tasks 1–7 are implemented in the feature branch and covered by focused tests plus the Ubuntu
+`VM Smoke` workflow. The clean-checkout release builder now generates ignored `build:app`,
+`build:configurator`, and `build:format-blueprints` inputs before Wrangler collection. The latest
+feature head is `f77009f`; Build/Test, Lint, and the two-language Ubuntu VM journey pass.
+
+Task 8 remains intentionally open. A real operator VM still must provide OIDC provider behavior,
+TLS/WebSocket proxy evidence, reboot persistence, log-redaction review, backup checksum and
+isolated restore, release rollback, and release-owner/security sign-off. CI evidence and local
+macOS rehearsal data do not satisfy those production acceptance items.
+
 ---
 
 ## File and Boundary Map
