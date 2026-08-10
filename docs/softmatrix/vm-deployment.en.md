@@ -112,6 +112,25 @@ pnpm init:vm:evidence -- \
   --workerd /usr/local/bin/workerd
 ```
 
+After seeding a draft, run the automated evidence collector on the target VM. It records only
+host facts, the runtime binary version, the HTTPS/WSS probe, and the `ss` loopback check. OIDC,
+model governance, storage, log review, reboot, backup, restore, rollback, and the three sign-offs
+remain manual; the collector always keeps the report `NO-GO`:
+
+```sh
+pnpm collect:vm:evidence -- \
+  --report /secure/release-records/softmatrix-v1.0.0.json \
+  --out /secure/release-records/softmatrix-v1.0.0.collected.json \
+  --base-url https://softmatrix.example \
+  --workerd /usr/local/bin/workerd \
+  --proxy-name Caddy \
+  --proxy-version 2.9.1
+```
+
+`--allow-http-loopback` is for local harness tests only; HTTP/WS results are never recorded as
+production HTTPS/WSS passes. Review the collected report, complete every remaining check and
+sign-off, then run `validate:vm:evidence`.
+
 ## 4. Backup, restore, and rollback
 
 Stop the service (or otherwise quiesce writes) before taking a backup:

@@ -38,8 +38,10 @@ TLS/WebSocket proxy evidence, reboot persistence, log-redaction review, backup c
 isolated restore, release rollback, and release-owner/security sign-off. CI evidence and local
 macOS rehearsal data do not satisfy those production acceptance items.
 
-The repository now includes `pnpm init:vm:evidence`, which seeds an explicitly `NO-GO` report from
-immutable release and host facts without inventing production evidence. The latest automated gates
+The repository now includes `pnpm init:vm:evidence` and `pnpm collect:vm:evidence`. The initializer
+seeds an explicitly `NO-GO` report from immutable release and host facts without inventing production
+evidence; the collector can add only directly observed HTTPS/WSS, loopback, and runtime facts and
+still keeps the report `NO-GO`. The latest automated gates
 for the current head are [CI run 31388086502](https://github.com/yonglun/softmatrix-os/actions/runs/31388086502)
 and [VM Smoke run 31388086580](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580).
 
@@ -54,7 +56,7 @@ and [VM Smoke run 31388086580](https://github.com/yonglun/softmatrix-os/actions/
 | Build | `scripts/vm/build-release.mjs`, `scripts/vm/build-release.test.js` | Produce immutable VM release directory from an exact commit |
 | Install/rollback | `scripts/vm/install-release.mjs`, `scripts/vm/healthcheck.mjs`, `scripts/vm/install-release.test.js` | Atomic `current`/`previous` switch, readiness checks, rollback |
 | Data safety | `scripts/vm/backup-data.mjs`, `scripts/vm/restore-data.mjs`, `scripts/vm/vm-data.test.js` | Snapshot, checksum, isolated restore, and validation |
-| Acceptance | `scripts/run-vm-e2e.mjs`, `e2e/vm-self-hosting.spec.ts`, `scripts/vm/operator-probe.mjs`, `scripts/vm/release-evidence.mjs` | VM runtime, restart persistence, bilingual, OIDC, model, Gatekeeper journeys, public HTTP/WebSocket probe, and evidence completeness |
+| Acceptance | `scripts/run-vm-e2e.mjs`, `e2e/vm-self-hosting.spec.ts`, `scripts/vm/operator-probe.mjs`, `scripts/vm/release-evidence*.mjs` | VM runtime, restart persistence, bilingual, OIDC, model, Gatekeeper journeys, public HTTP/WebSocket probe, host-fact collection, and evidence completeness |
 | Documentation | `docs/softmatrix/vm-deployment.en.md`, `docs/softmatrix/vm-deployment.zh-CN.md`, `docs/softmatrix/vm-operations.en.md`, `docs/softmatrix/vm-operations.zh-CN.md` | Installation, configuration, backup, monitoring, upgrade, rollback, support boundaries |
 | Root commands | `package.json` | Stable `build:vm`, `install:vm`, `healthcheck:vm`, `backup:vm`, `restore:vm`, `test:e2e:vm` entry points |
 

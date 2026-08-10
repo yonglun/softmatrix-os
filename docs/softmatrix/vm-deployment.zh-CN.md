@@ -106,6 +106,23 @@ pnpm init:vm:evidence -- \
   --workerd /usr/local/bin/workerd
 ```
 
+草稿生成后，可以在目标 VM 上运行自动证据收集器。它只会写入当前主机事实、制品运行时版本、
+HTTPS/WSS 探针和 `ss` loopback 检查；OIDC、模型治理、存储、日志、重启、备份、恢复、回滚和三方签署
+仍保持待人工验收，输出也始终是 `NO-GO`：
+
+```sh
+pnpm collect:vm:evidence -- \
+  --report /secure/release-records/softmatrix-v1.0.0.json \
+  --out /secure/release-records/softmatrix-v1.0.0.collected.json \
+  --base-url https://softmatrix.example \
+  --workerd /usr/local/bin/workerd \
+  --proxy-name Caddy \
+  --proxy-version 2.9.1
+```
+
+`--allow-http-loopback` 仅用于本机测试，绝不会把 HTTP/WS 结果记录为生产 HTTPS/WSS 通过证据。
+请人工复核收集结果、补齐所有剩余检查和签署后，再运行 `validate:vm:evidence`。
+
 ## 4. Backup, restore, and rollback
 
 备份前停止服务（或用等价方式暂停写入）：
