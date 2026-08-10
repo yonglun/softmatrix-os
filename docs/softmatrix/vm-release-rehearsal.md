@@ -60,9 +60,10 @@ pnpm validate:vm:evidence -- --report /secure/release-records/softmatrix-v1.0.0.
 The validator requires all production checks, release hashes, recovery data, and three sign-offs;
 `GO` is rejected if any check is missing, failed, pending, or lacks evidence.
 
-The repository can seed a `NO-GO` draft from a release directory so artifact hashes and pinned
-runtime facts are not copied manually. This draft is not acceptance evidence and must be completed
-on the operator VM:
+From a clean source checkout matching the recorded source commit, the repository can seed a `NO-GO`
+draft from a release directory so artifact hashes and pinned runtime facts are not copied manually.
+The immutable release directory does not contain these operator scripts. This draft is not acceptance
+evidence and must be completed on the operator VM, outside the release directory:
 
 ```sh
 pnpm init:vm:evidence -- \

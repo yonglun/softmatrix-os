@@ -93,8 +93,10 @@ pnpm probe:vm -- --base-url https://softmatrix.example
 `pnpm validate:vm:evidence -- --report <record.json>`。校验器会拒绝缺失/失败的检查、无效的
 制品哈希以及带有密钥形状的字段。
 
-为避免手工复制制品哈希，可以先从不可变发布目录生成明确为 `NO-GO` 的草稿。它只记录本机的
-发布/主机事实；必须将所有待处理检查替换为真实 VM 证据后，校验器才会接受 `GO`：
+请在与发布 `sourceCommit` 一致的干净源码 checkout 中执行此命令（不可变制品目录不包含仓库中的
+操作脚本）。为避免手工复制制品哈希，可以先从不可变发布目录生成明确为 `NO-GO` 的草稿。它只记录
+本机的发布/主机事实；必须将所有待处理检查替换为真实 VM 证据后，校验器才会接受 `GO`。报告应保存在
+制品目录之外：
 
 ```sh
 pnpm init:vm:evidence -- \

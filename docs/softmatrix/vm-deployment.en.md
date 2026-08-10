@@ -98,9 +98,11 @@ Keep the production acceptance record outside the release directory. Start from
 `pnpm validate:vm:evidence -- --report <record.json>` before recording a `GO` decision. The
 validator rejects missing checks, failed checks, invalid artifact hashes, and secret-shaped fields.
 
-To avoid copying artifact hashes by hand, initialize an explicitly `NO-GO` draft from the immutable
-release. It records only local release/host facts; replace every pending check with real VM evidence
-before validation can accept `GO`:
+Run this from a clean source checkout matching the release `sourceCommit` (the immutable release
+directory does not contain the repository's operator scripts). To avoid copying artifact hashes by
+hand, initialize an explicitly `NO-GO` draft from the immutable release. It records only local
+release/host facts; replace every pending check with real VM evidence before validation can accept
+`GO`. Keep the report outside the release directory:
 
 ```sh
 pnpm init:vm:evidence -- \
