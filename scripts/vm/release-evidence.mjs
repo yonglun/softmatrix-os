@@ -51,8 +51,9 @@ function timestamp(value, path) {
   return text;
 }
 
-function hash(value, path) {
+function hash(value, path, { allowPending = false } = {}) {
   const text = requiredString(value, path).toLowerCase();
+  if (allowPending && text === "pending") return text;
   if (!HEX_SHA256.test(text)) fail("VM_EVIDENCE_INVALID", `${path} must be a SHA-256 hex digest`);
   return text;
 }
@@ -101,6 +102,9 @@ export function validateReleaseEvidence(report) {
   if (report.decision !== "GO" && report.decision !== "NO-GO") {
     fail("VM_EVIDENCE_INVALID", "decision must be GO or NO-GO");
   }
+  if (report.draft === true && report.decision !== "NO-GO") {
+    fail("VM_EVIDENCE_INVALID", "draft evidence must use the NO-GO decision");
+  }
   timestamp(report.capturedAt, "capturedAt");
 
   const release = checkObject(report.release, "release");
@@ -140,7 +144,9 @@ export function validateReleaseEvidence(report) {
 
   const recovery = checkObject(report.recovery, "recovery");
   requiredString(recovery.backupArchive, "recovery.backupArchive");
-  hash(recovery.backupSha256, "recovery.backupSha256");
+  hash(recovery.backupSha256, "recovery.backupSha256", {
+    allowPending: report.draft === true && report.decision === "NO-GO",
+  });
   requiredString(recovery.restoreTarget, "recovery.restoreTarget");
   const rollbackId = requiredString(recovery.rollbackReleaseId, "recovery.rollbackReleaseId");
   if (!RELEASE_ID.test(rollbackId)) fail("VM_EVIDENCE_INVALID", "recovery.rollbackReleaseId is not safe");

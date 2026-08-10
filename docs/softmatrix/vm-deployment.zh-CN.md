@@ -93,6 +93,17 @@ pnpm probe:vm -- --base-url https://softmatrix.example
 `pnpm validate:vm:evidence -- --report <record.json>`。校验器会拒绝缺失/失败的检查、无效的
 制品哈希以及带有密钥形状的字段。
 
+为避免手工复制制品哈希，可以先从不可变发布目录生成明确为 `NO-GO` 的草稿。它只记录本机的
+发布/主机事实；必须将所有待处理检查替换为真实 VM 证据后，校验器才会接受 `GO`：
+
+```sh
+pnpm init:vm:evidence -- \
+  --release /opt/softmatrix/incoming-v1.0.0 \
+  --out /secure/release-records/softmatrix-v1.0.0.json \
+  --origin https://softmatrix.example \
+  --workerd /usr/local/bin/workerd
+```
+
 ## 4. Backup, restore, and rollback
 
 备份前停止服务（或用等价方式暂停写入）：

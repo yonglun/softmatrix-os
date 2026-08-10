@@ -98,6 +98,18 @@ Keep the production acceptance record outside the release directory. Start from
 `pnpm validate:vm:evidence -- --report <record.json>` before recording a `GO` decision. The
 validator rejects missing checks, failed checks, invalid artifact hashes, and secret-shaped fields.
 
+To avoid copying artifact hashes by hand, initialize an explicitly `NO-GO` draft from the immutable
+release. It records only local release/host facts; replace every pending check with real VM evidence
+before validation can accept `GO`:
+
+```sh
+pnpm init:vm:evidence -- \
+  --release /opt/softmatrix/incoming-v1.0.0 \
+  --out /secure/release-records/softmatrix-v1.0.0.json \
+  --origin https://softmatrix.example \
+  --workerd /usr/local/bin/workerd
+```
+
 ## 4. Backup, restore, and rollback
 
 Stop the service (or otherwise quiesce writes) before taking a backup:
