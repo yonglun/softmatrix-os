@@ -131,6 +131,16 @@ pnpm collect:vm:evidence -- \
 production HTTPS/WSS passes. Review the collected report, complete every remaining check and
 sign-off, then run `validate:vm:evidence`.
 
+The log-redaction audit never prints log content; it emits only a pass/fail result and matching line
+numbers. During production acceptance, cover the journal window for this release:
+
+```sh
+pnpm audit:vm:logs -- --unit softmatrix --since "2026-08-10 00:00:00"
+```
+
+If the command fails or finds an unredacted credential, prompt, cookie, JWT, or provider body,
+keep `logsRedacted` as `FAIL`.
+
 ## 4. Backup, restore, and rollback
 
 Stop the service (or otherwise quiesce writes) before taking a backup:

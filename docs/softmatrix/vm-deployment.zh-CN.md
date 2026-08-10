@@ -123,6 +123,14 @@ pnpm collect:vm:evidence -- \
 `--allow-http-loopback` 仅用于本机测试，绝不会把 HTTP/WS 结果记录为生产 HTTPS/WSS 通过证据。
 请人工复核收集结果、补齐所有剩余检查和签署后，再运行 `validate:vm:evidence`。
 
+日志脱敏审计不会输出日志内容，只输出结果和命中行号。生产验收时应覆盖与本次发布相关的 journal 时间窗：
+
+```sh
+pnpm audit:vm:logs -- --unit softmatrix --since "2026-08-10 00:00:00"
+```
+
+命令失败或发现未脱敏的凭据、提示词、Cookie、JWT 或 provider body 时，`logsRedacted` 必须保持 `FAIL`。
+
 ## 4. Backup, restore, and rollback
 
 备份前停止服务（或用等价方式暂停写入）：
