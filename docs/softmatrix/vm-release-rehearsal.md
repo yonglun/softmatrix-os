@@ -17,16 +17,16 @@ Fill these values from the exact clean checkout and immutable artifact:
 
 | Field | Value |
 |---|---|
-| Source commit (latest automated rehearsal) | `c749409edb41c46ab082b935c040c6ebb69c8363`; replace with the exact production checkout SHA |
-| Release ID (local rehearsal) | `softmatrix-vm-v1.0.0` |
-| Build timestamp (UTC) | `2026-08-10T10:16:48.973Z` |
-| Release directory | `/tmp/softmatrix-vm-v1.0.0-c749409` |
-| `manifest.json` SHA-256 | `d6faec66e3bcd3786f825b5dd220e88ff1dff19be333fb2140c49aee76035bf7` |
-| `checksums.sha256` SHA-256 | `51be992a5027dd18962754e7ae2af0d308c561ab1a54f58a6f9a394c817a9ea1` |
+| Source commit (latest automated rehearsal) | `9648723852026daedf1e7cb5be57bc19b12b0e4c`; replace with the exact production checkout SHA |
+| Release ID (local rehearsal) | `softmatrix-vm-v1.0.0-9648723` |
+| Build timestamp (UTC) | `2026-08-10T12:39:18.473Z` |
+| Release directory | `/tmp/softmatrix-vm-v1.0.0-9648723` |
+| `manifest.json` SHA-256 | `011f04d56c7b10e89d23d303238e15704ae11b6ff9b38885c103aa78791bba61` |
+| `checksums.sha256` SHA-256 | `59b8b86db1ec17634b5683e400af69a04cfaabc758e94487c2a0105b3b5d4a47` |
 | `legal-manifest.json` SHA-256 | `a8dc8b170d5d742e3e88da0491858a93c12c59724668f0bd5e01c3f3681b08c1` |
 | Apache-2.0 `LICENSE` SHA-256 | `0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594` |
 | `tools/vm-config.mjs` SHA-256 | `f7974028822f010879df7e91d75b61800c5cd74032beef45d749d080cfc2184d` |
-| `workerd` version/binary SHA-256 | `2026-08-01` / `b3eea2de0ef56b987737aab8775ac16d046500b2c68587a1bb1f7cc2080647e7` (local arm64 binary; verify the VM binary separately) |
+| `workerd` version/binary SHA-256 | `2026-08-01` / `b3eea2de0ef56b987737aab8775ac16d046500b2c68587a1bb1f7cc2080647e7` (local binary; verify the VM binary separately) |
 | Node.js / pnpm versions | `v22.14.0` / `11.17.0` |
 | OS / kernel | `macOS 26.5.2` / `Darwin 25.5.0 arm64` |
 | systemd and TLS proxy versions | `PENDING` |
@@ -89,7 +89,7 @@ These results are development evidence only and must be re-run from the clean re
 | Bilingual VM browser journey | PASS (8/8) | Ubuntu `VM Smoke` run below; English/Chinese password restart, OIDC success, cancellation, and domain-denial journeys |
 | Compliance and i18n coverage | PASS (3/3) | `node --test scripts/softmatrix-compliance.test.js scripts/i18n-coverage.test.js` |
 
-The RC artifact contains 18 workers, 84 modules, and 31 asset blobs. Its generated
+The `softmatrix-vm-v1.0.0-9648723` artifact contains 18 workers, 84 modules, and 31 asset blobs. Its generated
 `runtime/workerd.capnp` compiled successfully; the current local compiled configuration SHA-256 is
 `65bf5df46617041b7bd80acc9de089cac017fa7240c806767b739e9971dd466b`. The immutable package
 also includes the systemd fail-closed preflight at `tools/vm-config.mjs`.
@@ -98,22 +98,22 @@ also includes the systemd fail-closed preflight at `tools/vm-config.mjs`.
 
 The release builder has since been hardened to generate every ignored worker input before Wrangler
 collects modules (`build:app`, `build:configurator`, and `build:format-blueprints`). The latest
-release gate is `c749409`; its GitHub CI run passed build, tests, lint, and Chromium browser E2E,
+release gate is `9648723`; its GitHub CI run passed build, tests, lint, and Chromium browser E2E,
 and its Ubuntu `VM Smoke` run passed the network contract, public probe, and all eight browser
 journeys on an ephemeral Linux VM:
 
 | Check | Result | Evidence |
 |---|---|---|
-| Repository build, tests, lint, and browser E2E | PASS | [GitHub CI run](https://github.com/yonglun/softmatrix-os/actions/runs/31377215066) |
-| VM configuration contract | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31377215224) |
-| VM network boundary contract | PASS (4/4) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31377215224) |
-| VM public endpoint probe | PASS (3/3) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31377215224) |
-| VM release evidence schema | PASS (4/4) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31377215224) |
-| Native workerd persistence | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31377215224) |
-| Clean immutable release build (18 workers / 84 modules) | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31377215224) |
-| English and Simplified Chinese password/restart journeys | PASS (2/2) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31377215224) |
-| English and Simplified Chinese OIDC success journeys | PASS (2/2) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31377215224) |
-| English and Simplified Chinese OIDC cancellation/domain-denial journeys | PASS (4/4) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31377215224) |
+| Repository build, tests, lint, and browser E2E | PASS | [GitHub CI run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086502) |
+| VM configuration contract | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |
+| VM network boundary contract | PASS (4/4) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |
+| VM public endpoint probe | PASS (3/3) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |
+| VM release evidence schema | PASS (4/4) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |
+| Native workerd persistence | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |
+| Clean immutable release build (18 workers / 84 modules) | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |
+| English and Simplified Chinese password/restart journeys | PASS (2/2) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |
+| English and Simplified Chinese OIDC success journeys | PASS (2/2) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |
+| English and Simplified Chinese OIDC cancellation/domain-denial journeys | PASS (4/4) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |
 
 This is CI evidence on an ephemeral Ubuntu runner, not production VM sign-off. Keep the status below
 as `PENDING OPERATOR EXECUTION` until the real VM, TLS proxy, OIDC provider, backup destination,

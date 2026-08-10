@@ -25,7 +25,7 @@
 Tasks 1–7 are implemented in the feature branch and covered by focused tests plus the Ubuntu
 `VM Smoke` workflow. The clean-checkout release builder now generates ignored `build:app`,
 `build:configurator`, and `build:format-blueprints` inputs before Wrangler collection. The latest
-feature head is `3089936`; Build/Test, Lint, Chromium browser E2E, the VM network contract, public
+feature head is `9648723`; Build/Test, Lint, Chromium browser E2E, the VM network contract, public
 endpoint probe, and the eight-test two-language Ubuntu VM journey pass in GitHub Actions.
 The VM harness now includes a native local OIDC provider with RS256 signing, JWKS discovery, and
 PKCE validation; each fixture authorization provisions an isolated identity so the bilingual
@@ -40,8 +40,8 @@ macOS rehearsal data do not satisfy those production acceptance items.
 
 The repository now includes `pnpm init:vm:evidence`, which seeds an explicitly `NO-GO` report from
 immutable release and host facts without inventing production evidence. The latest automated gates
-for the current head are [CI run 31387272589](https://github.com/yonglun/softmatrix-os/actions/runs/31387272589)
-and [VM Smoke run 31387272550](https://github.com/yonglun/softmatrix-os/actions/runs/31387272550).
+for the current head are [CI run 31388086502](https://github.com/yonglun/softmatrix-os/actions/runs/31388086502)
+and [VM Smoke run 31388086580](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580).
 
 ---
 
