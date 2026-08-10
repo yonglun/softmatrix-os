@@ -25,8 +25,8 @@
 Tasks 1–7 are implemented in the feature branch and covered by focused tests plus the Ubuntu
 `VM Smoke` workflow. The clean-checkout release builder now generates ignored `build:app`,
 `build:configurator`, and `build:format-blueprints` inputs before Wrangler collection. The latest
-feature head is `0591ca8`; Build/Test, Lint, the VM network contract, public endpoint probe, and the
-eight-test two-language Ubuntu VM journey pass.
+feature head is `08b2a45`; Build/Test, Lint, Chromium browser E2E, the VM network contract, public
+endpoint probe, and the eight-test two-language Ubuntu VM journey pass in GitHub Actions.
 The VM harness now includes a native local OIDC provider with RS256 signing, JWKS discovery, and
 PKCE validation; each fixture authorization provisions an isolated identity so the bilingual
 onboarding assertions are independent. It also exercises IdP cancellation and exact email-domain
@@ -37,6 +37,9 @@ VM still must provide the chosen production IdP's success/cancel/domain-policy e
 TLS/WebSocket proxy evidence, reboot persistence, log-redaction review, backup checksum and
 isolated restore, release rollback, and release-owner/security sign-off. CI evidence and local
 macOS rehearsal data do not satisfy those production acceptance items.
+
+The latest automated release gates are [CI run 31375558687](https://github.com/yonglun/softmatrix-os/actions/runs/31375558687)
+and [VM Smoke run 31375558692](https://github.com/yonglun/softmatrix-os/actions/runs/31375558692).
 
 ---
 

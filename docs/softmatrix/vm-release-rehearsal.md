@@ -17,7 +17,7 @@ Fill these values from the exact clean checkout and immutable artifact:
 
 | Field | Value |
 |---|---|
-| Source commit (local rehearsal) | `774a90f120c6e3385f244d11b650a3b9467a217c` |
+| Source commit (local rehearsal) | `08b2a45` (automated gates); replace with the exact production checkout SHA |
 | Release ID (local rehearsal) | `softmatrix-vm-v1-rc3` |
 | Build timestamp (UTC) | `2026-08-09T22:38:33.008Z` |
 | Release directory | `/tmp/softmatrix-vm-rehearsal-release-d` |
@@ -86,20 +86,22 @@ also includes the systemd fail-closed preflight at `tools/vm-config.mjs`.
 
 The release builder has since been hardened to generate every ignored worker input before Wrangler
 collects modules (`build:app`, `build:configurator`, and `build:format-blueprints`). The latest
-VM public-endpoint probe hardening is `0591ca8`; its Ubuntu `VM Smoke` run passed the network
-contract, public probe, and all eight browser journeys on an ephemeral Linux VM:
+release gate is `08b2a45`; its GitHub CI run passed build, tests, lint, and Chromium browser E2E,
+and its Ubuntu `VM Smoke` run passed the network contract, public probe, and all eight browser
+journeys on an ephemeral Linux VM:
 
 | Check | Result | Evidence |
 |---|---|---|
-| VM configuration contract | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31372285224/job/93403695490) |
-| VM network boundary contract | PASS (4/4) | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31372285224/job/93403695490) |
-| VM public endpoint probe | PASS (3/3) | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31372285224/job/93403695490) |
-| VM release evidence schema | PASS (4/4) | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31372285224/job/93403695490) |
-| Native workerd persistence | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31372285224/job/93403695490) |
-| Clean immutable release build (18 workers / 84 modules) | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31372285224/job/93403695490) |
-| English and Simplified Chinese password/restart journeys | PASS (2/2) | [GitHub job](https://github.com/yonglun/softmatrix-os/actions/runs/31372285224/job/93403695490) |
-| English and Simplified Chinese OIDC success journeys | PASS (2/2) | [GitHub job](https://github.com/yonglun/softmatrix-os/actions/runs/31372285224/job/93403695490) |
-| English and Simplified Chinese OIDC cancellation/domain-denial journeys | PASS (4/4) | [GitHub job](https://github.com/yonglun/softmatrix-os/actions/runs/31372285224/job/93403695490) |
+| Repository build, tests, lint, and browser E2E | PASS | [GitHub CI run](https://github.com/yonglun/softmatrix-os/actions/runs/31375558687) |
+| VM configuration contract | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31375558692) |
+| VM network boundary contract | PASS (4/4) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31375558692) |
+| VM public endpoint probe | PASS (3/3) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31375558692) |
+| VM release evidence schema | PASS (4/4) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31375558692) |
+| Native workerd persistence | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31375558692) |
+| Clean immutable release build (18 workers / 84 modules) | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31375558692) |
+| English and Simplified Chinese password/restart journeys | PASS (2/2) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31375558692) |
+| English and Simplified Chinese OIDC success journeys | PASS (2/2) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31375558692) |
+| English and Simplified Chinese OIDC cancellation/domain-denial journeys | PASS (4/4) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31375558692) |
 
 This is CI evidence on an ephemeral Ubuntu runner, not production VM sign-off. Keep the status below
 as `PENDING OPERATOR EXECUTION` until the real VM, TLS proxy, OIDC provider, backup destination,
