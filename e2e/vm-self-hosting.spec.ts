@@ -29,6 +29,44 @@ for (const locale of ["en", "zh-CN"] as const satisfies FixtureLocale[]) {
     await expect(page.locator("body")).not.toContainText("fixture-oidc-secret");
   });
 
+  test(`single-VM ${locale} OIDC provider cancellation is localized`, async ({ page, request }) => {
+    const labels = localeCopy(locale);
+    const mode = await request.post(`${controlUrl}/oidc/mode`, { data: { mode: "cancel" } });
+    expect(mode.ok()).toBeTruthy();
+    await setLocale(page, locale);
+    await page.goto("/login");
+    const button = page.getByRole("button", {
+      name: locale === "zh-CN" ? "使用 Fixture SSO 继续" : "Continue with Fixture SSO",
+      exact: true,
+    });
+    await expect(button).toBeVisible({ timeout: 30_000 });
+    const popupPromise = page.waitForEvent("popup");
+    await button.click();
+    const popup = await popupPromise;
+    await popup.waitForLoadState("domcontentloaded").catch(() => undefined);
+    await expect(page.getByRole("alert")).toContainText(labels.oidcProviderUnavailable, { timeout: 30_000 });
+    await expect(page.locator("body")).not.toContainText("fixture-oidc-secret");
+  });
+
+  test(`single-VM ${locale} OIDC domain denial is localized`, async ({ page, request }) => {
+    const labels = localeCopy(locale);
+    const mode = await request.post(`${controlUrl}/oidc/mode`, { data: { mode: "denied" } });
+    expect(mode.ok()).toBeTruthy();
+    await setLocale(page, locale);
+    await page.goto("/login");
+    const button = page.getByRole("button", {
+      name: locale === "zh-CN" ? "使用 Fixture SSO 继续" : "Continue with Fixture SSO",
+      exact: true,
+    });
+    await expect(button).toBeVisible({ timeout: 30_000 });
+    const popupPromise = page.waitForEvent("popup");
+    await button.click();
+    const popup = await popupPromise;
+    await popup.waitForLoadState("domcontentloaded").catch(() => undefined);
+    await expect(page.getByRole("alert")).toContainText(labels.oidcDomainDenied, { timeout: 30_000 });
+    await expect(page.locator("body")).not.toContainText("fixture-oidc-secret");
+  });
+
   test(`single-VM ${locale} journey survives workerd restart`, async ({ page, request }) => {
     const labels = localeCopy(locale);
     await setLocale(page, locale);

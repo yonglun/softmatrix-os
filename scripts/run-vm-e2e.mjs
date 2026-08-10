@@ -33,6 +33,7 @@ const workerd = process.env.WORKERD_BIN ?? defaultWorkerdBinary();
 
 let provider;
 let oidcProvider;
+let oidcMode = "success";
 let child;
 const runtimeProcesses = new Set();
 let stopping = false;
@@ -150,6 +151,16 @@ function startOidcProvider() {
         if (!redirectUri || !state || !nonce || !codeChallenge) {
           return json(response, 400, { error: "invalid_request" });
         }
+        const mode = oidcMode;
+        // Modes are one-shot so a failed test cannot poison the next independent journey.
+        oidcMode = "success";
+        if (mode === "cancel") {
+          const callback = new URL(redirectUri);
+          callback.searchParams.set("error", "access_denied");
+          callback.searchParams.set("state", state);
+          response.writeHead(302, { location: callback.toString() });
+          return response.end();
+        }
         const code = `fixture-code-${randomUUID()}`;
         codes.set(code, {
           redirectUri,
@@ -157,7 +168,7 @@ function startOidcProvider() {
           codeChallenge,
           identity: {
             sub: `fixture-oidc-user-${randomUUID()}`,
-            email: `oidc-${randomUUID()}@example.test`,
+            email: `oidc-${randomUUID()}@${mode === "denied" ? "outside.test" : "example.test"}`,
           },
         });
         const callback = new URL(redirectUri);
@@ -380,6 +391,21 @@ async function restartRuntime(providerPort, oidcPort) {
 function startControlServer(providerPort, oidcPort) {
   const control = createServer(async (request, response) => {
     if (request.method === "GET" && request.url === "/health") return json(response, 200, { ok: Boolean(child) });
+    if (request.method === "POST" && request.url === "/oidc/mode") {
+      let body = "";
+      request.setEncoding("utf8");
+      request.on("data", chunk => { body += chunk; });
+      request.on("end", () => {
+        let mode;
+        try { mode = JSON.parse(body).mode; } catch { mode = undefined; }
+        if (mode !== "success" && mode !== "cancel" && mode !== "denied") {
+          return json(response, 400, { ok: false, error: "invalid OIDC fixture mode" });
+        }
+        oidcMode = mode;
+        return json(response, 200, { ok: true, mode });
+      });
+      return undefined;
+    }
     if (request.method === "POST" && request.url === "/restart") {
       try {
         await restartRuntime(providerPort, oidcPort);

@@ -12,6 +12,7 @@ import { renderWithLocale } from "../../test/renderWithLocale";
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.useRealTimers();
   localStorage.clear();
 });
 
@@ -74,6 +75,36 @@ describe("OidcButton", () => {
     await act(async () => { button.click(); });
     expect(localStorage.getItem("authToken")).toBe("alice:secret");
     expect(onSuccess).toHaveBeenCalledOnce();
+    rendered.unmount();
+  });
+
+  it("localizes a browser popup closure", async () => {
+    const dispose = vi.fn<() => void>();
+    const attempt = {
+      wait: vi.fn<() => Promise<never>>(() => new Promise(() => {})),
+      [Symbol.dispose]: dispose,
+    } as unknown as RpcStub<OidcLoginAttempt>;
+    const rpcStub = {
+      startOidcLogin: vi.fn<() => Promise<{ url: string; attempt: RpcStub<OidcLoginAttempt> }>>(
+        async () => ({ url: "https://id.example.com/authorize", attempt }),
+      ),
+    } as unknown as RpcStub<PublicApi>;
+    vi.spyOn(window, "open").mockReturnValue({ closed: true, location: { href: "about:blank" } } as Window);
+    const rendered = renderWithLocale(
+      <OidcButton rpcStub={rpcStub} config={{ displayName: "Company SSO" }} />,
+      "zh-CN",
+    );
+
+    vi.useFakeTimers();
+    const button = rendered.container.querySelector("button")!;
+    await act(async () => {
+      button.click();
+      await Promise.resolve();
+      await Promise.resolve();
+      await vi.advanceTimersByTimeAsync(600);
+    });
+    expect(rendered.container.querySelector('[role="alert"]')?.textContent).toContain("登录已取消");
+    expect(dispose).toHaveBeenCalled();
     rendered.unmount();
   });
 });
