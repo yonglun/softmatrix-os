@@ -51,6 +51,22 @@ function customFetch(fetcher: OidcFetch) {
     fetcher(url, options as RequestInit);
 }
 
+/** oauth4webapi rejects HTTP endpoints by default. Permit HTTP only for loopback dev fixtures;
+ * production OIDC remains HTTPS-only through getOidcConfig's URL validation. */
+function allowInsecureLocalRequests(config: OidcConfig): boolean {
+  const urls = [new URL(config.issuer), new URL(config.redirectUri)];
+  return urls.every(url => url.protocol === "http:"
+    && (url.hostname === "localhost" || url.hostname === "127.0.0.1"
+      || url.hostname === "::1" || url.hostname === "[::1]"));
+}
+
+function protocolRequestOptions(config: OidcConfig, fetcher: OidcFetch) {
+  return {
+    [oauth.customFetch]: customFetch(fetcher),
+    ...(allowInsecureLocalRequests(config) ? { [oauth.allowInsecureRequests]: true } : {}),
+  };
+}
+
 function rememberDiscovery(key: string, entry: DiscoveryCacheEntry): void {
   if (discoveryCache.size >= MAX_DISCOVERY_CACHE_ENTRIES && !discoveryCache.has(key)) {
     const oldest = discoveryCache.keys().next().value;
@@ -74,7 +90,7 @@ async function discover(config: OidcConfig, options?: OidcProtocolOptions): Prom
 
   try {
     const response = await oauth.discoveryRequest(issuer, {
-      [oauth.customFetch]: customFetch(fetchFor(options)),
+      ...protocolRequestOptions(config, fetchFor(options)),
     });
     const authorizationServer = await oauth.processDiscoveryResponse(issuer, response);
     if (!authorizationServer.authorization_endpoint
@@ -184,7 +200,7 @@ export async function exchangeAuthorizationCode(
       callbackParameters,
       config.redirectUri,
       stored.codeVerifier,
-      { [oauth.customFetch]: customFetch(fetcher) },
+      protocolRequestOptions(config, fetcher),
     );
     const processed = await oauth.processAuthorizationCodeResponse(
       entry.authorizationServer,
@@ -193,7 +209,7 @@ export async function exchangeAuthorizationCode(
       { expectedNonce: stored.nonce, requireIdToken: true },
     );
     await oauth.validateApplicationLevelSignature(entry.authorizationServer, tokenResponse, {
-      [oauth.customFetch]: customFetch(fetcher),
+      ...protocolRequestOptions(config, fetcher),
       [oauth.jwksCache]: entry.jwksCache,
     });
     const claims = oauth.getValidatedIdTokenClaims(processed);

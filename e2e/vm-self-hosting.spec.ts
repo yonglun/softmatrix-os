@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import {
   createWorkspace,
+  finishOnboarding,
   localeCopy,
   setLocale,
   signUpWithFixtureUser,
@@ -11,6 +12,23 @@ import {
 const controlUrl = `http://127.0.0.1:${process.env.SOFTMATRIX_VM_CONTROL_PORT ?? "9797"}`;
 
 for (const locale of ["en", "zh-CN"] as const satisfies FixtureLocale[]) {
+  test(`single-VM ${locale} OIDC sign-in provisions a session`, async ({ page }) => {
+    await setLocale(page, locale);
+    await page.goto("/login");
+
+    const button = page.getByRole("button", {
+      name: locale === "zh-CN" ? "使用 Fixture SSO 继续" : "Continue with Fixture SSO",
+      exact: true,
+    });
+    await expect(button).toBeVisible({ timeout: 30_000 });
+    const popupPromise = page.waitForEvent("popup");
+    await button.click();
+    const popup = await popupPromise;
+    await popup.waitForLoadState("domcontentloaded").catch(() => undefined);
+    await finishOnboarding(page, locale);
+    await expect(page.locator("body")).not.toContainText("fixture-oidc-secret");
+  });
+
   test(`single-VM ${locale} journey survives workerd restart`, async ({ page, request }) => {
     const labels = localeCopy(locale);
     await setLocale(page, locale);

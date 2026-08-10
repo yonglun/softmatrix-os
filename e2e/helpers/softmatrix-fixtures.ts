@@ -43,15 +43,8 @@ export async function setLocale(page: Page, locale: FixtureLocale): Promise<void
   }, locale);
 }
 
-export async function signUpWithFixtureUser(page: Page, locale: FixtureLocale): Promise<string> {
-  const username = `e2e_${locale.replace("-", "").toLowerCase()}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+export async function finishOnboarding(page: Page, locale: FixtureLocale): Promise<void> {
   const labels = localeCopy(locale);
-  await page.goto("/signup");
-  await page.getByRole("textbox", { name: labels.username, exact: true }).fill(username);
-  await page.getByRole("textbox", { name: labels.password, exact: true }).fill("fixture-password-123");
-  await page.getByRole("textbox", { name: labels.confirmPassword, exact: true }).fill("fixture-password-123");
-  await page.getByRole("button", { name: labels.signUp, exact: true }).click();
-  await expect(page).toHaveURL(/\/$/);
   await expect(
     page.getByRole("button", { name: labels.next, exact: true }),
   ).toBeVisible({ timeout: 30_000 });
@@ -67,7 +60,19 @@ export async function signUpWithFixtureUser(page: Page, locale: FixtureLocale): 
     await page.waitForTimeout(250);
   }
   await page.getByRole("button", { name: labels.finish, exact: true }).click();
-  await expect(page.getByRole("heading", { name: labels.homeTitle })).toBeVisible();
+  await expect(page.getByRole("heading", { name: labels.homeTitle })).toBeVisible({ timeout: 30_000 });
+}
+
+export async function signUpWithFixtureUser(page: Page, locale: FixtureLocale): Promise<string> {
+  const username = `e2e_${locale.replace("-", "").toLowerCase()}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  const labels = localeCopy(locale);
+  await page.goto("/signup");
+  await page.getByRole("textbox", { name: labels.username, exact: true }).fill(username);
+  await page.getByRole("textbox", { name: labels.password, exact: true }).fill("fixture-password-123");
+  await page.getByRole("textbox", { name: labels.confirmPassword, exact: true }).fill("fixture-password-123");
+  await page.getByRole("button", { name: labels.signUp, exact: true }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await finishOnboarding(page, locale);
   return username;
 }
 

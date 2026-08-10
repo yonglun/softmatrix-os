@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { createHash, createSign, generateKeyPairSync, randomUUID } from "node:crypto";
 import { createServer } from "node:http";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { spawn } from "node:child_process";
@@ -31,6 +32,7 @@ function defaultWorkerdBinary() {
 const workerd = process.env.WORKERD_BIN ?? defaultWorkerdBinary();
 
 let provider;
+let oidcProvider;
 let child;
 const runtimeProcesses = new Set();
 let stopping = false;
@@ -92,6 +94,105 @@ function startProvider() {
   });
 }
 
+function encodeJwtPart(value) {
+  return Buffer.from(JSON.stringify(value)).toString("base64url");
+}
+
+function signFixtureIdToken(privateKey, issuer, nonce) {
+  const header = encodeJwtPart({ alg: "RS256", kid: "fixture-key", typ: "JWT" });
+  const payload = encodeJwtPart({
+    iss: issuer,
+    sub: "fixture-oidc-user",
+    aud: "softmatrix",
+    iat: Math.floor(Date.now() / 1000) - 1,
+    exp: Math.floor(Date.now() / 1000) + 300,
+    nonce,
+    email: "oidc@example.test",
+    email_verified: true,
+  });
+  const signingInput = `${header}.${payload}`;
+  const signer = createSign("RSA-SHA256");
+  signer.update(signingInput);
+  signer.end();
+  return `${signingInput}.${signer.sign(privateKey).toString("base64url")}`;
+}
+
+function startOidcProvider() {
+  return new Promise((resolvePort) => {
+    const { privateKey, publicKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+    const exportedJwk = publicKey.export({ format: "jwk" });
+    const jwk = { ...exportedJwk, kid: "fixture-key", alg: "RS256", use: "sig" };
+    const codes = new Map();
+    let issuer;
+
+    oidcProvider = createServer((request, response) => {
+      const url = new URL(request.url ?? "/", issuer);
+      if (request.method === "GET" && url.pathname === "/.well-known/openid-configuration") {
+        return json(response, 200, {
+          issuer,
+          authorization_endpoint: `${issuer}/authorize`,
+          token_endpoint: `${issuer}/token`,
+          jwks_uri: `${issuer}/jwks`,
+          response_types_supported: ["code"],
+          subject_types_supported: ["public"],
+          id_token_signing_alg_values_supported: ["RS256"],
+          token_endpoint_auth_methods_supported: ["client_secret_post"],
+        });
+      }
+      if (request.method === "GET" && url.pathname === "/jwks") {
+        return json(response, 200, { keys: [jwk] });
+      }
+      if (request.method === "GET" && url.pathname === "/authorize") {
+        const redirectUri = url.searchParams.get("redirect_uri");
+        const state = url.searchParams.get("state");
+        const nonce = url.searchParams.get("nonce");
+        const codeChallenge = url.searchParams.get("code_challenge");
+        if (!redirectUri || !state || !nonce || !codeChallenge) {
+          return json(response, 400, { error: "invalid_request" });
+        }
+        const code = `fixture-code-${randomUUID()}`;
+        codes.set(code, { redirectUri, nonce, codeChallenge });
+        const callback = new URL(redirectUri);
+        callback.searchParams.set("code", code);
+        callback.searchParams.set("state", state);
+        response.writeHead(302, { location: callback.toString() });
+        return response.end();
+      }
+      if (request.method === "POST" && url.pathname === "/token") {
+        let body = "";
+        request.setEncoding("utf8");
+        request.on("data", chunk => { body += chunk; });
+        request.on("end", () => {
+          const params = new URLSearchParams(body);
+          const code = params.get("code");
+          const stored = code ? codes.get(code) : undefined;
+          const verifier = params.get("code_verifier") ?? "";
+          const challenge = createHash("sha256").update(verifier).digest("base64url");
+          if (params.get("client_id") !== "softmatrix"
+              || params.get("client_secret") !== "fixture-oidc-secret"
+              || !stored
+              || params.get("redirect_uri") !== stored.redirectUri
+              || challenge !== stored.codeChallenge) {
+            return json(response, 400, { error: "invalid_grant" });
+          }
+          codes.delete(code);
+          return json(response, 200, {
+            access_token: "fixture-oidc-access-token",
+            token_type: "Bearer",
+            id_token: signFixtureIdToken(privateKey, issuer, stored.nonce),
+          });
+        });
+        return undefined;
+      }
+      return json(response, 404, { error: "not_found" });
+    });
+    oidcProvider.listen(0, "127.0.0.1", () => {
+      issuer = `http://127.0.0.1:${oidcProvider.address().port}`;
+      resolvePort(oidcProvider.address().port);
+    });
+  });
+}
+
 function sanitize(value) {
   return value.replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, "").toUpperCase();
 }
@@ -110,13 +211,18 @@ async function ensureRelease() {
   });
 }
 
-function runtimeEnvironment(providerPort) {
+function runtimeEnvironment(providerPort, oidcPort) {
   const manifest = JSON.parse(readFileSync(join(releaseDir, "manifest.json"), "utf8"));
   const environment = {
     ...process.env,
     DEV: "1",
     SOFTMATRIX_E2E: "1",
     PUBLIC_BASE_URL: baseUrl,
+    OIDC_ISSUER: `http://127.0.0.1:${oidcPort}`,
+    OIDC_CLIENT_ID: "softmatrix",
+    OIDC_CLIENT_SECRET: "fixture-oidc-secret",
+    OIDC_DISPLAY_NAME: "Fixture SSO",
+    OIDC_ALLOWED_EMAIL_DOMAINS: "example.test",
     ADMINS: "[]",
     ORG_AI_MODELS: JSON.stringify([{
       id: "fixture-model",
@@ -154,8 +260,8 @@ function runtimeArgs(manifest) {
   return args;
 }
 
-function spawnRuntime(providerPort) {
-  const { environment, manifest } = runtimeEnvironment(providerPort);
+function spawnRuntime(providerPort, oidcPort) {
+  const { environment, manifest } = runtimeEnvironment(providerPort, oidcPort);
   const runtime = spawn(workerd, runtimeArgs(manifest), {
     cwd: releaseDir,
     env: environment,
@@ -231,13 +337,13 @@ async function stopRuntime() {
   await waitForRuntimeUnavailable();
 }
 
-async function startRuntime(providerPort) {
+async function startRuntime(providerPort, oidcPort) {
   const previousTransition = restarting;
   restarting = true;
   let lastError;
   try {
     for (let attempt = 0; attempt < 6; attempt += 1) {
-      spawnRuntime(providerPort);
+      spawnRuntime(providerPort, oidcPort);
       try {
         await waitForRuntime();
         return;
@@ -253,22 +359,22 @@ async function startRuntime(providerPort) {
   }
 }
 
-async function restartRuntime(providerPort) {
+async function restartRuntime(providerPort, oidcPort) {
   restarting = true;
   try {
     await stopRuntime();
-    await startRuntime(providerPort);
+    await startRuntime(providerPort, oidcPort);
   } finally {
     restarting = false;
   }
 }
 
-function startControlServer(providerPort) {
+function startControlServer(providerPort, oidcPort) {
   const control = createServer(async (request, response) => {
     if (request.method === "GET" && request.url === "/health") return json(response, 200, { ok: Boolean(child) });
     if (request.method === "POST" && request.url === "/restart") {
       try {
-        await restartRuntime(providerPort);
+        await restartRuntime(providerPort, oidcPort);
         return json(response, 200, { ok: true });
       } catch (error) {
         return json(response, 500, { ok: false, error: String(error?.message ?? error) });
@@ -280,11 +386,12 @@ function startControlServer(providerPort) {
   return control;
 }
 
+const oidcPort = await startOidcProvider();
 const providerPort = await startProvider();
 ensureState();
 await ensureRelease();
-const control = startControlServer(providerPort);
-await startRuntime(providerPort);
+const control = startControlServer(providerPort, oidcPort);
+await startRuntime(providerPort, oidcPort);
 
 async function stop() {
   if (stopping) return;
@@ -292,6 +399,7 @@ async function stop() {
   control.close();
   await stopRuntime();
   provider.close();
+  oidcProvider.close();
   if (ownsState) rmSync(stateDir, { recursive: true, force: true });
 }
 

@@ -101,6 +101,30 @@ describe("OIDC authorization-code protocol", () => {
     expect(request.stored.state).toBe("state-123");
   });
 
+  it("allows loopback HTTP fixtures without weakening production HTTPS checks", async () => {
+    const { fetchImpl: baseFetch } = await fixtureFetch();
+    const localConfig = {
+      ...config,
+      issuer: "http://127.0.0.1:43123",
+      redirectUri: "http://127.0.0.1:8787/api/auth/oidc/callback",
+    };
+    const fetchImpl = vi.fn(async (url: string, options: Parameters<typeof baseFetch>[1]) => {
+      if (url.endsWith("/.well-known/openid-configuration")) {
+        return Response.json({
+          ...DISCOVERY,
+          issuer: localConfig.issuer,
+          authorization_endpoint: `${localConfig.issuer}/authorize`,
+          token_endpoint: `${localConfig.issuer}/token`,
+          jwks_uri: `${localConfig.issuer}/jwks`,
+        });
+      }
+      return baseFetch(url, options);
+    });
+    const request = await createAuthorizationRequest(localConfig, "state-local", { fetch: fetchImpl });
+    expect(request.url.protocol).toBe("http:");
+    expect(request.url.searchParams.get("redirect_uri")).toBe(localConfig.redirectUri);
+  });
+
   it("exchanges a valid callback and returns only a verified identity", async () => {
     const { fetchImpl, setExpectedNonce } = await fixtureFetch();
     const { stored } = await createAuthorizationRequest(config, "state-123", { fetch: fetchImpl });

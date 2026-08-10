@@ -33,7 +33,7 @@ describe("OidcButton", () => {
         async () => ({ url: "https://id.example.com/authorize", attempt }),
       ),
     } as unknown as RpcStub<PublicApi>;
-    vi.spyOn(window, "open").mockReturnValue({ closed: false } as Window);
+    vi.spyOn(window, "open").mockReturnValue({ closed: false, location: { href: "about:blank" } } as Window);
     const rendered = renderWithLocale(
       <OidcButton rpcStub={rpcStub} config={{ displayName: "Company SSO" }} />,
       "zh-CN",
@@ -63,7 +63,7 @@ describe("OidcButton", () => {
         async () => ({ url: "https://id.example.com/authorize", attempt }),
       ),
     } as unknown as RpcStub<PublicApi>;
-    vi.spyOn(window, "open").mockReturnValue({ closed: false } as Window);
+    vi.spyOn(window, "open").mockReturnValue({ closed: false, location: { href: "about:blank" } } as Window);
     const rendered = renderWithLocale(
       <OidcButton rpcStub={rpcStub} config={{ displayName: "Company SSO" }} onSuccess={onSuccess} />,
       "en",
