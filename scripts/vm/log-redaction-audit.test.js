@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
-import { auditLogText } from "./log-redaction-audit.mjs";
+import { auditLogText, readLogSource } from "./log-redaction-audit.mjs";
 
 test("accepts ordinary logs and explicitly redacted sensitive fields", () => {
   const result = auditLogText([
@@ -72,5 +72,12 @@ test("CLI reports only safe metadata when a file contains a secret", async () =>
       assert.match(error.stdout, /findingCount/u);
       return true;
     },
+  );
+});
+
+test("rejects unsafe journal unit names before invoking journalctl", async () => {
+  await assert.rejects(
+    readLogSource({ unit: "--output=json", since: "today" }),
+    /unsafe systemd unit name/u,
   );
 });
