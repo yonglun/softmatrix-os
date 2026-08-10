@@ -87,6 +87,7 @@ These results are development evidence only and must be re-run from the clean re
 | VM evidence draft initializer | PASS (2/2) | `node --test scripts/vm/release-evidence-init.test.js`; immutable facts only, explicit NO-GO |
 | VM evidence collector contract | PASS (7/7) | `node --test scripts/vm/release-evidence-collect.test.js`; automated facts and log audit cannot change NO-GO to GO |
 | VM log-redaction audit contract | PASS (5/5) | `node --test scripts/vm/log-redaction-audit.test.js`; findings never include log values or unsafe journal arguments |
+| Dependency license inventory | `[ ]` target VM | Run `pnpm licenses list --json` from the clean Linux release checkout; review LGPL/Unlicense/UNKNOWN/custom entries and attach the normalized report |
 | Install, health, backup, restore tests | PASS (6/6) | `node --test scripts/vm/install-release.test.js scripts/vm/vm-data.test.js` |
 | Router asset MIME tests | PASS (14/14) | `pnpm --filter @gadgets/router test` |
 | VM workerd config compile | PASS | `workerd compile runtime/workerd.capnp config` |
@@ -253,6 +254,8 @@ sudo pnpm rollback:vm -- \
 The release is **GO** only when all of the following are true:
 
 - no secret appears in artifacts, manifests, browser assets, or logs;
+- the target-platform dependency license inventory has been reviewed and every flagged package has
+  an approved license/notice treatment;
 - bilingual login, OIDC, model governance, Gatekeeper, attachment, and Blueprint checks pass;
 - restart and VM reboot preserve the same workspace and model preference;
 - the backup checksum verifies and isolated restore succeeds;
