@@ -98,16 +98,16 @@ function encodeJwtPart(value) {
   return Buffer.from(JSON.stringify(value)).toString("base64url");
 }
 
-function signFixtureIdToken(privateKey, issuer, nonce) {
+function signFixtureIdToken(privateKey, issuer, nonce, identity) {
   const header = encodeJwtPart({ alg: "RS256", kid: "fixture-key", typ: "JWT" });
   const payload = encodeJwtPart({
     iss: issuer,
-    sub: "fixture-oidc-user",
+    sub: identity.sub,
     aud: "softmatrix",
     iat: Math.floor(Date.now() / 1000) - 1,
     exp: Math.floor(Date.now() / 1000) + 300,
     nonce,
-    email: "oidc@example.test",
+    email: identity.email,
     email_verified: true,
   });
   const signingInput = `${header}.${payload}`;
@@ -151,7 +151,15 @@ function startOidcProvider() {
           return json(response, 400, { error: "invalid_request" });
         }
         const code = `fixture-code-${randomUUID()}`;
-        codes.set(code, { redirectUri, nonce, codeChallenge });
+        codes.set(code, {
+          redirectUri,
+          nonce,
+          codeChallenge,
+          identity: {
+            sub: `fixture-oidc-user-${randomUUID()}`,
+            email: `oidc-${randomUUID()}@example.test`,
+          },
+        });
         const callback = new URL(redirectUri);
         callback.searchParams.set("code", code);
         callback.searchParams.set("state", state);
@@ -179,7 +187,7 @@ function startOidcProvider() {
           return json(response, 200, {
             access_token: "fixture-oidc-access-token",
             token_type: "Bearer",
-            id_token: signFixtureIdToken(privateKey, issuer, stored.nonce),
+            id_token: signFixtureIdToken(privateKey, issuer, stored.nonce, stored.identity),
           });
         });
         return undefined;
