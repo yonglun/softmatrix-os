@@ -8,6 +8,7 @@ const CHECK_NAMES = [
   "oidcProductionDomainDenial",
   "modelGovernance",
   "attachmentBlueprintStorage",
+  "licenseInventory",
   "logsRedacted",
   "publicHttps",
   "websocketUpgrade",
@@ -16,6 +17,7 @@ const CHECK_NAMES = [
   "isolatedRestore",
   "rollbackWorkspace",
 ];
+export const RELEASE_EVIDENCE_SCHEMA_VERSION = 2;
 
 const HEX_SHA256 = /^[a-f0-9]{64}$/u;
 const COMMIT = /^[a-f0-9]{7,64}$/u;
@@ -98,7 +100,9 @@ function checkSignoff(value, path) {
 export function validateReleaseEvidence(report) {
   checkObject(report, "report");
   checkSecretKeys(report);
-  if (report.schemaVersion !== 1) fail("VM_EVIDENCE_INVALID", "schemaVersion must be 1");
+  if (report.schemaVersion !== RELEASE_EVIDENCE_SCHEMA_VERSION) {
+    fail("VM_EVIDENCE_INVALID", `schemaVersion must be ${RELEASE_EVIDENCE_SCHEMA_VERSION}`);
+  }
   if (report.decision !== "GO" && report.decision !== "NO-GO") {
     fail("VM_EVIDENCE_INVALID", "decision must be GO or NO-GO");
   }

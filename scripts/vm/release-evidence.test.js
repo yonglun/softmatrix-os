@@ -1,10 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { ReleaseEvidenceError, validateReleaseEvidence } from "./release-evidence.mjs";
+import {
+  RELEASE_EVIDENCE_SCHEMA_VERSION,
+  ReleaseEvidenceError,
+  validateReleaseEvidence,
+} from "./release-evidence.mjs";
 
 function validEvidence() {
   return {
-    schemaVersion: 1,
+    schemaVersion: RELEASE_EVIDENCE_SCHEMA_VERSION,
     decision: "GO",
     capturedAt: "2026-08-10T12:00:00Z",
     release: {
@@ -36,6 +40,7 @@ function validEvidence() {
       "oidcProductionDomainDenial",
       "modelGovernance",
       "attachmentBlueprintStorage",
+      "licenseInventory",
       "logsRedacted",
       "publicHttps",
       "websocketUpgrade",
@@ -60,7 +65,7 @@ function validEvidence() {
 }
 
 test("accepts a complete GO evidence record without secret fields", () => {
-  assert.deepEqual(validateReleaseEvidence(validEvidence()), { decision: "GO", checkCount: 12 });
+  assert.deepEqual(validateReleaseEvidence(validEvidence()), { decision: "GO", checkCount: 13 });
 });
 
 test("rejects GO when a production check is missing or pending", () => {
@@ -68,6 +73,13 @@ test("rejects GO when a production check is missing or pending", () => {
   delete evidence.checks.websocketUpgrade;
   assert.throws(
     () => validateReleaseEvidence(evidence),
+    error => error instanceof ReleaseEvidenceError && error.code === "VM_EVIDENCE_INCOMPLETE",
+  );
+
+  const missingLicenseReview = validEvidence();
+  delete missingLicenseReview.checks.licenseInventory;
+  assert.throws(
+    () => validateReleaseEvidence(missingLicenseReview),
     error => error instanceof ReleaseEvidenceError && error.code === "VM_EVIDENCE_INCOMPLETE",
   );
 
@@ -95,10 +107,19 @@ test("rejects malformed hashes, timestamps, and secret-shaped fields", () => {
   );
 });
 
+test("rejects the pre-license-review evidence schema", () => {
+  const legacy = validEvidence();
+  legacy.schemaVersion = 1;
+  assert.throws(
+    () => validateReleaseEvidence(legacy),
+    error => error instanceof ReleaseEvidenceError && error.code === "VM_EVIDENCE_INVALID",
+  );
+});
+
 test("allows a fully evidenced NO-GO record for auditability", () => {
   const evidence = validEvidence();
   evidence.decision = "NO-GO";
   evidence.checks.modelGovernance = { status: "FAIL", evidence: "provider policy rejected model REL-2" };
   for (const signoff of Object.values(evidence.signoff)) signoff.decision = "HOLD";
-  assert.deepEqual(validateReleaseEvidence(evidence), { decision: "NO-GO", checkCount: 12 });
+  assert.deepEqual(validateReleaseEvidence(evidence), { decision: "NO-GO", checkCount: 13 });
 });

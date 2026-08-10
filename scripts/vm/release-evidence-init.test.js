@@ -42,10 +42,10 @@ test("creates a valid NO-GO draft from an immutable release without inventing pr
   assert.match(draft.release.manifestSha256, /^[a-f0-9]{64}$/u);
   assert.match(draft.release.checksumsSha256, /^[a-f0-9]{64}$/u);
   assert.match(draft.release.legalManifestSha256, /^[a-f0-9]{64}$/u);
-  assert.equal(Object.values(draft.checks).length, 12);
+  assert.equal(Object.values(draft.checks).length, 13);
   assert.ok(Object.values(draft.checks).every(check => check.status === "FAIL"));
   assert.ok(Object.values(draft.checks).every(check => check.evidence.includes("PENDING")));
-  assert.deepEqual(validateReleaseEvidence(draft), { decision: "NO-GO", checkCount: 12 });
+  assert.deepEqual(validateReleaseEvidence(draft), { decision: "NO-GO", checkCount: 13 });
   assert.equal(JSON.stringify(draft).includes("client-secret"), false);
 });
 

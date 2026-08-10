@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "decision": "GO",
   "capturedAt": "<fill: UTC ISO timestamp>",
   "release": {
@@ -31,6 +31,7 @@
     "oidcProductionDomainDenial": { "status": "PASS", "evidence": "<fill: evidence reference>" },
     "modelGovernance": { "status": "PASS", "evidence": "<fill: evidence reference>" },
     "attachmentBlueprintStorage": { "status": "PASS", "evidence": "<fill: evidence reference>" },
+    "licenseInventory": { "status": "PASS", "evidence": "<fill: evidence reference>" },
     "logsRedacted": { "status": "PASS", "evidence": "<fill: evidence reference>" },
     "publicHttps": { "status": "PASS", "evidence": "<fill: evidence reference>" },
     "websocketUpgrade": { "status": "PASS", "evidence": "<fill: evidence reference>" },

@@ -6,7 +6,7 @@ import { hostname as systemHostname, release as systemKernel } from "node:os";
 import { dirname, resolve } from "node:path";
 
 import { sha256Hex } from "../release/hash-lib.mjs";
-import { validateReleaseEvidence } from "./release-evidence.mjs";
+import { RELEASE_EVIDENCE_SCHEMA_VERSION, validateReleaseEvidence } from "./release-evidence.mjs";
 
 const CHECK_NAMES = [
   "oidcProductionSuccess",
@@ -14,6 +14,7 @@ const CHECK_NAMES = [
   "oidcProductionDomainDenial",
   "modelGovernance",
   "attachmentBlueprintStorage",
+  "licenseInventory",
   "logsRedacted",
   "publicHttps",
   "websocketUpgrade",
@@ -110,7 +111,7 @@ export async function createReleaseEvidenceDraft({
   }
 
   const report = {
-    schemaVersion: 1,
+    schemaVersion: RELEASE_EVIDENCE_SCHEMA_VERSION,
     draft: true,
     decision: "NO-GO",
     capturedAt,

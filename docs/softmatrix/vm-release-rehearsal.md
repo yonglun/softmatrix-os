@@ -83,7 +83,7 @@ These results are development evidence only and must be re-run from the clean re
 | VM config preflight tests | PASS (5/5) | `node --test scripts/vm/vm-config.test.js`; packaged CLI also passed |
 | VM network boundary tests | PASS (4/4) | `pnpm test:vm:network`; service/profile loopback and Caddy/Nginx WebSocket proxy templates |
 | VM public endpoint probe tests | PASS (3/3) | `pnpm test:vm:probe`; HTTP status, HTTPS requirement, and `/api` WebSocket 101 checks |
-| VM release evidence schema | PASS (4/4) | `node --test scripts/vm/release-evidence.test.js`; GO/NO-GO completeness, hash, timestamp, and secret-field guards |
+| VM release evidence schema v2 | PASS (5/5) | `node --test scripts/vm/release-evidence.test.js`; GO/NO-GO completeness, target-platform license review, hash, timestamp, and secret-field guards |
 | VM evidence draft initializer | PASS (2/2) | `node --test scripts/vm/release-evidence-init.test.js`; immutable facts only, explicit NO-GO |
 | VM evidence collector contract | PASS (7/7) | `node --test scripts/vm/release-evidence-collect.test.js`; automated facts and log audit cannot change NO-GO to GO |
 | VM log-redaction audit contract | PASS (5/5) | `node --test scripts/vm/log-redaction-audit.test.js`; findings never include log values or unsafe journal arguments |
@@ -117,7 +117,7 @@ and [VM Smoke run 31398677796](https://github.com/yonglun/softmatrix-os/actions/
 | VM configuration contract | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |
 | VM network boundary contract | PASS (4/4) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |
 | VM public endpoint probe | PASS (3/3) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |
-| VM release evidence schema | PASS (4/4) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |
+| VM release evidence schema v2 | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580); current source adds the required `licenseInventory` check |
 | Native workerd persistence | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |
 | Clean immutable release build (18 workers / 84 modules) | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |
 | English and Simplified Chinese password/restart journeys | PASS (2/2) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580) |

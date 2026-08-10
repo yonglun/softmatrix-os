@@ -5,7 +5,7 @@ import { auditLogText } from "./log-redaction-audit.mjs";
 import { assessLoopbackListeners, collectVmEvidence } from "./release-evidence-collect.mjs";
 
 const draft = () => ({
-  schemaVersion: 1,
+  schemaVersion: 2,
   draft: true,
   decision: "NO-GO",
   capturedAt: "2026-08-10T15:00:00Z",
@@ -38,6 +38,7 @@ const draft = () => ({
     "oidcProductionDomainDenial",
     "modelGovernance",
     "attachmentBlueprintStorage",
+    "licenseInventory",
     "logsRedacted",
     "publicHttps",
     "websocketUpgrade",
