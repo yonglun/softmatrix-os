@@ -17,16 +17,16 @@ Fill these values from the exact clean checkout and immutable artifact:
 
 | Field | Value |
 |---|---|
-| Source commit (latest automated rehearsal) | `9648723852026daedf1e7cb5be57bc19b12b0e4c`; replace with the exact production checkout SHA |
-| Release ID (local rehearsal) | `softmatrix-vm-v1.0.0-9648723` |
-| Build timestamp (UTC) | `2026-08-10T12:39:18.473Z` |
-| Release directory | `/tmp/softmatrix-vm-v1.0.0-9648723` |
-| `manifest.json` SHA-256 | `011f04d56c7b10e89d23d303238e15704ae11b6ff9b38885c103aa78791bba61` |
-| `checksums.sha256` SHA-256 | `59b8b86db1ec17634b5683e400af69a04cfaabc758e94487c2a0105b3b5d4a47` |
+| Source commit (latest automated rehearsal) | `396a6cccd0d09e264ebd4344021ea8ce624808ab`; replace with the exact production checkout SHA |
+| Release ID (local rehearsal) | `softmatrix-vm-v1.0.0-396a6cc` |
+| Build timestamp (UTC) | `2026-08-10T14:44:10.824Z` |
+| Release directory | `/tmp/softmatrix-vm-v1.0.0-396a6cc` |
+| `manifest.json` SHA-256 | `789ed154ef0331af5877eac153456e30c8273fe6d9d738a4d5349d9b02c8c4bc` |
+| `checksums.sha256` SHA-256 | `4e5fcaddcd1589b3165c43e165fe6a5b9e22a1cfe73d0950af7b5f5ba5c847c0` |
 | `legal-manifest.json` SHA-256 | `a8dc8b170d5d742e3e88da0491858a93c12c59724668f0bd5e01c3f3681b08c1` |
 | Apache-2.0 `LICENSE` SHA-256 | `0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594` |
 | `tools/vm-config.mjs` SHA-256 | `f7974028822f010879df7e91d75b61800c5cd74032beef45d749d080cfc2184d` |
-| `workerd` version/binary SHA-256 | `2026-08-01` / `b3eea2de0ef56b987737aab8775ac16d046500b2c68587a1bb1f7cc2080647e7` (local binary; verify the VM binary separately) |
+| `workerd` version/binary SHA-256 | `2026-08-01` / `3da61644318c8fab32e68a504513865aef12329b1356d75d7e6f83a713ea9f7b` (local binary; verify the VM binary separately) |
 | Node.js / pnpm versions | `v22.14.0` / `11.17.0` |
 | OS / kernel | `macOS 26.5.2` / `Darwin 25.5.0 arm64` |
 | systemd and TLS proxy versions | `PENDING` |
@@ -93,9 +93,9 @@ These results are development evidence only and must be re-run from the clean re
 | Bilingual VM browser journey | PASS (8/8) | Ubuntu `VM Smoke` run below; English/Chinese password restart, OIDC success, cancellation, and domain-denial journeys |
 | Compliance and i18n coverage | PASS (3/3) | `node --test scripts/softmatrix-compliance.test.js scripts/i18n-coverage.test.js` |
 
-The `softmatrix-vm-v1.0.0-9648723` artifact contains 18 workers, 84 modules, and 31 asset blobs. Its generated
+The `softmatrix-vm-v1.0.0-396a6cc` artifact contains 18 workers, 84 modules, and 31 asset blobs. Its generated
 `runtime/workerd.capnp` compiled successfully; the current local compiled configuration SHA-256 is
-`65bf5df46617041b7bd80acc9de089cac017fa7240c806767b739e9971dd466b`. The immutable package
+`34dda6332c6a7716118c0a3a6969e76e3b39e4c99e20667669dc0ebd488d6773`. The immutable package
 also includes the systemd fail-closed preflight at `tools/vm-config.mjs`.
 
 ## Latest clean-checkout CI gate
