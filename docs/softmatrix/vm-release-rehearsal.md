@@ -57,6 +57,7 @@ These results are development evidence only and must be re-run from the clean re
 |---|---|---|
 | VM build artifact tests | PASS (2/2) | `node --test scripts/vm/build-release.test.js` |
 | VM config preflight tests | PASS (5/5) | `node --test scripts/vm/vm-config.test.js`; packaged CLI also passed |
+| VM network boundary tests | PASS (4/4) | `pnpm test:vm:network`; service/profile loopback and Caddy/Nginx WebSocket proxy templates |
 | Install, health, backup, restore tests | PASS (6/6) | `node --test scripts/vm/install-release.test.js scripts/vm/vm-data.test.js` |
 | Router asset MIME tests | PASS (14/14) | `pnpm --filter @gadgets/router test` |
 | VM workerd config compile | PASS | `workerd compile runtime/workerd.capnp config` |

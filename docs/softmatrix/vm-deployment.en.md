@@ -42,6 +42,7 @@ sudo node scripts/vm/install-release.mjs \
   --root /opt/softmatrix \
   --release /opt/softmatrix/incoming-v1.0.0 \
   --base-url https://softmatrix.example
+```
 
 The stable root command for the same install is:
 
@@ -49,7 +50,6 @@ The stable root command for the same install is:
 sudo pnpm install:vm -- --root /opt/softmatrix \
   --release /opt/softmatrix/incoming-v1.0.0 \
   --base-url https://softmatrix.example
-```
 ```
 
 The installer validates checksums, Apache-2.0/notice sidecars, and module hashes before an
@@ -78,6 +78,13 @@ private, and local destinations; all gatekeeper workers keep public-only egress.
 For an on-VM Ollama provider, use an `ollama` model with `apiUrl` such as
 `http://127.0.0.1:11434`. Do not expose Ollama or port 8787 to the Internet. Configure Caddy/Nginx
 to proxy only HTTPS traffic to `127.0.0.1:8787` and preserve WebSocket upgrades.
+
+The repository includes checked-in proxy templates. For Caddy, set `SOFTMATRIX_DOMAIN` in the
+Caddy service environment, copy `deploy/vm/Caddyfile.example` to the Caddy configuration path,
+and reload Caddy. For Nginx, replace the hostname and certificate paths in
+`deploy/vm/nginx.conf.example`, include it from the `http {}` configuration, then reload Nginx.
+The templates deliberately proxy only to loopback; the network-contract test protects this
+boundary and the WebSocket upgrade headers.
 
 ## 4. Backup, restore, and rollback
 

@@ -41,6 +41,7 @@ sudo node scripts/vm/install-release.mjs \
   --root /opt/softmatrix \
   --release /opt/softmatrix/incoming-v1.0.0 \
   --base-url https://softmatrix.example
+```
 
 同一安装流程也可以使用稳定的根命令：
 
@@ -48,7 +49,6 @@ sudo node scripts/vm/install-release.mjs \
 sudo pnpm install:vm -- --root /opt/softmatrix \
   --release /opt/softmatrix/incoming-v1.0.0 \
   --base-url https://softmatrix.example
-```
 ```
 
 安装器会校验 checksum、Apache-2.0/notice sidecar 和模块哈希，再原子切换 `current`。就绪检查
@@ -76,6 +76,11 @@ VM secret manager 或仅 root 可读的环境文件中。受治理部署设置 `
 如使用 VM 内 Ollama，请使用 `ollama` provider，并设置类似
 `http://127.0.0.1:11434` 的 `apiUrl`。不要把 Ollama 或 8787 暴露到公网。Caddy/Nginx 只应把
 HTTPS 代理到 `127.0.0.1:8787`，并保留 WebSocket upgrade。
+
+仓库提供了已纳入版本控制的代理模板。使用 Caddy 时，将 `SOFTMATRIX_DOMAIN` 注入 Caddy
+服务环境，复制 `deploy/vm/Caddyfile.example` 到 Caddy 配置路径后 reload。使用 Nginx 时，先
+替换 `deploy/vm/nginx.conf.example` 中的域名和证书路径，将它 include 到 `http {}` 配置后
+reload。模板只代理到回环地址；网络契约测试会保护该边界以及 WebSocket upgrade 请求头。
 
 ## 4. Backup, restore, and rollback
 

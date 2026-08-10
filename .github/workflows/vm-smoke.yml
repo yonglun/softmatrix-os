@@ -54,6 +54,9 @@ jobs:
           ADMINS='["admin@example.com"]' \
           node scripts/vm/vm-config.mjs --check
 
+      - name: Validate VM network contract
+        run: pnpm test:vm:network
+
       - name: Run native workerd persistence smoke
         run: pnpm test:vm:workerd
 
