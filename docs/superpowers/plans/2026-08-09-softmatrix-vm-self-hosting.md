@@ -25,9 +25,13 @@
 Tasks 1–7 are implemented in the feature branch and covered by focused tests plus the Ubuntu
 `VM Smoke` workflow. The clean-checkout release builder now generates ignored `build:app`,
 `build:configurator`, and `build:format-blueprints` inputs before Wrangler collection. The latest
-feature head is `f77009f`; Build/Test, Lint, and the two-language Ubuntu VM journey pass.
+feature head is `b45452b`; Build/Test, Lint, and the four-test two-language Ubuntu VM journey pass.
+The VM harness now includes a native local OIDC provider with RS256 signing, JWKS discovery, and
+PKCE validation; each fixture authorization provisions an isolated identity so the bilingual
+onboarding assertions are independent.
 
-Task 8 remains intentionally open. A real operator VM still must provide OIDC provider behavior,
+Task 8 remains intentionally open. CI now proves the local OIDC success path, but a real operator
+VM still must provide the chosen production IdP's success/cancel/domain-policy evidence,
 TLS/WebSocket proxy evidence, reboot persistence, log-redaction review, backup checksum and
 isolated restore, release rollback, and release-owner/security sign-off. CI evidence and local
 macOS rehearsal data do not satisfy those production acceptance items.
@@ -447,6 +451,8 @@ Expected: the candidate starts without a Cloudflare account or Cloudflare servic
 
 Verify bilingual login, OIDC success/cancel/domain denial, workspace persistence, model policy,
 BYOK behavior, Gatekeeper approval, attachment/Blueprint storage, log redaction, and public HTTPS.
+The automated local fixture covers only OIDC success; cancellation and domain denial must be
+replayed against the production IdP on the operator VM.
 
 - [ ] **Step 4: Reboot, restore, and roll back**
 
