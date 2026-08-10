@@ -21,7 +21,7 @@ centralized product metadata, and compliance controls. The Git history records t
 test("Softmatrix distribution retains the exact Apache-2.0 license and attribution", async () => {
   const [license, notice, readme, readmeZh, contributing, compliance, upstreamSync, releasePlan,
     envDts, deploymentEn, deploymentZh, operationsEn, operationsZh, upgradeEn, upgradeZh,
-    vmDeploymentEn, vmDeploymentZh, vmOperationsEn, vmOperationsZh, vmService, vmWorkflow] =
+    vmDeploymentEn, vmDeploymentZh, vmOperationsEn, vmOperationsZh, vmService, vmWorkflow, ciWorkflow] =
     await Promise.all([
       readFile(new URL("../LICENSE", import.meta.url)),
       readFile(new URL("../NOTICE", import.meta.url), "utf8"),
@@ -47,6 +47,7 @@ test("Softmatrix distribution retains the exact Apache-2.0 license and attributi
       readFile(new URL("../docs/softmatrix/vm-operations.zh-CN.md", import.meta.url), "utf8"),
       readFile(new URL("../deploy/vm/softmatrix.service", import.meta.url), "utf8"),
       readFile(new URL("../.github/workflows/vm-smoke.yml", import.meta.url), "utf8"),
+      readFile(new URL("../.github/workflows/ci.yml", import.meta.url), "utf8"),
     ]);
 
   assert.equal(createHash("sha256").update(license).digest("hex"), APACHE_2_LICENSE_SHA256);
@@ -99,6 +100,8 @@ test("Softmatrix distribution retains the exact Apache-2.0 license and attributi
   assert.match(vmWorkflow, /scripts\/vm\/vm-config\.mjs --check/);
   assert.match(vmWorkflow, /test:vm:workerd/);
   assert.match(vmWorkflow, /test:e2e:vm/);
+  assert.match(ciWorkflow, /playwright install --with-deps chromium/);
+  assert.match(ciWorkflow, /run: pnpm test:e2e/);
 
   function headingSignature(markdown) {
     return markdown.split("\n")

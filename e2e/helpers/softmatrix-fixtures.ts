@@ -84,12 +84,25 @@ export async function selectModelIfAvailable(page: Page, locale: FixtureLocale):
   const labels = localeCopy(locale);
   const picker = page.getByRole("button", { name: labels.selectModel, exact: true });
   if (await picker.count() === 0) return;
-  const selected = await picker.innerText();
-  if (selected === "Fixture Model") return;
-  await picker.click();
-  const model = page.getByRole("menuitem", { name: "Fixture Model", exact: true });
-  if (await model.count() > 0) await model.click();
-  await page.keyboard.press("Escape");
+  const selected = (await picker.innerText()).trim();
+  const menu = page.getByRole("menu", { name: labels.selectModel, exact: true });
+  if (selected !== "Fixture Model") {
+    await picker.click();
+    const model = page.getByRole("menuitem", { name: "Fixture Model", exact: true });
+    if (await model.count() > 0) {
+      await model.click();
+      await expect(picker).toContainText("Fixture Model", { timeout: 5_000 });
+    }
+  }
+  // Base UI keeps the menu mounted while the selection transition settles.
+  // Always close it before interacting with the composer, otherwise its inert
+  // portal can intercept the send button even though the model is selected.
+  if (await picker.getAttribute("aria-expanded") === "true") {
+    await page.keyboard.press("Escape");
+    if (await picker.getAttribute("aria-expanded") === "true") await picker.click();
+  }
+  await expect(picker).toHaveAttribute("aria-expanded", "false");
+  if (await menu.count() > 0) await expect(menu).toBeHidden({ timeout: 5_000 });
 }
 
 export async function createWorkspace(page: Page, locale: FixtureLocale, prompt: string): Promise<void> {

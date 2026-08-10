@@ -7,6 +7,9 @@ const systemChrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chro
 
 export default defineConfig({
   testDir: "./e2e",
+  // The VM journey needs its fixture control plane and is run separately by
+  // `pnpm test:e2e:vm`; keep the ordinary local release gate deterministic.
+  testIgnore: vmE2E ? [] : ["**/vm-self-hosting.spec.ts"],
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,
