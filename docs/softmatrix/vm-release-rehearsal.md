@@ -102,13 +102,13 @@ also includes the systemd fail-closed preflight at `tools/vm-config.mjs`.
 
 The release builder has since been hardened to generate every ignored worker input before Wrangler
 collects modules (`build:app`, `build:configurator`, and `build:format-blueprints`). The latest
-release gate is `9648723`; its GitHub CI run passed build, tests, lint, and Chromium browser E2E,
+release gate is `43d435c`; its GitHub CI run passed build, tests, lint, and Chromium browser E2E,
 and its Ubuntu `VM Smoke` run passed the network contract, public probe, and all eight browser
 journeys on an ephemeral Linux VM:
 
-The follow-on head `bbf2966` adds the safe evidence collector and re-ran the same gates successfully:
-[CI run 31394159764](https://github.com/yonglun/softmatrix-os/actions/runs/31394159764) and
-[VM Smoke run 31394159436](https://github.com/yonglun/softmatrix-os/actions/runs/31394159436).
+The follow-on head `43d435c` adds the safe log audit and evidence-collector integration and re-ran
+the same gates successfully: [CI run 31398677663](https://github.com/yonglun/softmatrix-os/actions/runs/31398677663)
+and [VM Smoke run 31398677796](https://github.com/yonglun/softmatrix-os/actions/runs/31398677796).
 
 | Check | Result | Evidence |
 |---|---|---|

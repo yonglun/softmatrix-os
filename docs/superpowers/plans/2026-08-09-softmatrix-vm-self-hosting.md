@@ -25,8 +25,9 @@
 Tasks 1–7 are implemented in the feature branch and covered by focused tests plus the Ubuntu
 `VM Smoke` workflow. The clean-checkout release builder now generates ignored `build:app`,
 `build:configurator`, and `build:format-blueprints` inputs before Wrangler collection. The latest
-feature head is `9648723`; Build/Test, Lint, Chromium browser E2E, the VM network contract, public
-endpoint probe, and the eight-test two-language Ubuntu VM journey pass in GitHub Actions.
+feature head is `43d435c`; Build/Test, Lint, Chromium browser E2E, the VM network contract, public
+endpoint probe, and the eight-test two-language Ubuntu VM journey pass in GitHub Actions. The final
+log-redaction audit test and evidence-collector integration are included in this head.
 The VM harness now includes a native local OIDC provider with RS256 signing, JWKS discovery, and
 PKCE validation; each fixture authorization provisions an isolated identity so the bilingual
 onboarding assertions are independent. It also exercises IdP cancellation and exact email-domain
@@ -43,8 +44,8 @@ seeds an explicitly `NO-GO` report from immutable release and host facts without
 evidence; the collector can add only directly observed HTTPS/WSS, loopback, and runtime facts and
 still keeps the report `NO-GO`. The recorded release-artifact milestone is covered by [CI run 31388086502](https://github.com/yonglun/softmatrix-os/actions/runs/31388086502)
 and [VM Smoke run 31388086580](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580).
-The current evidence-collector head `bbf2966` is additionally covered by [CI run 31394159764](https://github.com/yonglun/softmatrix-os/actions/runs/31394159764)
-and [VM Smoke run 31394159436](https://github.com/yonglun/softmatrix-os/actions/runs/31394159436).
+The current evidence-collector head `43d435c` is covered by [CI run 31398677663](https://github.com/yonglun/softmatrix-os/actions/runs/31398677663)
+and [VM Smoke run 31398677796](https://github.com/yonglun/softmatrix-os/actions/runs/31398677796).
 
 ---
 
