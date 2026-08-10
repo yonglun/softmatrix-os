@@ -17,7 +17,7 @@ Fill these values from the exact clean checkout and immutable artifact:
 
 | Field | Value |
 |---|---|
-| Source commit (local rehearsal) | `08b2a45` (automated gates); replace with the exact production checkout SHA |
+| Source commit (latest automated rehearsal) | `40c949535b28b70affac25fd7ba025fd324bebbf`; replace with the exact production checkout SHA |
 | Release ID (local rehearsal) | `softmatrix-vm-v1-rc3` |
 | Build timestamp (UTC) | `2026-08-09T22:38:33.008Z` |
 | Release directory | `/tmp/softmatrix-vm-rehearsal-release-d` |
@@ -86,7 +86,7 @@ also includes the systemd fail-closed preflight at `tools/vm-config.mjs`.
 
 The release builder has since been hardened to generate every ignored worker input before Wrangler
 collects modules (`build:app`, `build:configurator`, and `build:format-blueprints`). The latest
-release gate is `08b2a45`; its GitHub CI run passed build, tests, lint, and Chromium browser E2E,
+release gate is `40c9495`; its GitHub CI run passed build, tests, lint, and Chromium browser E2E,
 and its Ubuntu `VM Smoke` run passed the network contract, public probe, and all eight browser
 journeys on an ephemeral Linux VM:
 
