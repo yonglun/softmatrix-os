@@ -86,6 +86,11 @@ and reload Caddy. For Nginx, replace the hostname and certificate paths in
 The templates deliberately proxy only to loopback; the network-contract test protects this
 boundary and the WebSocket upgrade headers.
 
+Keep the production acceptance record outside the release directory. Start from
+`docs/softmatrix/vm-acceptance-report.example.json` and validate the filled record with
+`pnpm validate:vm:evidence -- --report <record.json>` before recording a `GO` decision. The
+validator rejects missing checks, failed checks, invalid artifact hashes, and secret-shaped fields.
+
 ## 4. Backup, restore, and rollback
 
 Stop the service (or otherwise quiesce writes) before taking a backup:

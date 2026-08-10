@@ -49,6 +49,17 @@ pnpm healthcheck:vm
 The candidate must start without a Cloudflare account, Access policy, AI Gateway, KV deployment,
 or R2 deployment. Store the artifact manifest and checksum files with this report.
 
+After the real VM rehearsal, copy [`vm-acceptance-report.example.json`](vm-acceptance-report.example.json),
+fill it with evidence references (never secrets), and validate it before changing this report to
+`GO`:
+
+```sh
+pnpm validate:vm:evidence -- --report /secure/release-records/softmatrix-v1.0.0.json
+```
+
+The validator requires all production checks, release hashes, recovery data, and three sign-offs;
+`GO` is rejected if any check is missing, failed, pending, or lacks evidence.
+
 ## Automated evidence from this source milestone
 
 These results are development evidence only and must be re-run from the clean release checkout:
@@ -58,6 +69,7 @@ These results are development evidence only and must be re-run from the clean re
 | VM build artifact tests | PASS (2/2) | `node --test scripts/vm/build-release.test.js` |
 | VM config preflight tests | PASS (5/5) | `node --test scripts/vm/vm-config.test.js`; packaged CLI also passed |
 | VM network boundary tests | PASS (4/4) | `pnpm test:vm:network`; service/profile loopback and Caddy/Nginx WebSocket proxy templates |
+| VM release evidence schema | PASS (4/4) | `pnpm test:vm:evidence`; GO/NO-GO completeness, hash, timestamp, and secret-field guards |
 | Install, health, backup, restore tests | PASS (6/6) | `node --test scripts/vm/install-release.test.js scripts/vm/vm-data.test.js` |
 | Router asset MIME tests | PASS (14/14) | `pnpm --filter @gadgets/router test` |
 | VM workerd config compile | PASS | `workerd compile runtime/workerd.capnp config` |

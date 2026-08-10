@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "decision": "GO",
+  "capturedAt": "<fill: UTC ISO timestamp>",
+  "release": {
+    "id": "<fill: release ID>",
+    "sourceCommit": "<fill: Git SHA>",
+    "manifestSha256": "<fill: 64-char SHA-256>",
+    "checksumsSha256": "<fill: 64-char SHA-256>",
+    "legalManifestSha256": "<fill: 64-char SHA-256>",
+    "workerdVersion": "<fill: pinned workerd version>"
+  },
+  "vm": {
+    "hostname": "<fill: VM hostname>",
+    "os": "<fill: OS release>",
+    "kernel": "<fill: kernel version>",
+    "nodeVersion": "<fill: Node.js version>",
+    "pnpmVersion": "<fill: pnpm version>",
+    "systemdVersion": "<fill: systemd version>",
+    "proxy": {
+      "name": "<fill: Caddy or Nginx>",
+      "version": "<fill: proxy version>",
+      "origin": "https://<fill: public hostname>",
+      "tlsEvidence": "<fill: certificate fingerprint or ticket reference>",
+      "websocketEvidence": "<fill: WSS 101 handshake evidence reference>"
+    }
+  },
+  "checks": {
+    "oidcProductionSuccess": { "status": "PASS", "evidence": "<fill: evidence reference>" },
+    "oidcProductionCancellation": { "status": "PASS", "evidence": "<fill: evidence reference>" },
+    "oidcProductionDomainDenial": { "status": "PASS", "evidence": "<fill: evidence reference>" },
+    "modelGovernance": { "status": "PASS", "evidence": "<fill: evidence reference>" },
+    "attachmentBlueprintStorage": { "status": "PASS", "evidence": "<fill: evidence reference>" },
+    "logsRedacted": { "status": "PASS", "evidence": "<fill: evidence reference>" },
+    "publicHttps": { "status": "PASS", "evidence": "<fill: evidence reference>" },
+    "websocketUpgrade": { "status": "PASS", "evidence": "<fill: evidence reference>" },
+    "loopbackOnly": { "status": "PASS", "evidence": "<fill: evidence reference>" },
+    "rebootPersistence": { "status": "PASS", "evidence": "<fill: evidence reference>" },
+    "isolatedRestore": { "status": "PASS", "evidence": "<fill: evidence reference>" },
+    "rollbackWorkspace": { "status": "PASS", "evidence": "<fill: evidence reference>" }
+  },
+  "recovery": {
+    "backupArchive": "<fill: archive path>",
+    "backupSha256": "<fill: 64-char SHA-256>",
+    "restoreTarget": "<fill: isolated restore path>",
+    "rollbackReleaseId": "<fill: last-known-good release ID>",
+    "recoveryTimeSeconds": 0
+  },
+  "signoff": {
+    "releaseOwner": { "name": "<fill>", "decision": "APPROVE", "capturedAt": "<fill>", "ticket": "<fill>" },
+    "vmOperator": { "name": "<fill>", "decision": "APPROVE", "capturedAt": "<fill>", "ticket": "<fill>" },
+    "securityReviewer": { "name": "<fill>", "decision": "APPROVE", "capturedAt": "<fill>", "ticket": "<fill>" }
+  }
+}

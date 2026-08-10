@@ -64,3 +64,4 @@ OIDC 拒绝峰值、模型服务商延迟/错误以及异常公网监听。将 G
 上完成全部命令前，报告必须保持 `PENDING OPERATOR EXECUTION`。记录源代码 commit、release ID、
 workerd/runtime 版本、发布包和备份 checksum、重启/持久化结果、隔离恢复结果、回滚结果及操作员
 批准。本地自动化 E2E 只能作为辅助证据，不能替代干净 VM 的签字验收。
+在发布前运行 `pnpm validate:vm:evidence -- --report <record.json>`，确认验收记录完整。

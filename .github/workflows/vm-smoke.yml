@@ -57,6 +57,9 @@ jobs:
       - name: Validate VM network contract
         run: pnpm test:vm:network
 
+      - name: Validate VM release evidence schema
+        run: pnpm test:vm:evidence
+
       - name: Run native workerd persistence smoke
         run: pnpm test:vm:workerd
 

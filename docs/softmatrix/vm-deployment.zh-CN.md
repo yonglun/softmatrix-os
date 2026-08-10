@@ -82,6 +82,11 @@ HTTPS 代理到 `127.0.0.1:8787`，并保留 WebSocket upgrade。
 替换 `deploy/vm/nginx.conf.example` 中的域名和证书路径，将它 include 到 `http {}` 配置后
 reload。模板只代理到回环地址；网络契约测试会保护该边界以及 WebSocket upgrade 请求头。
 
+生产验收记录应保存在发布目录之外。请从 `docs/softmatrix/vm-acceptance-report.example.json`
+开始填写，并在记录 `GO` 前运行
+`pnpm validate:vm:evidence -- --report <record.json>`。校验器会拒绝缺失/失败的检查、无效的
+制品哈希以及带有密钥形状的字段。
+
 ## 4. Backup, restore, and rollback
 
 备份前停止服务（或用等价方式暂停写入）：

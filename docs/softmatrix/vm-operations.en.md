@@ -71,3 +71,5 @@ The report must remain `PENDING OPERATOR EXECUTION` until the commands run on a 
 Record the source commit, release ID, workerd/runtime versions, artifact and backup checksums,
 restart/persistence result, isolated restore result, rollback result, and operator approval. Local
 automated E2E output is supporting evidence only; it does not replace the clean-VM sign-off.
+Validate the completed record with `pnpm validate:vm:evidence -- --report <record.json>` before
+publishing the release.

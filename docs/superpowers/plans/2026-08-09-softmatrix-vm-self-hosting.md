@@ -49,7 +49,7 @@ macOS rehearsal data do not satisfy those production acceptance items.
 | Build | `scripts/vm/build-release.mjs`, `scripts/vm/build-release.test.js` | Produce immutable VM release directory from an exact commit |
 | Install/rollback | `scripts/vm/install-release.mjs`, `scripts/vm/healthcheck.mjs`, `scripts/vm/install-release.test.js` | Atomic `current`/`previous` switch, readiness checks, rollback |
 | Data safety | `scripts/vm/backup-data.mjs`, `scripts/vm/restore-data.mjs`, `scripts/vm/vm-data.test.js` | Snapshot, checksum, isolated restore, and validation |
-| Acceptance | `scripts/run-vm-e2e.mjs`, `e2e/vm-self-hosting.spec.ts` | VM runtime, restart persistence, bilingual, OIDC, model, and Gatekeeper journeys |
+| Acceptance | `scripts/run-vm-e2e.mjs`, `e2e/vm-self-hosting.spec.ts`, `scripts/vm/release-evidence.mjs` | VM runtime, restart persistence, bilingual, OIDC, model, Gatekeeper journeys, and evidence completeness |
 | Documentation | `docs/softmatrix/vm-deployment.en.md`, `docs/softmatrix/vm-deployment.zh-CN.md`, `docs/softmatrix/vm-operations.en.md`, `docs/softmatrix/vm-operations.zh-CN.md` | Installation, configuration, backup, monitoring, upgrade, rollback, support boundaries |
 | Root commands | `package.json` | Stable `build:vm`, `install:vm`, `healthcheck:vm`, `backup:vm`, `restore:vm`, `test:e2e:vm` entry points |
 
