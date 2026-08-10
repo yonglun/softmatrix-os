@@ -105,6 +105,10 @@ release gate is `9648723`; its GitHub CI run passed build, tests, lint, and Chro
 and its Ubuntu `VM Smoke` run passed the network contract, public probe, and all eight browser
 journeys on an ephemeral Linux VM:
 
+The follow-on head `bbf2966` adds the safe evidence collector and re-ran the same gates successfully:
+[CI run 31394159764](https://github.com/yonglun/softmatrix-os/actions/runs/31394159764) and
+[VM Smoke run 31394159436](https://github.com/yonglun/softmatrix-os/actions/runs/31394159436).
+
 | Check | Result | Evidence |
 |---|---|---|
 | Repository build, tests, lint, and browser E2E | PASS | [GitHub CI run](https://github.com/yonglun/softmatrix-os/actions/runs/31388086502) |

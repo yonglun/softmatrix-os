@@ -41,9 +41,10 @@ macOS rehearsal data do not satisfy those production acceptance items.
 The repository now includes `pnpm init:vm:evidence` and `pnpm collect:vm:evidence`. The initializer
 seeds an explicitly `NO-GO` report from immutable release and host facts without inventing production
 evidence; the collector can add only directly observed HTTPS/WSS, loopback, and runtime facts and
-still keeps the report `NO-GO`. The latest automated gates
-for the current head are [CI run 31388086502](https://github.com/yonglun/softmatrix-os/actions/runs/31388086502)
+still keeps the report `NO-GO`. The recorded release-artifact milestone is covered by [CI run 31388086502](https://github.com/yonglun/softmatrix-os/actions/runs/31388086502)
 and [VM Smoke run 31388086580](https://github.com/yonglun/softmatrix-os/actions/runs/31388086580).
+The current evidence-collector head `bbf2966` is additionally covered by [CI run 31394159764](https://github.com/yonglun/softmatrix-os/actions/runs/31394159764)
+and [VM Smoke run 31394159436](https://github.com/yonglun/softmatrix-os/actions/runs/31394159436).
 
 ---
 
