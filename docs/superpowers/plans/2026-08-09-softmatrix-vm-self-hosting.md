@@ -38,8 +38,8 @@ TLS/WebSocket proxy evidence, reboot persistence, log-redaction review, backup c
 isolated restore, release rollback, and release-owner/security sign-off. CI evidence and local
 macOS rehearsal data do not satisfy those production acceptance items.
 
-The latest automated release gates are [CI run 31375558687](https://github.com/yonglun/softmatrix-os/actions/runs/31375558687)
-and [VM Smoke run 31375558692](https://github.com/yonglun/softmatrix-os/actions/runs/31375558692).
+The latest automated release gates are [CI run 31377215066](https://github.com/yonglun/softmatrix-os/actions/runs/31377215066)
+and [VM Smoke run 31377215224](https://github.com/yonglun/softmatrix-os/actions/runs/31377215224).
 
 ---
 
