@@ -73,17 +73,18 @@ also includes the systemd fail-closed preflight at `tools/vm-config.mjs`.
 
 The release builder has since been hardened to generate every ignored worker input before Wrangler
 collects modules (`build:app`, `build:configurator`, and `build:format-blueprints`). The latest
-OIDC failure-journey hardening is `5ae2587`; its Ubuntu `VM Smoke` run passed all eight browser
-journeys on an ephemeral Linux VM:
+VM network-boundary hardening is `eb7f430`; its Ubuntu `VM Smoke` run passed the network contract
+and all eight browser journeys on an ephemeral Linux VM:
 
 | Check | Result | Evidence |
 |---|---|---|
-| VM configuration contract | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31367656028/job/93389453548) |
-| Native workerd persistence | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31367656028/job/93389453548) |
-| Clean immutable release build (18 workers / 84 modules) | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31367656028/job/93389453548) |
-| English and Simplified Chinese password/restart journeys | PASS (2/2) | [GitHub job](https://github.com/yonglun/softmatrix-os/actions/runs/31367656028/job/93389453548) |
-| English and Simplified Chinese OIDC success journeys | PASS (2/2) | [GitHub job](https://github.com/yonglun/softmatrix-os/actions/runs/31367656028/job/93389453548) |
-| English and Simplified Chinese OIDC cancellation/domain-denial journeys | PASS (4/4) | [GitHub job](https://github.com/yonglun/softmatrix-os/actions/runs/31367656028/job/93389453548) |
+| VM configuration contract | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31369035269/job/93393647670) |
+| VM network boundary contract | PASS (4/4) | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31369035269/job/93393647670) |
+| Native workerd persistence | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31369035269/job/93393647670) |
+| Clean immutable release build (18 workers / 84 modules) | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31369035269/job/93393647670) |
+| English and Simplified Chinese password/restart journeys | PASS (2/2) | [GitHub job](https://github.com/yonglun/softmatrix-os/actions/runs/31369035269/job/93393647670) |
+| English and Simplified Chinese OIDC success journeys | PASS (2/2) | [GitHub job](https://github.com/yonglun/softmatrix-os/actions/runs/31369035269/job/93393647670) |
+| English and Simplified Chinese OIDC cancellation/domain-denial journeys | PASS (4/4) | [GitHub job](https://github.com/yonglun/softmatrix-os/actions/runs/31369035269/job/93393647670) |
 
 This is CI evidence on an ephemeral Ubuntu runner, not production VM sign-off. Keep the status below
 as `PENDING OPERATOR EXECUTION` until the real VM, TLS proxy, OIDC provider, backup destination,

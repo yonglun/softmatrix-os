@@ -25,7 +25,8 @@
 Tasks 1–7 are implemented in the feature branch and covered by focused tests plus the Ubuntu
 `VM Smoke` workflow. The clean-checkout release builder now generates ignored `build:app`,
 `build:configurator`, and `build:format-blueprints` inputs before Wrangler collection. The latest
-feature head is `5ae2587`; Build/Test, Lint, and the eight-test two-language Ubuntu VM journey pass.
+feature head is `eb7f430`; Build/Test, Lint, the VM network contract, and the eight-test two-language
+Ubuntu VM journey pass.
 The VM harness now includes a native local OIDC provider with RS256 signing, JWKS discovery, and
 PKCE validation; each fixture authorization provisions an isolated identity so the bilingual
 onboarding assertions are independent. It also exercises IdP cancellation and exact email-domain
