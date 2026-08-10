@@ -21,6 +21,48 @@ export interface Env {
   [key: string]: unknown;
 }
 
+function assetRequest(req: Request): Request {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return req;
+  const url = new URL(req.url);
+  const lastSegment = url.pathname.slice(url.pathname.lastIndexOf('/') + 1);
+  // Cloudflare's SPA asset mode performs this fallback for us. Native DiskDirectory only
+  // serves exact files, so mirror the same contract for document routes in the VM profile.
+  if (url.pathname === '/' || !lastSegment.includes('.')) url.pathname = '/index.html';
+  return new Request(url, req);
+}
+
+function assetContentType(pathname: string): string | undefined {
+  const extension = pathname.slice(pathname.lastIndexOf('.') + 1).toLowerCase();
+  return {
+    html: 'text/html; charset=utf-8',
+    css: 'text/css; charset=utf-8',
+    js: 'text/javascript; charset=utf-8',
+    mjs: 'text/javascript; charset=utf-8',
+    json: 'application/json; charset=utf-8',
+    svg: 'image/svg+xml',
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    webp: 'image/webp',
+    ico: 'image/x-icon',
+    woff: 'font/woff',
+    woff2: 'font/woff2',
+  }[extension];
+}
+
+async function serveAsset(req: Request, assets: Fetcher): Promise<Response> {
+  const rewritten = assetRequest(req);
+  const response = await assets.fetch(rewritten);
+  // Native workerd DiskDirectory serves opaque files as application/octet-stream. Add the MIME
+  // type Cloudflare Assets would normally provide so browser navigations are not downloads.
+  if (response.headers.get('content-type') !== 'application/octet-stream') return response;
+  const contentType = assetContentType(new URL(rewritten.url).pathname);
+  if (!contentType) return response;
+  const headers = new Headers(response.headers);
+  headers.set('content-type', contentType);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
@@ -45,7 +87,7 @@ export default {
     // callbacks.
 
     if (env.ASSETS) {
-      return env.ASSETS.fetch(req);
+      return serveAsset(req, env.ASSETS);
     }
 
     // Dev only: with no assets binding here, everything else goes to the backend.

@@ -38,15 +38,19 @@ export default function OidcButton({ rpcStub, config, onSuccess }: OidcButtonPro
     if (pending) return;
     setError(null);
     setPending(true);
+    // Open a blank window synchronously from the click handler. Browsers block pop-ups opened
+    // after the asynchronous startOidcLogin() RPC resolves because the user gesture has ended.
+    // Navigating this already-authorized window keeps enterprise SSO usable in real browsers.
+    const popup = window.open("about:blank", "oidc-login", "popup,width=520,height=680");
+    if (!popup) {
+      setError(t("auth.popupBlocked"));
+      setPending(false);
+      return;
+    }
     try {
       const { url, attempt } = await rpcStub.startOidcLogin();
       attemptRef.current = attempt as unknown as Disposable;
-      const popup = window.open(url, "oidc-login", "popup,width=520,height=680");
-      if (!popup) {
-        try { (attempt as unknown as Disposable)[Symbol.dispose](); } catch { /* already disposed */ }
-        attemptRef.current = null;
-        throw new Error(t("auth.popupBlocked"));
-      }
+      popup.location.href = url;
 
       const result = await new Promise<OidcLoginResult>((resolve, reject) => {
         let settled = false;
@@ -78,6 +82,7 @@ export default function OidcButton({ rpcStub, config, onSuccess }: OidcButtonPro
       if (onSuccess) onSuccess();
       else window.location.reload();
     } catch (reason) {
+      if (!popup.closed) popup.close();
       if (mountedRef.current) {
         const popupBlocked = t("auth.popupBlocked");
         const signInCancelled = t("auth.signInCancelled");

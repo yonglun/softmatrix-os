@@ -27,6 +27,23 @@ used by the current source milestone.
 | `@tanstack/react-router` | pinned in lockfile | MIT | <https://github.com/TanStack/router> |
 | `i18next` | 26.3.6 | MIT | <https://github.com/i18next/i18next> |
 | `react-i18next` | 17.0.11 | MIT | <https://github.com/i18next/react-i18next> |
+| `miniflare` (vendored local KV/R2 workers) | 5.20260801.0-alpha | MIT | <https://github.com/cloudflare/workers-sdk/tree/main/packages/miniflare> |
+
+## Current license-review findings
+
+The 2026-08-10 development-host inventory also reported the following transitive or optional
+packages. They are recorded here so the release review cannot silently omit them:
+
+| Package | Version | License | Review boundary |
+| --- | --- | --- | --- |
+| `@img/sharp-libvips-darwin-arm64` | 1.3.1 | LGPL-3.0-or-later | Optional macOS ARM build dependency; confirm whether the target Linux VM resolves a corresponding libvips package and retain the required LGPL notices if it is shipped or executed. |
+| `isbot` | 5.2.1 | Unlicense | Transitive package; retain its upstream metadata and confirm the approved Unlicense treatment in the final dependency review. |
+
+This snapshot is not a final production approval. Run `pnpm licenses list --json` from the clean
+Linux VM release checkout, compare all `UNKNOWN`, copyleft, custom, and missing entries with this
+record, and attach the reviewed inventory to the release ticket. A release remains `NO-GO` until
+the target-platform review explicitly accepts or removes each flagged dependency and verifies the
+corresponding legal notices.
 
 Each package retains the copyright and license text supplied by its upstream project. When a
 dependency ships a separate `NOTICE` file, the release job copies that notice into the legal
@@ -39,4 +56,3 @@ Every candidate and published release contains the exact root `LICENSE`, `NOTICE
 and a SHA-256/size sidecar at `legal-manifest.json`. See
 [`docs/compliance.md`](docs/compliance.md) and the bilingual deployment runbooks for the
 review and rollback procedure.
-

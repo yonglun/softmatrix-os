@@ -125,7 +125,7 @@ Softmatrix OS 构建于 [Cloudflare Workers](https://workers.cloudflare.com)，�
 
 底层架构源自 Cloudflare OS，由构建 Workers 的团队设计。Dynamic Workers、Facets 和其他运行时能力，都是为了支持上游项目而加入的。Softmatrix OS 保留了这套架构，同时维护清晰、独立的产品身份。
 
-构建于 Workers 之上并不意味着 Softmatrix OS 只能运行在 Cloudflare 上。事实上，[`workerd`（Cloudflare Workers Runtime）本身就是开源项目](https://github.com/cloudflare/workerd)，Softmatrix OS 可以完全运行在你自己的服务器上。
+构建于 Workers 之上并不意味着 Softmatrix OS 只能运行在 Cloudflare 上。事实上，[`workerd`（Cloudflare Workers Runtime）本身就是开源项目](https://github.com/cloudflare/workerd)，Softmatrix OS 可以完全运行在你自己的服务器上。单台 VM 的完整部署步骤见[中文 VM 手册](docs/softmatrix/vm-deployment.zh-CN.md)（[English](docs/softmatrix/vm-deployment.en.md)）。
 
 ## 功能
 

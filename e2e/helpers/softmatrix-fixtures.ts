@@ -14,6 +14,8 @@ const copy = {
     createWorkspace: "Create workspace",
     next: "Next",
     finish: "Let's build",
+    oidcProviderUnavailable: "The identity provider is unavailable. Please try again.",
+    oidcDomainDenied: "This email domain is not allowed to sign in.",
     homeTitle: "What are we working on?",
     composer: "Start a new conversation…",
   },
@@ -28,6 +30,8 @@ const copy = {
     createWorkspace: "创建工作区",
     next: "下一步",
     finish: "开始构建",
+    oidcProviderUnavailable: "身份提供商暂时不可用，请重试。",
+    oidcDomainDenied: "此邮箱域名不允许登录。",
     homeTitle: "我们要一起做什么？",
     composer: "开始新对话…",
   },
@@ -43,15 +47,8 @@ export async function setLocale(page: Page, locale: FixtureLocale): Promise<void
   }, locale);
 }
 
-export async function signUpWithFixtureUser(page: Page, locale: FixtureLocale): Promise<string> {
-  const username = `e2e_${locale.replace("-", "").toLowerCase()}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+export async function finishOnboarding(page: Page, locale: FixtureLocale): Promise<void> {
   const labels = localeCopy(locale);
-  await page.goto("/signup");
-  await page.getByRole("textbox", { name: labels.username, exact: true }).fill(username);
-  await page.getByRole("textbox", { name: labels.password, exact: true }).fill("fixture-password-123");
-  await page.getByRole("textbox", { name: labels.confirmPassword, exact: true }).fill("fixture-password-123");
-  await page.getByRole("button", { name: labels.signUp, exact: true }).click();
-  await expect(page).toHaveURL(/\/$/);
   await expect(
     page.getByRole("button", { name: labels.next, exact: true }),
   ).toBeVisible({ timeout: 30_000 });
@@ -67,7 +64,19 @@ export async function signUpWithFixtureUser(page: Page, locale: FixtureLocale): 
     await page.waitForTimeout(250);
   }
   await page.getByRole("button", { name: labels.finish, exact: true }).click();
-  await expect(page.getByRole("heading", { name: labels.homeTitle })).toBeVisible();
+  await expect(page.getByRole("heading", { name: labels.homeTitle })).toBeVisible({ timeout: 30_000 });
+}
+
+export async function signUpWithFixtureUser(page: Page, locale: FixtureLocale): Promise<string> {
+  const username = `e2e_${locale.replace("-", "").toLowerCase()}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  const labels = localeCopy(locale);
+  await page.goto("/signup");
+  await page.getByRole("textbox", { name: labels.username, exact: true }).fill(username);
+  await page.getByRole("textbox", { name: labels.password, exact: true }).fill("fixture-password-123");
+  await page.getByRole("textbox", { name: labels.confirmPassword, exact: true }).fill("fixture-password-123");
+  await page.getByRole("button", { name: labels.signUp, exact: true }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await finishOnboarding(page, locale);
   return username;
 }
 
@@ -75,12 +84,25 @@ export async function selectModelIfAvailable(page: Page, locale: FixtureLocale):
   const labels = localeCopy(locale);
   const picker = page.getByRole("button", { name: labels.selectModel, exact: true });
   if (await picker.count() === 0) return;
-  const selected = await picker.innerText();
-  if (selected === "No agent" || selected === "无智能体" || selected === "Fixture Model") return;
-  await picker.click();
-  const model = page.getByRole("menuitem", { name: "Fixture Model", exact: true });
-  if (await model.count() > 0) await model.click();
-  await page.keyboard.press("Escape");
+  const selected = (await picker.innerText()).trim();
+  const menu = page.getByRole("menu", { name: labels.selectModel, exact: true });
+  if (selected !== "Fixture Model") {
+    await picker.click();
+    const model = page.getByRole("menuitem", { name: "Fixture Model", exact: true });
+    if (await model.count() > 0) {
+      await model.click();
+      await expect(picker).toContainText("Fixture Model", { timeout: 5_000 });
+    }
+  }
+  // Base UI keeps the menu mounted while the selection transition settles.
+  // Always close it before interacting with the composer, otherwise its inert
+  // portal can intercept the send button even though the model is selected.
+  if (await picker.getAttribute("aria-expanded") === "true") {
+    await page.keyboard.press("Escape");
+    if (await picker.getAttribute("aria-expanded") === "true") await picker.click();
+  }
+  await expect(picker).toHaveAttribute("aria-expanded", "false");
+  if (await menu.count() > 0) await expect(menu).toBeHidden({ timeout: 5_000 });
 }
 
 export async function createWorkspace(page: Page, locale: FixtureLocale, prompt: string): Promise<void> {

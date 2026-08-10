@@ -1,0 +1,73 @@
+name: VM Smoke
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22.14.0"
+
+jobs:
+  vm-smoke:
+    name: Linux VM smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Validate VM configuration contract
+        run: |
+          state_dir="$(mktemp -d)"
+          mkdir -p "$state_dir/data" "$state_dir/objects"
+          PUBLIC_BASE_URL=https://softmatrix.example \
+          SOFTMATRIX_DATA_DIR="$state_dir/data" \
+          SOFTMATRIX_OBJECT_STORE_DIR="$state_dir/objects" \
+          OIDC_ISSUER=https://idp.example \
+          OIDC_CLIENT_ID=softmatrix \
+          OIDC_CLIENT_SECRET=ci-fixture-secret \
+          OIDC_ALLOWED_EMAIL_DOMAINS=example.com \
+          DISABLE_PASSWORD_AUTH=true \
+          ORG_AI_MODELS='[]' \
+          ALLOW_USER_BYOK=false \
+          ADMINS='["admin@example.com"]' \
+          node scripts/vm/vm-config.mjs --check
+
+      - name: Validate VM network contract
+        run: pnpm test:vm:network
+
+      - name: Validate VM public endpoint probe
+        run: pnpm test:vm:probe
+
+      - name: Validate VM release evidence schema
+        run: pnpm test:vm:evidence
+
+      - name: Run native workerd persistence smoke
+        run: pnpm test:vm:workerd
+
+      - name: Run bilingual VM browser journey
+        env:
+          CI: "true"
+          SOFTMATRIX_E2E_VM: "1"
+        run: pnpm test:e2e:vm -- --workers=1

@@ -1,0 +1,17 @@
+# Softmatrix OS public HTTPS proxy.
+#
+# Set SOFTMATRIX_DOMAIN in Caddy's environment before loading this file. Caddy
+# obtains and renews the certificate for the hostname automatically. The
+# reverse_proxy directive keeps HTTP/1.1 WebSocket upgrades enabled by default.
+
+https://{$SOFTMATRIX_DOMAIN} {
+    encode zstd gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    reverse_proxy 127.0.0.1:8787
+}

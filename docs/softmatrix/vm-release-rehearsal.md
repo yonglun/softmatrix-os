@@ -1,0 +1,276 @@
+# Softmatrix OS first VM release rehearsal
+
+Status: `PENDING OPERATOR EXECUTION`
+
+This is an auditable checklist and evidence record for the first fully self-hosted, single-VM
+release. The local automated checks listed below were run during development; they do not prove
+that a clean production VM, TLS proxy, secret store, backup destination, or operator rollback has
+been exercised. Do not change the status to `GO` until every required field has evidence.
+
+The values marked **local rehearsal** below describe a macOS development host and disposable
+directories. They are useful for reproducing the release mechanics, but are not production VM
+sign-off.
+
+## Recorded release identity
+
+Fill these values from the exact clean checkout and immutable artifact:
+
+| Field | Value |
+|---|---|
+| Source commit (latest automated rehearsal) | `05f0998c49a46c1dc5bb74fccc1b87a8c9c55cad`; replace with the exact production checkout SHA |
+| Release ID (local rehearsal) | `softmatrix-vm-v1.0.0-05f0998` |
+| Build timestamp (UTC) | `2026-08-10T15:16:49.276Z` |
+| Release directory | `/tmp/softmatrix-vm-v1.0.0-05f0998` |
+| `manifest.json` SHA-256 | `f69ed247bbbd2ed985813479ebe67ecbd77adf26d2a939d014851d69ea3e13c7` |
+| `checksums.sha256` SHA-256 | `311a7f3328935256a9a66322c3fd02cb226f8f7bd161f2b324b10d576667be58` |
+| `legal-manifest.json` SHA-256 | `1ac0f53860b29dfe7f92712dd20cf6ce44b4390c42166a719146f1582d01caa7` |
+| Apache-2.0 `LICENSE` SHA-256 | `0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594` |
+| `tools/vm-config.mjs` SHA-256 | `f7974028822f010879df7e91d75b61800c5cd74032beef45d749d080cfc2184d` |
+| `workerd` version/binary SHA-256 | `2026-08-01` / `b3eea2de0ef56b987737aab8775ac16d046500b2c68587a1bb1f7cc2080647e7` (local binary; verify the VM binary separately) |
+| Node.js / pnpm versions | `v22.14.0` / `11.17.0` |
+| OS / kernel | `macOS 26.5.2` / `Darwin 25.5.0 arm64` |
+| systemd and TLS proxy versions | `PENDING` |
+
+## Clean VM execution
+
+Record the VM hostname, service account, persistent volume, independent backup volume, proxy
+origin, and secret-provider reference before running the commands. Keep secrets out of this file.
+
+```sh
+pnpm install --frozen-lockfile
+pnpm verify:softmatrix
+pnpm test:e2e:vm
+pnpm build:vm -- --release-id softmatrix-vm-v1-rc3
+sudo cp -a release-out /opt/softmatrix/release-out
+sudo pnpm install:vm -- --root /opt/softmatrix --release /opt/softmatrix/release-out
+pnpm healthcheck:vm
+```
+
+The candidate must start without a Cloudflare account, Access policy, AI Gateway, KV deployment,
+or R2 deployment. Store the artifact manifest and checksum files with this report.
+
+After the real VM rehearsal, copy [`vm-acceptance-report.example.json`](vm-acceptance-report.example.json),
+fill it with evidence references (never secrets), and validate it before changing this report to
+`GO`:
+
+```sh
+pnpm validate:vm:evidence -- --report /secure/release-records/softmatrix-v1.0.0.json
+```
+
+The validator requires all production checks, release hashes, recovery data, and three sign-offs;
+`GO` is rejected if any check is missing, failed, pending, or lacks evidence.
+
+From a clean source checkout matching the recorded source commit, the repository can seed a `NO-GO`
+draft from a release directory so artifact hashes and pinned runtime facts are not copied manually.
+The immutable release directory does not contain these operator scripts. This draft is not acceptance
+evidence and must be completed on the operator VM, outside the release directory:
+
+```sh
+pnpm init:vm:evidence -- \
+  --release /opt/softmatrix/incoming-v1.0.0 \
+  --out /secure/release-records/softmatrix-v1.0.0.json \
+  --origin https://softmatrix.example \
+  --workerd /usr/local/bin/workerd
+```
+
+## Automated evidence from this source milestone
+
+These results are development evidence only and must be re-run from the clean release checkout:
+
+| Check | Result | Evidence timestamp / log |
+|---|---|---|
+| VM build artifact tests | PASS (2/2) | `node --test scripts/vm/build-release.test.js` |
+| VM config preflight tests | PASS (5/5) | `node --test scripts/vm/vm-config.test.js`; packaged CLI also passed |
+| VM network boundary tests | PASS (4/4) | `pnpm test:vm:network`; service/profile loopback and Caddy/Nginx WebSocket proxy templates |
+| VM public endpoint probe tests | PASS (3/3) | `pnpm test:vm:probe`; HTTP status, HTTPS requirement, and `/api` WebSocket 101 checks |
+| VM release evidence schema v2 | PASS (5/5) | `node --test scripts/vm/release-evidence.test.js`; GO/NO-GO completeness, target-platform license review, hash, timestamp, and secret-field guards |
+| VM evidence draft initializer | PASS (2/2) | `node --test scripts/vm/release-evidence-init.test.js`; immutable facts only, explicit NO-GO |
+| VM evidence collector contract | PASS (7/7) | `node --test scripts/vm/release-evidence-collect.test.js`; automated facts and log audit cannot change NO-GO to GO |
+| VM log-redaction audit contract | PASS (5/5) | `node --test scripts/vm/log-redaction-audit.test.js`; findings never include log values or unsafe journal arguments |
+| Dependency license inventory | `[ ]` target VM | Run `pnpm licenses list --json` from the clean Linux release checkout; review LGPL/Unlicense/UNKNOWN/custom entries and attach the normalized report |
+| Install, health, backup, restore tests | PASS (6/6) | `node --test scripts/vm/install-release.test.js scripts/vm/vm-data.test.js` |
+| Router asset MIME tests | PASS (14/14) | `pnpm --filter @gadgets/router test` |
+| VM workerd config compile | PASS | `workerd compile runtime/workerd.capnp config` |
+| Bilingual VM browser journey | PASS (8/8) | Ubuntu `VM Smoke` run below; English/Chinese password restart, OIDC success, cancellation, and domain-denial journeys |
+| Compliance and i18n coverage | PASS (3/3) | `node --test scripts/softmatrix-compliance.test.js scripts/i18n-coverage.test.js` |
+
+The `softmatrix-vm-v1.0.0-05f0998` artifact contains 18 workers, 84 modules, and 31 asset blobs. Its generated
+`runtime/workerd.capnp` compiled successfully; the current local compiled configuration SHA-256 is
+`34dda6332c6a7716118c0a3a6969e76e3b39e4c99e20667669dc0ebd488d6773`. The immutable package
+also includes the systemd fail-closed preflight at `tools/vm-config.mjs`. A local standalone
+`workerd compile` produced 134,864,400 bytes with SHA-256
+`65bf5df46617041b7bd80acc9de089cac017fa7240c806767b739e9971dd466b`.
+
+## Latest clean-checkout CI gate
+
+The release builder has been hardened to generate every ignored worker input before Wrangler
+collects modules (`build:app`, `build:configurator`, and `build:format-blueprints`). The latest
+release gate is `05f0998`; its GitHub CI and Ubuntu `VM Smoke` runs passed build, tests, lint,
+Chromium/browser journeys, VM contracts, and the schema-v2 license-review requirement on an
+ephemeral Linux VM. CI also archived the dependency license inventory as a 14-day artifact:
+[CI run 31402363545](https://github.com/yonglun/softmatrix-os/actions/runs/31402363545) and
+[VM Smoke run 31402363673](https://github.com/yonglun/softmatrix-os/actions/runs/31402363673).
+
+| Check | Result | Evidence |
+|---|---|---|
+| Repository build, tests, lint, and browser E2E | PASS | [GitHub CI run](https://github.com/yonglun/softmatrix-os/actions/runs/31402363545) |
+| Dependency license inventory artifact | PASS | [GitHub CI run](https://github.com/yonglun/softmatrix-os/actions/runs/31402363545) |
+| VM configuration contract | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31402363673) |
+| VM network boundary contract | PASS (4/4) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31402363673) |
+| VM public endpoint probe | PASS (3/3) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31402363673) |
+| VM release evidence schema v2 | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31402363673); `licenseInventory` is required for GO |
+| Native workerd persistence | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31402363673) |
+| Clean immutable release build (18 workers / 84 modules) | PASS | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31402363673) |
+| English and Simplified Chinese password/restart journeys | PASS (2/2) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31402363673) |
+| English and Simplified Chinese OIDC success journeys | PASS (2/2) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31402363673) |
+| English and Simplified Chinese OIDC cancellation/domain-denial journeys | PASS (4/4) | [GitHub VM Smoke run](https://github.com/yonglun/softmatrix-os/actions/runs/31402363673) |
+
+This is CI evidence on an ephemeral Ubuntu runner, not production VM sign-off. Keep the status below
+as `PENDING OPERATOR EXECUTION` until the real VM, TLS proxy, OIDC provider, backup destination,
+logs, reboot, rollback, and operator signatures have been recorded.
+
+## GitHub release gates and legal configuration
+
+The repository-managed gates are the `CI` and `VM Smoke` workflows listed above. There is currently
+no CLA workflow under `.github/workflows`; a CLA Assistant check observed on PR #3 is therefore a
+GitHub repository/app configuration rather than code in this repository. The observed check used the
+Cloudflare CLA endpoint and a `cla-signatures` branch that is not present in this fork. Do not copy
+upstream signatures or change the legal policy as part of a code release.
+
+Before merging the first release, the repository owner must record exactly one legal decision and
+make the corresponding GitHub-side change:
+
+1. **Retain the upstream Cloudflare CLA.** Obtain authorization from the policy owner, provision the
+   required CLA endpoint/signature branch, and verify the check on a test PR. This keeps the upstream
+   contribution path but is not something the fork can infer or authorize itself.
+2. **Adopt a Softmatrix CLA or DCO.** Publish the approved legal text, configure the corresponding
+   GitHub App/workflow, and have the owner verify that the required check reports success. The text
+   and workflow must be reviewed as legal policy, not generated by a release script.
+3. **Use no CLA gate.** The owner may disable/remove the external required check if the project's
+   approved contribution policy does not require a CLA. Keep the repository's Apache-2.0 license and
+   contributor instructions consistent with that decision.
+
+The Bonk PR Review check is also an external optional review service. A failed Bonk run must not be
+silently treated as a passing code gate: either repair its GitHub secrets/configuration and rerun it,
+or explicitly remove it from required checks under the repository owner's review policy. Until the
+CLA decision and any required external checks are resolved, the release remains `NO-GO` even when
+the repository CI and VM Smoke checks pass.
+
+For the clean VM handoff, the operator should preserve the exact release ID and run the evidence
+collector on the target VM. The collector accepts `--log-file`, `--log-since`, or `--log-unit`; it
+records only redaction status, finding counts, and line numbers, never log content or secret values:
+
+```sh
+pnpm init:vm:evidence -- \
+  --release /opt/softmatrix/incoming-v1.0.0 \
+  --out /secure/release-records/softmatrix-v1.0.0.json \
+  --origin https://softmatrix.example \
+  --workerd /usr/local/bin/workerd
+
+pnpm collect:vm:evidence -- \
+  --report /secure/release-records/softmatrix-v1.0.0.json \
+  --base-url https://softmatrix.example \
+  --log-unit softmatrix \
+  --log-since '30 minutes ago'
+
+pnpm validate:vm:evidence -- \
+  --report /secure/release-records/softmatrix-v1.0.0.json
+```
+
+The collector is intentionally unable to turn a draft into `GO`. The operator must still attach
+evidence for production OIDC, model policy, Gatekeeper/storage, HTTPS/WSS and loopback binding,
+reboot persistence, backup/isolated restore, rollback, and the three required sign-offs. Keep the
+completed report outside the release artifact and redact secrets before sharing it.
+
+## Manual acceptance matrix
+
+Mark each item only after attaching a timestamped log, screenshot, or checksum reference.
+
+| Check | Status | Evidence |
+|---|---|---|
+| English password signup/login | `[x]` local | release `softmatrix-vm-v1-rc3`; `e2e/vm-self-hosting.spec.ts` |
+| Simplified Chinese password signup/login | `[x]` local | release `softmatrix-vm-v1-rc3`; `e2e/vm-self-hosting.spec.ts` |
+| OIDC success with local RS256/JWKS/PKCE fixture | `[x]` CI | [Ubuntu VM Smoke](https://github.com/yonglun/softmatrix-os/actions/runs/31372285224/job/93403695490); production IdP still pending |
+| OIDC cancellation and domain-denial mapping with local fixture | `[x]` CI | [Ubuntu VM Smoke](https://github.com/yonglun/softmatrix-os/actions/runs/31372285224/job/93403695490); production IdP replay still pending |
+| OIDC cancellation and domain-denial mapping against the chosen production IdP | `[ ]` | `PENDING operator execution` |
+| Model catalog policy and `ALLOW_USER_BYOK=false` | `[x]` local | Fixture Model visible; Add model action absent in release `softmatrix-vm-v1-rc3` |
+| Approved BYOK behavior (if enabled) | `[ ]` | `PENDING` |
+| Gatekeeper availability and approval flow | `[x]` local availability | `/gatekeepers` localized heading visible in release `softmatrix-vm-v1-rc3`; approval flow still requires VM/provider setup |
+| Workspace/chat persists after browser reload | `[x]` local | release `softmatrix-vm-v1-rc3`; restart E2E passed 2/2 |
+| Attachment and Blueprint KV/R2-compatible storage | `[ ]` | `PENDING` |
+| Logs contain no prompts, tokens, cookies, or provider bodies | `[ ]` | `PENDING` |
+| Public HTTPS, WebSocket upgrade, and loopback-only workerd | `[ ]` | `PENDING` |
+
+## Recovery and rollback evidence
+
+Quiesce writes before backup. Save the archive checksum beside the release record.
+
+```sh
+sudo systemctl stop softmatrix
+sudo pnpm backup:vm -- \
+  --data-dir /var/lib/softmatrix/data \
+  --object-store-dir /var/lib/softmatrix/objects \
+  --out /var/backups/softmatrix \
+  --release-id softmatrix-vm-v1-rc3
+sudo systemctl start softmatrix
+sudo pnpm healthcheck:vm -- --base-url https://softmatrix.example
+```
+
+Record the archive path, `.sha256` sidecar, checksum, backup age, and time to recover:
+
+Local rehearsal archive: `/tmp/softmatrix-vm-rehearsal-backups-d/softmatrix-vm-v1-rc3-20260809224123.tar.gz`.
+Its SHA-256 is `4b7ccd987bee531df18ced129d94b66679604b22c38532b3942d675030820053`; the isolated
+restore target was `/tmp/softmatrix-vm-rehearsal-restore-d`.
+
+| Recovery check | Status | Evidence |
+|---|---|---|
+| Reboot VM and restore the same workspace/model preference | `[ ]` | `PENDING` |
+| Restore archive into an empty isolated directory | `[x]` local | checksum `4b7ccd987bee531df18ced129d94b66679604b22c38532b3942d675030820053`; migration `v3` |
+| Install release B and pass readiness | `[x]` local | local stub service; `softmatrix-vm-v1-rc2` |
+| Force a readiness failure without changing active release | `[x]` automated | `install-release.test.js` failure-path coverage |
+| Roll back to the exact release A ID | `[x]` local | current `releases/softmatrix-vm-v1-rc1`, previous `releases/softmatrix-vm-v1-rc2` |
+| Workspace remains available after rollback | `[ ]` | `PENDING` |
+
+For an isolated restore, use a target outside the active paths and verify the expected checksum:
+
+```sh
+sudo pnpm restore:vm -- \
+  --archive /var/backups/softmatrix/<release>-<timestamp>.tar.gz \
+  --target /var/lib/softmatrix-restore \
+  --checksum <archive-sha256>
+```
+
+Rollback must use an exact known release ID and the installer must run readiness before accepting
+the switch:
+
+```sh
+sudo pnpm rollback:vm -- \
+  --root /opt/softmatrix \
+  --rollback <release-a-id> \
+  --base-url https://softmatrix.example
+```
+
+## Go / no-go decision
+
+The release is **GO** only when all of the following are true:
+
+- no secret appears in artifacts, manifests, browser assets, or logs;
+- the target-platform dependency license inventory has been reviewed and every flagged package has
+  an approved license/notice treatment;
+- bilingual login, OIDC, model governance, Gatekeeper, attachment, and Blueprint checks pass;
+- restart and VM reboot preserve the same workspace and model preference;
+- the backup checksum verifies and isolated restore succeeds;
+- a deliberately failed readiness check leaves `current` unchanged;
+- rollback selects the recorded release ID and the original data remains available; and
+- the operator has recorded the exact release ID, artifact checksums, backup checksum, and sign-off.
+
+Otherwise mark **NO-GO**, preserve the failing evidence, and keep the last known-good release
+active.
+
+## Operator sign-off
+
+| Role | Name | Decision | UTC timestamp | Signature / ticket |
+|---|---|---|---|---|
+| Release owner | `PENDING` | `PENDING` | `PENDING` | `PENDING` |
+| VM operator | `PENDING` | `PENDING` | `PENDING` | `PENDING` |
+| Security reviewer | `PENDING` | `PENDING` | `PENDING` | `PENDING` |

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { createRootRoute, Outlet, useRouterState } from '@tanstack/react-router'
+import { createRootRoute, Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
 import { TooltipProvider, Toasty } from '@cloudflare/kumo'
 import { RpcStub } from 'capnweb'
 import { AuthenticatedApi } from '@gadgets/workshop-shared/api'
@@ -34,6 +34,7 @@ function RootComponent() {
   const connectionLost = useConnectionLost()
   const { isAuthenticated, authenticatedApi, isLoading, error, logout, login } = useAuth(rpcStub)
   const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const navigate = useNavigate()
 
   // When authenticatedApi becomes available, the connection is proven alive.
   useEffect(() => {
@@ -57,6 +58,9 @@ function RootComponent() {
     const token = localStorage.getItem('authToken')
     if (token) {
       login(token)
+      // Login pages are public routes. Move the newly authenticated session to the app root so
+      // the authenticated shell renders a valid child route instead of `/login`'s Not Found page.
+      void navigate({ to: '/' })
     }
   }
 

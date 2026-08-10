@@ -20,7 +20,8 @@ centralized product metadata, and compliance controls. The Git history records t
 
 test("Softmatrix distribution retains the exact Apache-2.0 license and attribution", async () => {
   const [license, notice, readme, readmeZh, contributing, compliance, upstreamSync, releasePlan,
-    envDts, deploymentEn, deploymentZh, operationsEn, operationsZh, upgradeEn, upgradeZh] =
+    envDts, deploymentEn, deploymentZh, operationsEn, operationsZh, upgradeEn, upgradeZh,
+    vmDeploymentEn, vmDeploymentZh, vmOperationsEn, vmOperationsZh, vmService, vmWorkflow, ciWorkflow] =
     await Promise.all([
       readFile(new URL("../LICENSE", import.meta.url)),
       readFile(new URL("../NOTICE", import.meta.url), "utf8"),
@@ -40,6 +41,13 @@ test("Softmatrix distribution retains the exact Apache-2.0 license and attributi
       readFile(new URL("../docs/softmatrix/operations.zh-CN.md", import.meta.url), "utf8"),
       readFile(new URL("../docs/softmatrix/upgrade.en.md", import.meta.url), "utf8"),
       readFile(new URL("../docs/softmatrix/upgrade.zh-CN.md", import.meta.url), "utf8"),
+      readFile(new URL("../docs/softmatrix/vm-deployment.en.md", import.meta.url), "utf8"),
+      readFile(new URL("../docs/softmatrix/vm-deployment.zh-CN.md", import.meta.url), "utf8"),
+      readFile(new URL("../docs/softmatrix/vm-operations.en.md", import.meta.url), "utf8"),
+      readFile(new URL("../docs/softmatrix/vm-operations.zh-CN.md", import.meta.url), "utf8"),
+      readFile(new URL("../deploy/vm/softmatrix.service", import.meta.url), "utf8"),
+      readFile(new URL("../.github/workflows/vm-smoke.yml", import.meta.url), "utf8"),
+      readFile(new URL("../.github/workflows/ci.yml", import.meta.url), "utf8"),
     ]);
 
   assert.equal(createHash("sha256").update(license).digest("hex"), APACHE_2_LICENSE_SHA256);
@@ -51,6 +59,7 @@ test("Softmatrix distribution retains the exact Apache-2.0 license and attributi
   assert.match(readmeZh, /Apache License 2\.0/);
   assert.doesNotMatch(readme, /cloudflare\/cloudflare-os\/discussions/);
   assert.doesNotMatch(contributing, /cloudflare\/cloudflare-os\/discussions/);
+  assert.doesNotMatch(contributing, /cloudflare\.com\/cla/i);
   assert.match(compliance, /THIRD_PARTY_NOTICES\.md/);
   assert.match(compliance, /release-blocking/i);
   assert.match(upstreamSync, /first business day of every month/i);
@@ -59,6 +68,40 @@ test("Softmatrix distribution retains the exact Apache-2.0 license and attributi
   assert.match(releasePlan, /scripts\/release\/upload-release\.mjs/);
   assert.match(releasePlan, /scripts\/release\/promote-release\.mjs/);
   assert.match(releasePlan, /scripts\/release-legal-artifacts\.test\.js/);
+
+  const vmDocs = [vmDeploymentEn, vmDeploymentZh, vmOperationsEn, vmOperationsZh];
+  const vmDocumentation = vmDocs.join("\n");
+  for (const phrase of [
+    "softmatrix-vm",
+    "workerd",
+    "PUBLIC_BASE_URL",
+    "ORG_AI_MODELS",
+    "ALLOW_USER_BYOK",
+    "/var/lib/softmatrix/data",
+    "/var/lib/softmatrix/objects",
+    "backup-data.mjs",
+    "restore-data.mjs",
+    "healthcheck.mjs",
+    "install-release.mjs",
+    "rollback",
+    "OIDC_CLIENT_SECRET",
+    "journalctl",
+    "/usr/bin/node",
+    "Cloudflare",
+  ]) {
+    assert.ok(vmDocumentation.includes(phrase), `VM documentation is missing ${phrase}`);
+  }
+  for (const command of ["build:vm", "install:vm", "healthcheck:vm", "test:e2e:vm"]) {
+    assert.ok(vmDocumentation.includes(command), `VM documentation is missing ${command}`);
+  }
+  assert.match(vmService, /ExecStartPre=.*tools\/vm-config\.mjs --check/);
+  assert.match(vmService, /ExecStart=.*workerd/);
+  assert.match(vmWorkflow, /playwright install --with-deps chromium/);
+  assert.match(vmWorkflow, /scripts\/vm\/vm-config\.mjs --check/);
+  assert.match(vmWorkflow, /test:vm:workerd/);
+  assert.match(vmWorkflow, /test:e2e:vm/);
+  assert.match(ciWorkflow, /playwright install --with-deps chromium/);
+  assert.match(ciWorkflow, /run: pnpm test:e2e/);
 
   function headingSignature(markdown) {
     return markdown.split("\n")
@@ -69,6 +112,8 @@ test("Softmatrix distribution retains the exact Apache-2.0 license and attributi
     [deploymentEn, deploymentZh],
     [operationsEn, operationsZh],
     [upgradeEn, upgradeZh],
+    [vmDeploymentEn, vmDeploymentZh],
+    [vmOperationsEn, vmOperationsZh],
   ]) {
     assert.deepEqual(headingSignature(english), headingSignature(chinese));
   }

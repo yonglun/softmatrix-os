@@ -71,10 +71,28 @@ function pinnedWranglerVersion() {
   return pkg.version;
 }
 
-// Builds the Access-mode frontend (VITE_CF_ACCESS_MODE is a build-time flag,
-// workshop-frontend/src/useAuth.ts) — the one asset variant every release carries.
+// Some Workers have generated source modules that are intentionally not committed. The normal
+// workspace build creates them, but release builds also run directly in clean checkouts (including
+// the VM smoke runner), so make those prerequisites explicit before Wrangler collects modules.
+// This keeps release output reproducible instead of depending on local build residue.
+function buildGeneratedWorkerSources(packages) {
+  for (const pkg of packages) {
+    const packageJson = JSON.parse(readFileSync(join(pkg.dir, "package.json"), "utf8"));
+    for (const script of ["build:app", "build:configurator", "build:format-blueprints"]) {
+      if (packageJson.scripts?.[script]) {
+        run("pnpm", ["run", script], { cwd: pkg.dir });
+      }
+    }
+  }
+}
+
+// Builds the Access-mode frontend for Cloudflare releases. VM releases request the same
+// immutable bundle with password/OIDC mode enabled: they cannot rely on Cloudflare Access.
 function buildFrontend() {
-  const env = { ...process.env, VITE_CF_ACCESS_MODE: "true" };
+  const env = {
+    ...process.env,
+    VITE_CF_ACCESS_MODE: process.env.SOFTMATRIX_VM_PROFILE === "true" ? "false" : "true",
+  };
   run("pnpm", ["run", "build"], { cwd: FRONTEND_DIR, env });
   return collectAssets(join(FRONTEND_DIR, "dist"));
 }
@@ -107,8 +125,10 @@ function main() {
   // 2. Bundle every deployable package the way `wrangler deploy` would, without uploading.
   //    Run from each package dir so custom build commands (capnweb-validate) resolve their bins.
   const bundleDir = mkdtempSync(join(tmpdir(), "gadgets-release-"));
+  const deployablePackages = findDeployablePackages(PACKAGES_DIR);
+  buildGeneratedWorkerSources(deployablePackages);
   const workers = [];
-  for (const pkg of findDeployablePackages(PACKAGES_DIR)) {
+  for (const pkg of deployablePackages) {
     const outDir = join(bundleDir, pkg.name);
     run("pnpm", ["exec", "wrangler", "deploy", "--dry-run", "--outdir", outDir],
         { cwd: pkg.dir });
