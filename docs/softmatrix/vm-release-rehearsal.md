@@ -26,7 +26,7 @@ Fill these values from the exact clean checkout and immutable artifact:
 | `legal-manifest.json` SHA-256 | `a8dc8b170d5d742e3e88da0491858a93c12c59724668f0bd5e01c3f3681b08c1` |
 | Apache-2.0 `LICENSE` SHA-256 | `0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594` |
 | `tools/vm-config.mjs` SHA-256 | `f7974028822f010879df7e91d75b61800c5cd74032beef45d749d080cfc2184d` |
-| `workerd` version/binary SHA-256 | `PENDING operator-provided pinned binary` |
+| `workerd` version/binary SHA-256 | `2026-08-01` / `b3eea2de0ef56b987737aab8775ac16d046500b2c68587a1bb1f7cc2080647e7` (local arm64 binary; verify the VM binary separately) |
 | Node.js / pnpm versions | `v22.14.0` / `11.17.0` |
 | OS / kernel | `macOS 26.5.2` / `Darwin 25.5.0 arm64` |
 | systemd and TLS proxy versions | `PENDING` |
@@ -78,8 +78,8 @@ These results are development evidence only and must be re-run from the clean re
 | Compliance and i18n coverage | PASS (3/3) | `node --test scripts/softmatrix-compliance.test.js scripts/i18n-coverage.test.js` |
 
 The RC artifact contains 18 workers, 84 modules, and 31 asset blobs. Its generated
-`runtime/workerd.capnp` compiled successfully; the compiled configuration SHA-256 was
-`bfedaaa192e03ca40cca5e6e0c483436b6a400daa54a706dc3b5a66286ad953c`. The immutable package
+`runtime/workerd.capnp` compiled successfully; the current local compiled configuration SHA-256 is
+`65bf5df46617041b7bd80acc9de089cac017fa7240c806767b739e9971dd466b`. The immutable package
 also includes the systemd fail-closed preflight at `tools/vm-config.mjs`.
 
 ## Latest clean-checkout CI gate
