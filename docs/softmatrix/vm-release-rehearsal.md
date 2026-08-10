@@ -60,7 +60,7 @@ These results are development evidence only and must be re-run from the clean re
 | Install, health, backup, restore tests | PASS (6/6) | `node --test scripts/vm/install-release.test.js scripts/vm/vm-data.test.js` |
 | Router asset MIME tests | PASS (14/14) | `pnpm --filter @gadgets/router test` |
 | VM workerd config compile | PASS | `workerd compile runtime/workerd.capnp config` |
-| Bilingual VM browser journey | PASS (4/4) | Ubuntu `VM Smoke` run below; English/Chinese password restart and OIDC journeys |
+| Bilingual VM browser journey | PASS (8/8) | Ubuntu `VM Smoke` run below; English/Chinese password restart, OIDC success, cancellation, and domain-denial journeys |
 | Compliance and i18n coverage | PASS (3/3) | `node --test scripts/softmatrix-compliance.test.js scripts/i18n-coverage.test.js` |
 
 The RC artifact contains 18 workers, 84 modules, and 31 asset blobs. Its generated
@@ -72,16 +72,17 @@ also includes the systemd fail-closed preflight at `tools/vm-config.mjs`.
 
 The release builder has since been hardened to generate every ignored worker input before Wrangler
 collects modules (`build:app`, `build:configurator`, and `build:format-blueprints`). The latest
-OIDC fixture hardening is `b45452b`; its Ubuntu `VM Smoke` run passed all four browser journeys on
-an ephemeral Linux VM:
+OIDC failure-journey hardening is `5ae2587`; its Ubuntu `VM Smoke` run passed all eight browser
+journeys on an ephemeral Linux VM:
 
 | Check | Result | Evidence |
 |---|---|---|
-| VM configuration contract | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31365676828/job/93383410367) |
-| Native workerd persistence | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31365676828/job/93383410367) |
-| Clean immutable release build (18 workers / 84 modules) | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31365676828/job/93383410367) |
-| English and Simplified Chinese password/restart journeys | PASS (2/2) | [GitHub job](https://github.com/yonglun/softmatrix-os/actions/runs/31365676828/job/93383410367) |
-| English and Simplified Chinese OIDC fixture journeys | PASS (2/2) | [GitHub job](https://github.com/yonglun/softmatrix-os/actions/runs/31365676828/job/93383410367) |
+| VM configuration contract | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31367656028/job/93389453548) |
+| Native workerd persistence | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31367656028/job/93389453548) |
+| Clean immutable release build (18 workers / 84 modules) | PASS | [GitHub job step](https://github.com/yonglun/softmatrix-os/actions/runs/31367656028/job/93389453548) |
+| English and Simplified Chinese password/restart journeys | PASS (2/2) | [GitHub job](https://github.com/yonglun/softmatrix-os/actions/runs/31367656028/job/93389453548) |
+| English and Simplified Chinese OIDC success journeys | PASS (2/2) | [GitHub job](https://github.com/yonglun/softmatrix-os/actions/runs/31367656028/job/93389453548) |
+| English and Simplified Chinese OIDC cancellation/domain-denial journeys | PASS (4/4) | [GitHub job](https://github.com/yonglun/softmatrix-os/actions/runs/31367656028/job/93389453548) |
 
 This is CI evidence on an ephemeral Ubuntu runner, not production VM sign-off. Keep the status below
 as `PENDING OPERATOR EXECUTION` until the real VM, TLS proxy, OIDC provider, backup destination,
@@ -95,7 +96,8 @@ Mark each item only after attaching a timestamped log, screenshot, or checksum r
 |---|---|---|
 | English password signup/login | `[x]` local | release `softmatrix-vm-v1-rc3`; `e2e/vm-self-hosting.spec.ts` |
 | Simplified Chinese password signup/login | `[x]` local | release `softmatrix-vm-v1-rc3`; `e2e/vm-self-hosting.spec.ts` |
-| OIDC success with local RS256/JWKS/PKCE fixture | `[x]` CI | [Ubuntu VM Smoke](https://github.com/yonglun/softmatrix-os/actions/runs/31365676828/job/93383410367); production IdP still pending |
+| OIDC success with local RS256/JWKS/PKCE fixture | `[x]` CI | [Ubuntu VM Smoke](https://github.com/yonglun/softmatrix-os/actions/runs/31367656028/job/93389453548); production IdP still pending |
+| OIDC cancellation and domain-denial mapping with local fixture | `[x]` CI | [Ubuntu VM Smoke](https://github.com/yonglun/softmatrix-os/actions/runs/31367656028/job/93389453548); production IdP replay still pending |
 | OIDC cancellation and domain-denial mapping against the chosen production IdP | `[ ]` | `PENDING operator execution` |
 | Model catalog policy and `ALLOW_USER_BYOK=false` | `[x]` local | Fixture Model visible; Add model action absent in release `softmatrix-vm-v1-rc3` |
 | Approved BYOK behavior (if enabled) | `[ ]` | `PENDING` |
