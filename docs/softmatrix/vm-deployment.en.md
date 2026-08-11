@@ -118,9 +118,11 @@ When OIDC is enabled (for example, Microsoft Entra ID), register the exact redir
 `X-Forwarded-Proto: https`; the VM runtime consumes that header, and the backend also canonicalizes
 the callback against `PUBLIC_BASE_URL`. After changing OIDC environment values, rerun the VM config
 check and restart the service. Build and install a new release ID only when code or runtime
-configuration changes; never edit an older artifact in place. For Workforce Entra tenants that do not emit
-`email_verified=true`, use the Microsoft Entra External ID federation procedure in
-`docs/oidc-sso.md`; the VM still uses the generic `OIDC_*` variables and the External ID issuer.
+configuration changes; never edit an older artifact in place. For a single Workforce Entra tenant that
+does not emit `email_verified=true`, set `OIDC_IDENTITY_MODE=entra-tenant`, `OIDC_ENTRA_TENANT_ID`, and
+an exact `OIDC_ALLOWED_EMAIL_DOMAINS`; configure the Entra app to emit the `upn` ID-token optional
+claim. The account security key is `tid + oid`, while UPN is the profile/admin identity. External ID
+federation remains an optional multi-tenant alternative documented in `docs/oidc-sso.md`.
 
 The repository includes checked-in proxy templates. For Caddy, set `SOFTMATRIX_DOMAIN` in the
 Caddy service environment, copy `deploy/vm/Caddyfile.example` to the Caddy configuration path,

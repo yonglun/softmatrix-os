@@ -114,9 +114,11 @@ HTTPS 代理到 `127.0.0.1:8787`，并保留 WebSocket upgrade。
 `X-Forwarded-Proto: https`，VM runtime 会读取该头；后端还会依据 `PUBLIC_BASE_URL` 规范化
 回调地址。修改 OIDC 环境变量后，应重新执行 VM 配置检查并重启服务。只有代码或 runtime
 配置发生变化时才需要构建并安装新的 release ID，不能原地修改旧制品。对于不输出
-`email_verified=true` 的 Workforce Entra 租户，请按
-`docs/oidc-sso.md` 中的 Microsoft Entra External ID 联邦流程配置；VM 仍使用通用的
-`OIDC_*` 变量，但 `OIDC_ISSUER` 应改为 External ID 的 issuer。
+`email_verified=true` 的单一 Workforce Entra 租户，应设置
+`OIDC_IDENTITY_MODE=entra-tenant`、`OIDC_ENTRA_TENANT_ID` 和精确的
+`OIDC_ALLOWED_EMAIL_DOMAINS`，并在 Entra 应用中配置 `upn` ID token optional claim。账号安全键
+使用 `tid + oid`，UPN 只作为用户资料和管理员身份。External ID 联邦仍是多租户场景的可选方案，
+详见 `docs/oidc-sso.md`。
 
 仓库提供了已纳入版本控制的代理模板。使用 Caddy 时，将 `SOFTMATRIX_DOMAIN` 注入 Caddy
 服务环境，复制 `deploy/vm/Caddyfile.example` 到 Caddy 配置路径后 reload。使用 Nginx 时，先
