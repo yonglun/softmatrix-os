@@ -9,6 +9,18 @@ required.
 
 - Linux VM with Node.js 22+ installed at `/usr/bin/node` (used by installation tooling and the
   systemd preflight), `systemd`, and a pinned `workerd` binary matching the release build.
+- A Node.js installed by FNM/nvm is only present in the current user's shell environment; `sudo`
+  and systemd do not see it by default. You can keep using FNM for development, but production
+  should also have a system Node.js at `/usr/bin/node`. If you temporarily only have FNM, pass the
+  current Node's absolute path for the one-off install below; systemd still requires `/usr/bin/node`:
+
+```sh
+NODE_BIN="$(type -P node)"
+sudo "$NODE_BIN" scripts/vm/install-release.mjs \
+  --root /opt/softmatrix \
+  --release /opt/softmatrix/incoming-v1.0.0 \
+  --base-url https://softmatrix.example
+```
 - At least 4 GB RAM, a persistent filesystem, and a DNS name with TLS terminated by Caddy or
   Nginx. Keep `workerd` on loopback (`127.0.0.1:8787`).
 - Create the service account and directories, then create the storage subdirectories:
@@ -38,7 +50,7 @@ artifacts. Keep the release directory immutable. Copy it under `/opt/softmatrix`
 
 ```sh
 sudo cp -a /tmp/softmatrix-vm-v1.0.0 /opt/softmatrix/incoming-v1.0.0
-sudo node scripts/vm/install-release.mjs \
+sudo /usr/bin/node scripts/vm/install-release.mjs \
   --root /opt/softmatrix \
   --release /opt/softmatrix/incoming-v1.0.0 \
   --base-url https://softmatrix.example
@@ -151,7 +163,7 @@ Stop the service (or otherwise quiesce writes) before taking a backup:
 
 ```sh
 sudo systemctl stop softmatrix
-sudo node scripts/vm/backup-data.mjs \
+sudo /usr/bin/node scripts/vm/backup-data.mjs \
   --data-dir /var/lib/softmatrix/data \
   --object-store-dir /var/lib/softmatrix/objects \
   --out /var/backups/softmatrix \
@@ -163,7 +175,7 @@ The archive has a per-file manifest and an external SHA-256 sidecar. Restore onl
 inactive target, verify the checksum, then start the service:
 
 ```sh
-sudo node scripts/vm/restore-data.mjs \
+sudo /usr/bin/node scripts/vm/restore-data.mjs \
   --archive /var/backups/softmatrix/softmatrix-v1.0.0-*.tar.gz \
   --target /var/lib/softmatrix-restore \
   --checksum "<sha256>"
@@ -172,7 +184,7 @@ sudo node scripts/vm/restore-data.mjs \
 Use the exact previous release for a rollback:
 
 ```sh
-sudo node scripts/vm/install-release.mjs \
+sudo /usr/bin/node scripts/vm/install-release.mjs \
   --root /opt/softmatrix \
   --rollback <previous-release-id> \
   --base-url https://softmatrix.example
