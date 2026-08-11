@@ -137,6 +137,14 @@ test("VM release provisions Miniflare-compatible local KV and R2 services", asyn
     assert.match(runtimeConfig, /name = "softmatrix-r2-blueprint_content"/);
     assert.match(runtimeConfig, /name = "softmatrix-model-network"/);
     assert.match(runtimeConfig, /globalOutbound = "softmatrix-model-network"/);
+    assert.match(
+        runtimeConfig,
+        /name = "internet", network = \(allow = \["public"\], tlsOptions = \(trustBrowserCas = true\)\)/,
+    );
+    assert.match(
+        runtimeConfig,
+        /name = "softmatrix-model-network", network = \(allow = \["public", "private", "local"\], tlsOptions = \(trustBrowserCas = true\)\)/,
+    );
     assert.match(runtimeConfig, /KVNamespaceObject/);
     assert.match(runtimeConfig, /R2BucketObject/);
     assert.ok(release.manifest.runtime.storageAdapters?.miniflareLocal);
