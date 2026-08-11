@@ -84,8 +84,11 @@ sudo pnpm install:vm -- --root /opt/softmatrix \
 上面的 `sudo pnpm` 形式要求 pnpm 已安装到系统级 PATH；如果 pnpm 也由 FNM 管理，请使用前面的
 `sudo "$NODE_BIN" ...` 命令，不要尝试用 `sudo -E` 绕过 PATH 隔离。
 
-安装器会校验 checksum、Apache-2.0/notice sidecar 和模块哈希，再原子切换 `current`。就绪检查
-失败时会自动恢复上一版本。
+安装器会校验 checksum、Apache-2.0/notice sidecar 和模块哈希，再原子切换 `current`。它还会在
+重启 systemd 前检查 `internet` 与 `softmatrix-model-network` 是否包含
+`tlsOptions = (trustBrowserCas = true)`；旧 runtime 缺少该配置时返回
+`VM_RUNTIME_TLS_MISSING`。就绪检查失败时会自动恢复上一版本。发布目录不可变；runtime 配置
+发生变化后必须使用新的 release ID 重新构建和安装，不能原地修改已有 release。
 
 ## 3. Configure and start systemd
 

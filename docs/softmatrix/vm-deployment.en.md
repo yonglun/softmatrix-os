@@ -87,7 +87,11 @@ by FNM, use the preceding `sudo "$NODE_BIN" ...` command instead of trying to by
 with `sudo -E`.
 
 The installer validates checksums, Apache-2.0/notice sidecars, and module hashes before an
-atomic `current` switch. A failed readiness check restores the previous release automatically.
+atomic `current` switch. It also rejects a legacy runtime whose `internet` or
+`softmatrix-model-network` service lacks `tlsOptions = (trustBrowserCas = true)` with
+`VM_RUNTIME_TLS_MISSING`, before restarting systemd. A failed readiness check restores the
+previous release automatically. Release directories are immutable: after changing the runtime
+configuration, build and install a new release ID instead of editing an existing release in place.
 
 ## 3. Configure and start systemd
 
