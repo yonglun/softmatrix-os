@@ -37,11 +37,46 @@ contains `PUBLIC_BASE_URL`; it must never contain a client secret or an OIDC sec
 | Provider | Client type | Setup notes |
 | --- | --- | --- |
 | Keycloak | Confidential OpenID Connect client | Set access type to confidential, enable Standard Flow, add the exact redirect URI, and expose the `email` and `email_verified` claims in the ID token. |
-| Microsoft Entra ID | Web platform app registration | Add the redirect URI under Authentication, create a client secret, and request the standard OIDC scopes. Ensure the tenant emits a verified email claim for the users allowed to sign in. |
+| Microsoft Entra ID | Web platform app registration | Add the redirect URI under Authentication, create a client secret, and request the standard OIDC scopes. Workforce tenants that do not emit `email_verified=true` should use the External ID federation flow below. |
 | Okta | Web OIDC application | Use Authorization Code, add the exact redirect URI, create a client secret, and map `email` plus `email_verified` into the ID token. |
 
 Softmatrix validates discovery metadata, issuer, audience, signature, `exp`, `iat`, nonce, and
 `email_verified === true`. Group claims and role mapping are intentionally out of scope.
+
+## Microsoft Entra External ID federation
+
+This is the recommended path when the workforce Microsoft Entra ID token does not contain
+`email_verified=true`. Softmatrix remains a normal OIDC client; Microsoft Entra External ID becomes
+the OIDC issuer and federates the workforce tenant. The External ID flow can map the upstream
+identity claims, including `email` and `email_verified`, in its OIDC identity-provider configuration.
+
+1. Create an External tenant and register a Web application for Softmatrix. Add the exact redirect
+   URI `https://<your-domain>/api/auth/oidc/callback`, create a client secret, and associate the app
+   with a sign-up/sign-in user flow.
+2. In the workforce tenant, register the External tenant as an application for federation. Use the
+   federation redirect URIs shown by the External tenant, grant the delegated Graph permissions
+   `email`, `openid`, `profile`, and `User.Read`, and grant admin consent. Do not use the Softmatrix
+   callback URI for this federation registration; it belongs to the External tenant's federation
+   endpoint.
+3. In the External tenant, add the workforce tenant as a custom OpenID Connect identity provider.
+   Use the workforce tenant's well-known endpoint and tenant-specific issuer, then configure the
+   `sub`, `name`, `email`, and `email_verified` claim mappings. Keep `email` required in the user
+   flow unless there is a separate, reviewed identity policy.
+4. Set `OIDC_ISSUER` to the exact `issuer` value returned by the External tenant's discovery
+   document (not the `.well-known` URL), `OIDC_CLIENT_ID` to the Softmatrix app registration in the
+   External tenant, and `OIDC_CLIENT_SECRET` to its secret value. Set
+   `OIDC_ALLOWED_EMAIL_DOMAINS` to the approved domains.
+
+The External ID discovery URL uses the tenant-specific `ciamlogin.com` form, for example
+`https://<external-tenant>.ciamlogin.com/<external-tenant-id>/v2.0/.well-known/openid-configuration`.
+Microsoft's federation guide documents the workforce-to-External-ID registration and federation
+redirect URIs; its claims-mapping guide defines the `email_verified` meaning and requirement.
+
+Sources:
+
+- https://learn.microsoft.com/en-us/entra/external-id/customers/how-to-entra-id-federation-customers
+- https://learn.microsoft.com/en-us/entra/external-id/customers/how-to-custom-oidc-federation-customers
+- https://learn.microsoft.com/en-us/entra/external-id/customers/reference-oidc-claims-mapping-customers
 
 ## Account and domain policy
 

@@ -112,7 +112,10 @@ HTTPS 代理到 `127.0.0.1:8787`，并保留 WebSocket upgrade。
 如果启用 OIDC（例如 Microsoft Entra ID），身份提供商的重定向 URI 必须精确设置为
 `https://<你的域名>/api/auth/oidc/callback`。Nginx 模板会发送
 `X-Forwarded-Proto: https`，VM runtime 会读取该头；后端还会依据 `PUBLIC_BASE_URL` 规范化
-回调地址。修改 OIDC 或代理配置后必须构建新的 release ID，再安装新发布，不能复用旧制品。
+回调地址。对于不输出 `email_verified=true` 的 Workforce Entra 租户，请按
+`docs/oidc-sso.md` 中的 Microsoft Entra External ID 联邦流程配置；VM 仍使用通用的
+`OIDC_*` 变量，但 `OIDC_ISSUER` 应改为 External ID 的 issuer。修改 OIDC 或代理配置后必须
+构建新的 release ID，再安装新发布，不能复用旧制品。
 
 仓库提供了已纳入版本控制的代理模板。使用 Caddy 时，将 `SOFTMATRIX_DOMAIN` 注入 Caddy
 服务环境，复制 `deploy/vm/Caddyfile.example` 到 Caddy 配置路径后 reload。使用 Nginx 时，先
