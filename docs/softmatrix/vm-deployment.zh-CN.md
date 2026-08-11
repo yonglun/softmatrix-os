@@ -14,7 +14,7 @@ R2、Access 或 AI Gateway。
   `/usr/bin/node`：
 
 ```sh
-NODE_BIN="$(type -P node)"
+NODE_BIN="$(command -v node)"
 sudo "$NODE_BIN" scripts/vm/install-release.mjs \
   --root /opt/softmatrix \
   --release /opt/softmatrix/incoming-v1.0.0 \
