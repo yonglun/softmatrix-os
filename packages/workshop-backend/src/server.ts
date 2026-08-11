@@ -45,6 +45,29 @@ function publicBlueprintInfo(id: string, metadata: BlueprintPublicInfo['metadata
   };
 }
 
+export type AuthenticatedIdentityIds = {
+  internalUserId: string;
+  profileId: string;
+};
+
+export async function getAuthenticatedIdentityIds(
+  user: Pick<DurableObjectStub<UserDurableObject>, "whoami">,
+  internalUserId: string,
+): Promise<AuthenticatedIdentityIds> {
+  return { internalUserId, profileId: (await user.whoami()).id };
+}
+
+export function isConfiguredAdmin(admins: unknown, profileId: string): boolean {
+  if (!admins) return false;
+  if (typeof admins === "string") {
+    admins = JSON.parse(admins);
+  }
+  if (!Array.isArray(admins)) {
+    throw new TypeError("ADMINS must be configured as an array of usernames.");
+  }
+  return admins.includes(profileId);
+}
+
 // Re-export entrypoint types from ai-models.ts.
 export { LanguageModelGatekeeper };
 
@@ -88,24 +111,14 @@ class AuthenticatedApiImpl extends RpcTarget implements AuthenticatedApi {
   private overseers: DurableObjectNamespace<OverseerDurableObject>;
   private adminSettings: DurableObjectNamespace<AdminSettings>;
   private users: DurableObjectNamespace<UserDurableObject>;
+  #identityPromise?: Promise<AuthenticatedIdentityIds>;
 
-  #isAdmin(): boolean {
-    let name = this.user.id.name;
-    let admins = this.env.ADMINS;
+  #identity(): Promise<AuthenticatedIdentityIds> {
+    return this.#identityPromise ??= getAuthenticatedIdentityIds(this.user, this.user.id.toString());
+  }
 
-    if (!name || !admins) return false;
-
-    if (typeof admins === "string") {
-      // Admins should be a JSON binding of array type, but `.env` doesn't actually let you
-      // specify JSON bindings, so we also support a string that parses as JSON array.
-      admins = JSON.parse(admins);
-    }
-
-    if (!Array.isArray(admins)) {
-      throw new TypeError("ADMINS must be configured as an array of usernames.");
-    }
-
-    return admins.includes(name);
+  async #isAdmin(): Promise<boolean> {
+    return isConfiguredAdmin(this.env.ADMINS, (await this.#identity()).profileId);
   }
 
   whoami(): Promise<AiChatAuthorInfo> {
@@ -190,7 +203,7 @@ class AuthenticatedApiImpl extends RpcTarget implements AuthenticatedApi {
     }
     // Avatar data lives in KV (global), not the user's DO storage, so we
     // read/write it directly here to avoid routing through the DO location.
-    let userId = this.user.id.name!;
+    let userId = (await this.#identity()).profileId;
     if (data) {
       await this.env.AVATARS.put(userId, data);
     } else {
@@ -215,15 +228,14 @@ class AuthenticatedApiImpl extends RpcTarget implements AuthenticatedApi {
     }
   }
 
-  getUiFeatureFlags(): Promise<UiFeatureFlags> {
-    return resolveUiFeatureFlags(this.env, this.user.id.name!);
+  async getUiFeatureFlags(): Promise<UiFeatureFlags> {
+    return resolveUiFeatureFlags(this.env, (await this.#identity()).profileId);
   }
 
   async #openGadgetInternal(id: string, shareKey?: string,
                             configureObservers?: RpcStub<ObserverConfigCallback>)
       : Promise<NativeRpcStub<Overseer>> {
-    let userId = this.user.id.toString();
-    let profileId = this.user.id.name!;
+    let { internalUserId: userId, profileId } = await this.#identity();
     let overseerId;
     try {
       overseerId = this.overseers.idFromString(id);
@@ -585,7 +597,7 @@ class AuthenticatedApiImpl extends RpcTarget implements AuthenticatedApi {
     let app = accounts.find(account => account.vendorId === id && account.description.providesUi);
     if (!app) return null;
     // isAdmin is supplied fresh per open so admin-gated features reflect the user's current status.
-    return this.user.startAccountAppUi(app.accountId, { isAdmin: this.#isAdmin() });
+    return this.user.startAccountAppUi(app.accountId, { isAdmin: await this.#isAdmin() });
   }
 
   // --- Deployment admin ---
@@ -595,10 +607,10 @@ class AuthenticatedApiImpl extends RpcTarget implements AuthenticatedApi {
   }
 
   async getAdminApi(): Promise<RpcStub<AdminApi> | null> {
-    if (!this.#isAdmin()) return null;
-    // #isAdmin() guarantees a non-empty user id name. Forwarded to gatekeepers when listing the
-    // resource catalog so RBAC-gated ones still surface for this admin.
-    let adminUserId = this.user.id.name!;
+    if (!(await this.#isAdmin())) return null;
+    // #isAdmin() guarantees a non-empty stored profile id. Forwarded to gatekeepers when listing
+    // the resource catalog so RBAC-gated ones still surface for this admin.
+    let adminUserId = (await this.#identity()).profileId;
     // @ts-expect-error Cap'n Web RPC stubs and native RPC targets are compatible but the type
     //     system doesn't know this.
     return new AdminApiImpl(this.adminSettings.getByName(""), adminUserId);
