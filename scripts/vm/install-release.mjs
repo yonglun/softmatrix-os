@@ -82,6 +82,29 @@ function validateModules(releaseDir, manifest) {
   }
 }
 
+function runtimeServiceHasTls(runtimeConfig, serviceName) {
+  const marker = `(name = "${serviceName}"`;
+  const start = runtimeConfig.indexOf(marker);
+  if (start < 0) return false;
+  const nextService = runtimeConfig.indexOf("(name =", start + marker.length);
+  const service = runtimeConfig.slice(start, nextService < 0 ? undefined : nextService);
+  return /network\s*=\s*\(/u.test(service)
+    && /tlsOptions\s*=\s*\(\s*trustBrowserCas\s*=\s*true\s*\)/u.test(service);
+}
+
+function validateRuntimeTls(releaseDir) {
+  const runtimePath = join(releaseDir, "runtime", "workerd.capnp");
+  const runtimeConfig = readFileSync(runtimePath, "utf8");
+  const missing = ["internet", "softmatrix-model-network"]
+      .filter(serviceName => !runtimeServiceHasTls(runtimeConfig, serviceName));
+  if (missing.length > 0) {
+    throw new VmInstallError(
+        "VM_RUNTIME_TLS_MISSING",
+        `outbound TLS is not enabled for workerd network service(s): ${missing.join(", ")}`,
+    );
+  }
+}
+
 function validateRelease(releaseDir) {
   if (!existsSync(releaseDir) || !lstatSync(releaseDir).isDirectory()) {
     throw new VmInstallError("VM_RELEASE_NOT_FOUND", `release directory does not exist: ${releaseDir}`);
@@ -93,6 +116,7 @@ function validateRelease(releaseDir) {
   if (!existsSync(join(releaseDir, "runtime", "workerd.capnp"))) {
     throw new VmInstallError("VM_ARTIFACT_INVALID", "runtime/workerd.capnp is missing");
   }
+  validateRuntimeTls(releaseDir);
   try {
     validateLegalArtifacts(releaseDir);
   } catch (error) {
