@@ -27,6 +27,14 @@ const config: OidcConfig = {
   displayName: "Company SSO",
   allowedEmailDomains: [],
   redirectUri: "https://softmatrix.example/api/auth/oidc/callback",
+  identityMode: "verified-email",
+};
+
+const entraConfig: OidcConfig = {
+  ...config,
+  identityMode: "entra-tenant",
+  entraTenantId: "7551a691-532e-4a93-9292-faed619dd82f",
+  allowedEmailDomains: ["example.com"],
 };
 
 let fixtureKeys: Promise<{ privateKey: CryptoKey; publicKey: CryptoKey }> | undefined;
@@ -73,7 +81,20 @@ async function fixtureFetch(invalid?: string) {
         exp: invalid === "expired" ? now - 1 : now + 300,
         nonce: invalid === "nonce" ? "different-nonce" : expectedNonce,
         email: " Alice@Example.COM ",
-        email_verified: invalid !== "email_verified",
+        email_verified: invalid === "email_verified" ? undefined : true,
+        tid: invalid === "wrong-tid" ? "other-tenant" : entraConfig.entraTenantId,
+        oid: invalid === "missing-oid"
+          ? undefined
+          : invalid === "bad-oid"
+            ? "not-an-object-id"
+            : "11111111-2222-4333-8444-555555555555",
+        upn: invalid === "missing-upn"
+          ? undefined
+          : invalid === "bad-upn"
+            ? "Alice Example.COM"
+            : invalid === "disallowed-domain"
+              ? "alice@other.example"
+              : " Alice@Example.COM ",
       };
       const idToken = await new SignJWT(claims)
         .setProtectedHeader({ alg: "RS256", kid: "fixture-key" })
@@ -131,8 +152,43 @@ describe("OIDC authorization-code protocol", () => {
     setExpectedNonce(stored.nonce);
     const identity = await exchangeAuthorizationCode(config, stored, callback("state-123"), { fetch: fetchImpl });
 
-    expect(identity).toEqual({ email: "alice@example.com", subject: "subject-123" });
+    expect(identity).toEqual({
+      accountKey: "alice@example.com",
+      profileId: "alice@example.com",
+      subject: "subject-123",
+    });
   });
+
+  it("accepts an Entra token with UPN and no email_verified claim", async () => {
+    const { fetchImpl, setExpectedNonce } = await fixtureFetch("email_verified");
+    const { stored } = await createAuthorizationRequest(entraConfig, "state-entra", { fetch: fetchImpl });
+    setExpectedNonce(stored.nonce);
+    await expect(exchangeAuthorizationCode(
+      entraConfig,
+      stored,
+      callback("state-entra"),
+      { fetch: fetchImpl },
+    )).resolves.toEqual({
+      accountKey: "entra-7551a691-532e-4a93-9292-faed619dd82f-11111111-2222-4333-8444-555555555555",
+      profileId: "alice@example.com",
+      subject: "subject-123",
+    });
+  });
+
+  it.each(["wrong-tid", "missing-oid", "bad-oid", "missing-upn", "bad-upn", "disallowed-domain"])(
+    "rejects an invalid Entra %s claim",
+    async invalid => {
+      const { fetchImpl, setExpectedNonce } = await fixtureFetch(invalid);
+      const { stored } = await createAuthorizationRequest(entraConfig, `state-${invalid}`, { fetch: fetchImpl });
+      setExpectedNonce(stored.nonce);
+      await expect(exchangeAuthorizationCode(
+        entraConfig,
+        stored,
+        callback(`state-${invalid}`),
+        { fetch: fetchImpl },
+      )).rejects.toMatchObject({ code: "OIDC_TOKEN_INVALID" });
+    },
+  );
 
   it("rejects a callback with the wrong state or an expired attempt", async () => {
     const { fetchImpl } = await fixtureFetch();
