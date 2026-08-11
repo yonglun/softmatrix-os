@@ -116,8 +116,9 @@ to proxy only HTTPS traffic to `127.0.0.1:8787` and preserve WebSocket upgrades.
 When OIDC is enabled (for example, Microsoft Entra ID), register the exact redirect URI
 `https://<your-domain>/api/auth/oidc/callback`. The Nginx template sends
 `X-Forwarded-Proto: https`; the VM runtime consumes that header, and the backend also canonicalizes
-the callback against `PUBLIC_BASE_URL`. After changing OIDC or proxy settings, build and install a
-new release ID instead of reusing an older artifact. For Workforce Entra tenants that do not emit
+the callback against `PUBLIC_BASE_URL`. After changing OIDC environment values, rerun the VM config
+check and restart the service. Build and install a new release ID only when code or runtime
+configuration changes; never edit an older artifact in place. For Workforce Entra tenants that do not emit
 `email_verified=true`, use the Microsoft Entra External ID federation procedure in
 `docs/oidc-sso.md`; the VM still uses the generic `OIDC_*` variables and the External ID issuer.
 
