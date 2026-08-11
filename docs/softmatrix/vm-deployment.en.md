@@ -43,6 +43,15 @@ node scripts/vm/build-release.mjs \
   --release-id softmatrix-v1.0.0
 ```
 
+Install the `workerd` binary matching this build at the path used by systemd:
+
+```sh
+WORKERD_BIN="$(readlink -f node_modules/.pnpm/node_modules/workerd/bin/workerd)"
+test -x "$WORKERD_BIN"
+sudo install -o root -g root -m 0755 "$WORKERD_BIN" /usr/local/bin/workerd
+sudo /usr/local/bin/workerd --version
+```
+
 The artifact contains `manifest.json`, content-addressed Worker modules, browser assets, a
 generated `runtime/workerd.capnp`, vendored Miniflare local-storage workers, and exact legal
 artifacts. Keep the release directory immutable. Copy it under `/opt/softmatrix` before install:

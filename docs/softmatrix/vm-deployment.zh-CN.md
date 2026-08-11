@@ -42,6 +42,15 @@ node scripts/vm/build-release.mjs \
   --release-id softmatrix-v1.0.0
 ```
 
+将与本次构建匹配的 `workerd` 安装到 systemd 约定的路径：
+
+```sh
+WORKERD_BIN="$(readlink -f node_modules/.pnpm/node_modules/workerd/bin/workerd)"
+test -x "$WORKERD_BIN"
+sudo install -o root -g root -m 0755 "$WORKERD_BIN" /usr/local/bin/workerd
+sudo /usr/local/bin/workerd --version
+```
+
 发布包包含 `manifest.json`、内容寻址 Worker 模块、前端资源、生成的
 `runtime/workerd.capnp`、本地存储所需的 Miniflare worker，以及完整法务制品。发布目录应保持
 不可变；先复制到 `/opt/softmatrix` 再安装：
