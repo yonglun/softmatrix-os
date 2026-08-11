@@ -183,7 +183,8 @@ function transformWorker(pkgName, worker) {
       ...(pkgName === "workshop-backend"
         ? ["ADMINS", "ORG_AI_MODELS", "ALLOW_USER_BYOK", "DISABLE_PASSWORD_AUTH", "DEV",
           "OIDC_ISSUER", "OIDC_CLIENT_ID", "OIDC_CLIENT_SECRET", "OIDC_DISPLAY_NAME",
-          "OIDC_ALLOWED_EMAIL_DOMAINS", "AUTH_GATEKEEPERS"].map(name => ({
+          "OIDC_ALLOWED_EMAIL_DOMAINS", "OIDC_IDENTITY_MODE", "OIDC_ENTRA_TENANT_ID",
+          "AUTH_GATEKEEPERS"].map(name => ({
           type: "from_environment",
           name,
           environment: name,
