@@ -35,6 +35,9 @@ sudo systemd-tmpfiles --create deploy/vm/softmatrix.tmpfiles
 在经过审查的源码 checkout 中执行：
 
 ```sh
+corepack enable pnpm
+corepack install --global pnpm@11.17.0
+pnpm --version  # 应输出 11.17.0
 pnpm install --frozen-lockfile
 pnpm verify:softmatrix
 pnpm build:vm -- --release-id softmatrix-v1.0.0

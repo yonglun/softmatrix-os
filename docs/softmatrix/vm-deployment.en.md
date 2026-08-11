@@ -36,6 +36,9 @@ sudo systemd-tmpfiles --create deploy/vm/softmatrix.tmpfiles
 Run this on the reviewed source checkout:
 
 ```sh
+corepack enable pnpm
+corepack install --global pnpm@11.17.0
+pnpm --version  # should print 11.17.0
 pnpm install --frozen-lockfile
 pnpm verify:softmatrix
 pnpm build:vm -- --release-id softmatrix-v1.0.0
