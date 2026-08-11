@@ -839,8 +839,23 @@ function oidcCallbackResponse(status = 200): Response {
   });
 }
 
+/**
+ * Reverse proxies terminate TLS before forwarding the callback to workerd. Use the configured
+ * public redirect origin for protocol validation instead of the internal hop's URL, while keeping
+ * the provider response parameters exactly as received.
+ */
+function canonicalOidcCallbackUrl(req: Request, env: Env): string {
+  const incoming = new URL(req.url);
+  const config = getOidcConfig(env);
+  if (!config) return incoming.href;
+
+  const callback = new URL(config.redirectUri);
+  callback.search = incoming.search;
+  return callback.href;
+}
+
 /** Complete an OIDC attempt and return a static popup-closing page with no session token. */
-export async function handleOidcCallback(req: Request, _env: Env, ctx: ExecutionContext): Promise<Response> {
+export async function handleOidcCallback(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   if (req.method !== "GET") return oidcCallbackResponse(405);
   const url = new URL(req.url);
   const state = url.searchParams.getAll("state");
@@ -857,7 +872,7 @@ export async function handleOidcCallback(req: Request, _env: Env, ctx: Execution
     }).exports;
     const id = exports.OidcLoginDurableObject.idFromString(state[0]);
     const attempt = exports.OidcLoginDurableObject.get(id);
-    await attempt.complete(url.href);
+    await attempt.complete(canonicalOidcCallbackUrl(req, env));
     return oidcCallbackResponse();
   } catch {
     return oidcCallbackResponse(400);

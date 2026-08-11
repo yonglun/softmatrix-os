@@ -113,6 +113,12 @@ For an on-VM Ollama provider, use an `ollama` model with `apiUrl` such as
 `http://127.0.0.1:11434`. Do not expose Ollama or port 8787 to the Internet. Configure Caddy/Nginx
 to proxy only HTTPS traffic to `127.0.0.1:8787` and preserve WebSocket upgrades.
 
+When OIDC is enabled (for example, Microsoft Entra ID), register the exact redirect URI
+`https://<your-domain>/api/auth/oidc/callback`. The Nginx template sends
+`X-Forwarded-Proto: https`; the VM runtime consumes that header, and the backend also canonicalizes
+the callback against `PUBLIC_BASE_URL`. After changing OIDC or proxy settings, build and install a
+new release ID instead of reusing an older artifact.
+
 The repository includes checked-in proxy templates. For Caddy, set `SOFTMATRIX_DOMAIN` in the
 Caddy service environment, copy `deploy/vm/Caddyfile.example` to the Caddy configuration path,
 and reload Caddy. For Nginx, replace the hostname and certificate paths in

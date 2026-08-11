@@ -393,7 +393,7 @@ const config :Workerd.Config = (
     ])
   ],
   sockets = [
-    (name = "http", address = "127.0.0.1:8787", http = (), service = "softmatrix-router")
+    (name = "http", address = "127.0.0.1:8787", http = (forwardedProtoHeader = "X-Forwarded-Proto"), service = "softmatrix-router")
   ]
 );
 `;
