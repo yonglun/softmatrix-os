@@ -11,16 +11,8 @@ required.
   systemd preflight), `systemd`, and a pinned `workerd` binary matching the release build.
 - A Node.js installed by FNM/nvm is only present in the current user's shell environment; `sudo`
   and systemd do not see it by default. You can keep using FNM for development, but production
-  should also have a system Node.js at `/usr/bin/node`. If you temporarily only have FNM, pass the
-  current Node's absolute path for the one-off install below; systemd still requires `/usr/bin/node`:
-
-```sh
-NODE_BIN="$(command -v node)"
-sudo "$NODE_BIN" scripts/vm/install-release.mjs \
-  --root /opt/softmatrix \
-  --release /opt/softmatrix/incoming-v1.0.0 \
-  --base-url https://softmatrix.example
-```
+  should also have a system Node.js at `/usr/bin/node`. If you temporarily only have FNM, the release
+  install step below can pass the current Node's absolute path; systemd still requires `/usr/bin/node`.
 - At least 4 GB RAM, a persistent filesystem, and a DNS name with TLS terminated by Caddy or
   Nginx. Keep `workerd` on loopback (`127.0.0.1:8787`).
 - Create the service account and directories, then create the storage subdirectories:
@@ -29,6 +21,10 @@ sudo "$NODE_BIN" scripts/vm/install-release.mjs \
 sudo useradd --system --home /var/lib/softmatrix --shell /usr/sbin/nologin softmatrix || true
 sudo install -d -o softmatrix -g softmatrix /opt/softmatrix /etc/softmatrix
 sudo systemd-tmpfiles --create deploy/vm/softmatrix.tmpfiles
+sudo cp deploy/vm/softmatrix.env.example /etc/softmatrix/softmatrix.env
+sudoedit /etc/softmatrix/softmatrix.env
+sudo cp deploy/vm/softmatrix.service /etc/systemd/system/softmatrix.service
+sudo systemctl daemon-reload
 ```
 
 ## 2. Build and verify an immutable release
@@ -59,6 +55,16 @@ sudo /usr/bin/node scripts/vm/install-release.mjs \
   --base-url https://softmatrix.example
 ```
 
+If you temporarily only have FNM's Node, replace the install command above with:
+
+```sh
+NODE_BIN="$(command -v node)"
+sudo "$NODE_BIN" scripts/vm/install-release.mjs \
+  --root /opt/softmatrix \
+  --release /opt/softmatrix/incoming-v1.0.0 \
+  --base-url https://softmatrix.example
+```
+
 The stable root command for the same install is:
 
 ```sh
@@ -77,10 +83,6 @@ atomic `current` switch. A failed readiness check restores the previous release 
 ## 3. Configure and start systemd
 
 ```sh
-sudo cp deploy/vm/softmatrix.env.example /etc/softmatrix/softmatrix.env
-sudoedit /etc/softmatrix/softmatrix.env
-sudo cp deploy/vm/softmatrix.service /etc/systemd/system/softmatrix.service
-sudo systemctl daemon-reload
 sudo systemctl enable --now softmatrix
 pnpm healthcheck:vm -- --base-url https://softmatrix.example
 ```

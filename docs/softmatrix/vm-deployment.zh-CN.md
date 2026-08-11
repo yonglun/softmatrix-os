@@ -10,16 +10,8 @@ R2、Access 或 AI Gateway。
   `systemd`，以及与发布构建匹配的固定版本 `workerd`。
 - FNM/nvm 安装的 Node 只存在于当前用户的 shell 环境，`sudo` 和 systemd 默认看不到它。
   可以继续用 FNM 做开发，但生产 VM 还应安装一个系统级 Node 到 `/usr/bin/node`。如果暂时只能
-  使用 FNM，安装命令可以显式传入当前 Node 的绝对路径；这只解决一次性安装，systemd 启动前仍需要
-  `/usr/bin/node`：
-
-```sh
-NODE_BIN="$(command -v node)"
-sudo "$NODE_BIN" scripts/vm/install-release.mjs \
-  --root /opt/softmatrix \
-  --release /opt/softmatrix/incoming-v1.0.0 \
-  --base-url https://softmatrix.example
-```
+  使用 FNM，下面的发布安装步骤可以显式传入当前 Node 的绝对路径；这只解决一次性安装，systemd
+  启动前仍需要 `/usr/bin/node`。
 - 至少 4 GB 内存、持久化磁盘、带 TLS 的 DNS 名称。`workerd` 只监听回环地址
   `127.0.0.1:8787`，由 Caddy 或 Nginx 对外提供 HTTPS。
 - 创建服务账号和目录，再创建存储子目录：
@@ -28,6 +20,10 @@ sudo "$NODE_BIN" scripts/vm/install-release.mjs \
 sudo useradd --system --home /var/lib/softmatrix --shell /usr/sbin/nologin softmatrix || true
 sudo install -d -o softmatrix -g softmatrix /opt/softmatrix /etc/softmatrix
 sudo systemd-tmpfiles --create deploy/vm/softmatrix.tmpfiles
+sudo cp deploy/vm/softmatrix.env.example /etc/softmatrix/softmatrix.env
+sudoedit /etc/softmatrix/softmatrix.env
+sudo cp deploy/vm/softmatrix.service /etc/systemd/system/softmatrix.service
+sudo systemctl daemon-reload
 ```
 
 ## 2. Build and verify an immutable release
@@ -58,6 +54,16 @@ sudo /usr/bin/node scripts/vm/install-release.mjs \
   --base-url https://softmatrix.example
 ```
 
+如果暂时只有 FNM 的 Node，可将上面的安装命令替换为：
+
+```sh
+NODE_BIN="$(command -v node)"
+sudo "$NODE_BIN" scripts/vm/install-release.mjs \
+  --root /opt/softmatrix \
+  --release /opt/softmatrix/incoming-v1.0.0 \
+  --base-url https://softmatrix.example
+```
+
 同一安装流程也可以使用稳定的根命令：
 
 ```sh
@@ -75,10 +81,6 @@ sudo pnpm install:vm -- --root /opt/softmatrix \
 ## 3. Configure and start systemd
 
 ```sh
-sudo cp deploy/vm/softmatrix.env.example /etc/softmatrix/softmatrix.env
-sudoedit /etc/softmatrix/softmatrix.env
-sudo cp deploy/vm/softmatrix.service /etc/systemd/system/softmatrix.service
-sudo systemctl daemon-reload
 sudo systemctl enable --now softmatrix
 pnpm healthcheck:vm -- --base-url https://softmatrix.example
 ```
