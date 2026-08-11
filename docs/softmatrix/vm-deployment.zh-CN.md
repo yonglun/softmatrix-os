@@ -63,6 +63,9 @@ sudo pnpm install:vm -- --root /opt/softmatrix \
   --base-url https://softmatrix.example
 ```
 
+上面的 `sudo pnpm` 形式要求 pnpm 已安装到系统级 PATH；如果 pnpm 也由 FNM 管理，请使用前面的
+`sudo "$NODE_BIN" ...` 命令，不要尝试用 `sudo -E` 绕过 PATH 隔离。
+
 安装器会校验 checksum、Apache-2.0/notice sidecar 和模块哈希，再原子切换 `current`。就绪检查
 失败时会自动恢复上一版本。
 

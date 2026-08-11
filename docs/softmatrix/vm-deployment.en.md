@@ -64,6 +64,10 @@ sudo pnpm install:vm -- --root /opt/softmatrix \
   --base-url https://softmatrix.example
 ```
 
+The `sudo pnpm` form requires pnpm to be installed in the system-wide PATH. If pnpm is also managed
+by FNM, use the preceding `sudo "$NODE_BIN" ...` command instead of trying to bypass PATH isolation
+with `sudo -E`.
+
 The installer validates checksums, Apache-2.0/notice sidecars, and module hashes before an
 atomic `current` switch. A failed readiness check restores the previous release automatically.
 
