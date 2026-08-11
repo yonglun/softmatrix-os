@@ -9,6 +9,10 @@ required.
 
 - Linux VM with Node.js 22+ installed at `/usr/bin/node` (used by installation tooling and the
   systemd preflight), `systemd`, and a pinned `workerd` binary matching the release build.
+- A Node.js installed by FNM/nvm is only present in the current user's shell environment; `sudo`
+  and systemd do not see it by default. You can keep using FNM for development, but production
+  should also have a system Node.js at `/usr/bin/node`. If you temporarily only have FNM, the release
+  install step below can pass the current Node's absolute path; systemd still requires `/usr/bin/node`.
 - At least 4 GB RAM, a persistent filesystem, and a DNS name with TLS terminated by Caddy or
   Nginx. Keep `workerd` on loopback (`127.0.0.1:8787`).
 - Create the service account and directories, then create the storage subdirectories:
@@ -17,6 +21,10 @@ required.
 sudo useradd --system --home /var/lib/softmatrix --shell /usr/sbin/nologin softmatrix || true
 sudo install -d -o softmatrix -g softmatrix /opt/softmatrix /etc/softmatrix
 sudo systemd-tmpfiles --create deploy/vm/softmatrix.tmpfiles
+sudo cp deploy/vm/softmatrix.env.example /etc/softmatrix/softmatrix.env
+sudoedit /etc/softmatrix/softmatrix.env
+sudo cp deploy/vm/softmatrix.service /etc/systemd/system/softmatrix.service
+sudo systemctl daemon-reload
 ```
 
 ## 2. Build and verify an immutable release
@@ -24,6 +32,9 @@ sudo systemd-tmpfiles --create deploy/vm/softmatrix.tmpfiles
 Run this on the reviewed source checkout:
 
 ```sh
+corepack enable pnpm
+corepack install --global pnpm@11.17.0
+pnpm --version  # should print 11.17.0
 pnpm install --frozen-lockfile
 pnpm verify:softmatrix
 pnpm build:vm -- --release-id softmatrix-v1.0.0
@@ -32,13 +43,32 @@ node scripts/vm/build-release.mjs \
   --release-id softmatrix-v1.0.0
 ```
 
+Install the `workerd` binary matching this build at the path used by systemd:
+
+```sh
+WORKERD_BIN="$(readlink -f node_modules/.pnpm/node_modules/workerd/bin/workerd)"
+test -x "$WORKERD_BIN"
+sudo install -o root -g root -m 0755 "$WORKERD_BIN" /usr/local/bin/workerd
+sudo /usr/local/bin/workerd --version
+```
+
 The artifact contains `manifest.json`, content-addressed Worker modules, browser assets, a
 generated `runtime/workerd.capnp`, vendored Miniflare local-storage workers, and exact legal
 artifacts. Keep the release directory immutable. Copy it under `/opt/softmatrix` before install:
 
 ```sh
 sudo cp -a /tmp/softmatrix-vm-v1.0.0 /opt/softmatrix/incoming-v1.0.0
-sudo node scripts/vm/install-release.mjs \
+sudo /usr/bin/node scripts/vm/install-release.mjs \
+  --root /opt/softmatrix \
+  --release /opt/softmatrix/incoming-v1.0.0 \
+  --base-url https://softmatrix.example
+```
+
+If you temporarily only have FNM's Node, replace the install command above with:
+
+```sh
+NODE_BIN="$(command -v node)"
+sudo "$NODE_BIN" scripts/vm/install-release.mjs \
   --root /opt/softmatrix \
   --release /opt/softmatrix/incoming-v1.0.0 \
   --base-url https://softmatrix.example
@@ -52,16 +82,20 @@ sudo pnpm install:vm -- --root /opt/softmatrix \
   --base-url https://softmatrix.example
 ```
 
+The `sudo pnpm` form requires pnpm to be installed in the system-wide PATH. If pnpm is also managed
+by FNM, use the preceding `sudo "$NODE_BIN" ...` command instead of trying to bypass PATH isolation
+with `sudo -E`.
+
 The installer validates checksums, Apache-2.0/notice sidecars, and module hashes before an
-atomic `current` switch. A failed readiness check restores the previous release automatically.
+atomic `current` switch. It also rejects a legacy runtime whose `internet` or
+`softmatrix-model-network` service lacks `tlsOptions = (trustBrowserCas = true)` with
+`VM_RUNTIME_TLS_MISSING`, before restarting systemd. A failed readiness check restores the
+previous release automatically. Release directories are immutable: after changing the runtime
+configuration, build and install a new release ID instead of editing an existing release in place.
 
 ## 3. Configure and start systemd
 
 ```sh
-sudo cp deploy/vm/softmatrix.env.example /etc/softmatrix/softmatrix.env
-sudoedit /etc/softmatrix/softmatrix.env
-sudo cp deploy/vm/softmatrix.service /etc/systemd/system/softmatrix.service
-sudo systemctl daemon-reload
 sudo systemctl enable --now softmatrix
 pnpm healthcheck:vm -- --base-url https://softmatrix.example
 ```
@@ -78,6 +112,12 @@ private, and local destinations; all gatekeeper workers keep public-only egress.
 For an on-VM Ollama provider, use an `ollama` model with `apiUrl` such as
 `http://127.0.0.1:11434`. Do not expose Ollama or port 8787 to the Internet. Configure Caddy/Nginx
 to proxy only HTTPS traffic to `127.0.0.1:8787` and preserve WebSocket upgrades.
+
+When OIDC is enabled (for example, Microsoft Entra ID), register the exact redirect URI
+`https://<your-domain>/api/auth/oidc/callback`. The Nginx template sends
+`X-Forwarded-Proto: https`; the VM runtime consumes that header, and the backend also canonicalizes
+the callback against `PUBLIC_BASE_URL`. After changing OIDC or proxy settings, build and install a
+new release ID instead of reusing an older artifact.
 
 The repository includes checked-in proxy templates. For Caddy, set `SOFTMATRIX_DOMAIN` in the
 Caddy service environment, copy `deploy/vm/Caddyfile.example` to the Caddy configuration path,
@@ -151,7 +191,7 @@ Stop the service (or otherwise quiesce writes) before taking a backup:
 
 ```sh
 sudo systemctl stop softmatrix
-sudo node scripts/vm/backup-data.mjs \
+sudo /usr/bin/node scripts/vm/backup-data.mjs \
   --data-dir /var/lib/softmatrix/data \
   --object-store-dir /var/lib/softmatrix/objects \
   --out /var/backups/softmatrix \
@@ -163,7 +203,7 @@ The archive has a per-file manifest and an external SHA-256 sidecar. Restore onl
 inactive target, verify the checksum, then start the service:
 
 ```sh
-sudo node scripts/vm/restore-data.mjs \
+sudo /usr/bin/node scripts/vm/restore-data.mjs \
   --archive /var/backups/softmatrix/softmatrix-v1.0.0-*.tar.gz \
   --target /var/lib/softmatrix-restore \
   --checksum "<sha256>"
@@ -172,7 +212,7 @@ sudo node scripts/vm/restore-data.mjs \
 Use the exact previous release for a rollback:
 
 ```sh
-sudo node scripts/vm/install-release.mjs \
+sudo /usr/bin/node scripts/vm/install-release.mjs \
   --root /opt/softmatrix \
   --rollback <previous-release-id> \
   --base-url https://softmatrix.example

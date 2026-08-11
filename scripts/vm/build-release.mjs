@@ -381,8 +381,8 @@ const config :Workerd.Config = (
     (name = "data", disk = (writable = true)),
     (name = "objects", disk = (writable = true)),
     (name = "softmatrix-assets", disk = (path = "assets", writable = false)),
-    (name = "internet", network = (allow = ["public"])),
-    (name = "softmatrix-model-network", network = (allow = ["public", "private", "local"])),
+    (name = "internet", network = (allow = ["public"], tlsOptions = (trustBrowserCas = true))),
+    (name = "softmatrix-model-network", network = (allow = ["public", "private", "local"], tlsOptions = (trustBrowserCas = true))),
     ${localStorage.services},
     ${workerServices.join(",\n    ")}
   ],
@@ -393,7 +393,7 @@ const config :Workerd.Config = (
     ])
   ],
   sockets = [
-    (name = "http", address = "127.0.0.1:8787", http = (), service = "softmatrix-router")
+    (name = "http", address = "127.0.0.1:8787", http = (forwardedProtoHeader = "X-Forwarded-Proto"), service = "softmatrix-router")
   ]
 );
 `;

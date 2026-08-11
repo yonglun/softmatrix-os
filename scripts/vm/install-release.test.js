@@ -38,7 +38,15 @@ async function createRelease(root, releaseId) {
   const release = join(root, "incoming", releaseId);
   await mkdir(join(release, "modules"), { recursive: true });
   await mkdir(join(release, "runtime"), { recursive: true });
-  await writeFile(join(release, "runtime/workerd.capnp"), "using Workerd = import \"/workerd/workerd.capnp\";\n");
+  await writeFile(join(release, "runtime/workerd.capnp"), `using Workerd = import "/workerd/workerd.capnp";
+
+const config :Workerd.Config = (
+  services = [
+    (name = "internet", network = (allow = ["public"], tlsOptions = (trustBrowserCas = true))),
+    (name = "softmatrix-model-network", network = (allow = ["public", "private", "local"], tlsOptions = (trustBrowserCas = true)))
+  ]
+);
+`);
   const module = Buffer.from(`export default {fetch(){return new Response('${releaseId}')}};`);
   await writeFile(join(release, "modules/main.js"), module);
   const moduleHash = sha256(module);
@@ -95,7 +103,13 @@ test("failed readiness leaves current unchanged and rejects release paths outsid
     await installVmRelease({ rootDir: root, releaseDir: first, service, healthcheck: async () => ({ ok: true, checks: [] }) });
     const second = await createRelease(root, "two");
     await assert.rejects(
-        installVmRelease({ rootDir: root, releaseDir: second, service, healthcheck: async () => ({ ok: false, checks: [] }) }),
+        installVmRelease({
+          rootDir: root,
+          releaseDir: second,
+          service,
+          readinessAttempts: 1,
+          healthcheck: async () => ({ ok: false, checks: [] }),
+        }),
         /VM_READINESS_FAILED/);
     assert.equal(await readlink(join(root, "current")), "releases/one");
     const outside = await mkdtemp(join(tmpdir(), "softmatrix-vm-outside-"));
@@ -106,6 +120,49 @@ test("failed readiness leaves current unchanged and rejects release paths outsid
     } finally {
       await rm(outside, { recursive: true, force: true });
     }
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("retries readiness while the restarted service is becoming available", async () => {
+  const root = await mkdtemp(join(tmpdir(), "softmatrix-vm-readiness-retry-test-"));
+  const service = { restart: async () => {} };
+  let attempts = 0;
+  try {
+    const release = await createRelease(root, "retry");
+    const installed = await installVmRelease({
+      rootDir: root,
+      releaseDir: release,
+      service,
+      readinessDelayMs: 0,
+      healthcheck: async () => ({
+        ok: ++attempts >= 3,
+        checks: [{ name: "http", ok: attempts >= 3, status: attempts >= 3 ? 200 : 503 }],
+      }),
+    });
+    assert.equal(installed.releaseId, "retry");
+    assert.equal(attempts, 3);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("rejects a release whose outbound workerd networks do not enable TLS", async () => {
+  const root = await mkdtemp(join(tmpdir(), "softmatrix-vm-tls-contract-test-"));
+  const service = { restart: async () => { throw new Error("must not restart"); } };
+  try {
+    const release = await createRelease(root, "missing-tls");
+    await writeFile(
+        join(release, "runtime/workerd.capnp"),
+        'using Workerd = import "/workerd/workerd.capnp";\n',
+    );
+    await writeChecksums(release);
+    await assert.rejects(
+        installVmRelease({ rootDir: root, releaseDir: release, service, healthcheck: async () => ({ ok: true }) }),
+        error => error?.code === "VM_RUNTIME_TLS_MISSING" && /outbound TLS/u.test(error.message),
+    );
+    assert.equal(await readlink(join(root, "current")).catch(() => undefined), undefined);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
