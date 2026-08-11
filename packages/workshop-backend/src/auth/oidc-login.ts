@@ -2,12 +2,13 @@ import { DurableObject } from "cloudflare:workers";
 import type { OidcLoginErrorCode, OidcLoginResult } from "@gadgets/workshop-shared/api";
 import { readAdminConfig } from "../admin-config.js";
 import { getOidcConfig } from "./config.js";
-import { isEmailDomainAllowed, normalizeVerifiedEmail } from "./email-identity.js";
+import { isEmailDomainAllowed } from "./email-identity.js";
 import {
   createAuthorizationRequest,
   exchangeAuthorizationCode,
   OIDC_ATTEMPT_TTL_MS,
   OidcProtocolError,
+  type VerifiedOidcIdentity,
   type StoredOidcRequest,
 } from "./oidc-protocol.js";
 import type { UserDurableObject } from "../user.js";
@@ -26,6 +27,10 @@ function correlationId(): string {
 
 function failure(code: OidcLoginErrorCode): OidcLoginResult {
   return { ok: false, error: { code, correlationId: correlationId() } };
+}
+
+export function sessionTokenForIdentity(identity: VerifiedOidcIdentity, secret: string): string {
+  return `${identity.accountKey}:${secret}`;
 }
 
 /** Durable rendezvous for one browser-owned OIDC authorization-code attempt. */
@@ -80,17 +85,20 @@ export class OidcLoginDurableObject extends DurableObject<Cloudflare.Env> {
           result = failure("OIDC_PROVIDER_UNAVAILABLE");
         } else {
           const identity = await exchangeAuthorizationCode(config, state.request, callbackUrl);
-          const email = normalizeVerifiedEmail(identity.email);
-          if (!isEmailDomainAllowed(email, config.allowedEmailDomains)) {
+          if (!isEmailDomainAllowed(identity.profileId, config.allowedEmailDomains)) {
             result = failure("EMAIL_DOMAIN_NOT_ALLOWED");
           } else {
             const signupsEnabled = (await readAdminConfig(this.env)).signupsEnabled;
             const users = this.ctx.exports.UserDurableObject as DurableObjectNamespace<UserDurableObject>;
-            const user = users.get(users.idFromName(email));
-            const token = await user.loginOrCreateViaGatekeeper(email, signupsEnabled);
+            const user = users.get(users.idFromName(identity.accountKey));
+            const token = await user.loginOrCreateViaOidc(
+              identity.accountKey,
+              identity.profileId,
+              signupsEnabled,
+            );
             result = token === null
               ? failure("SIGNUP_NOT_ALLOWED")
-              : { ok: true, token: `${email}:${token}` };
+              : { ok: true, token: sessionTokenForIdentity(identity, token) };
           }
         }
       } catch (error) {

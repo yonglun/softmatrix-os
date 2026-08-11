@@ -232,6 +232,28 @@ function makeUserStorage(storage: DurableObjectStorage) {
 
 type UserStorage = ReturnType<typeof makeUserStorage>;
 
+const ENTRA_ACCOUNT_KEY_PATTERN = /^entra-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isOidcAccountKey(value: string): boolean {
+  if (ENTRA_ACCOUNT_KEY_PATTERN.test(value)) return true;
+  try {
+    normalizeVerifiedEmail(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function createSessionToken(storage: UserStorage): Promise<string> {
+  let sessionToken = new Uint8Array(32);
+  crypto.getRandomValues(sessionToken);
+
+  let tokenId = new Uint8Array(await crypto.subtle.digest('SHA-256', sessionToken)).toHex();
+  storage.sessions.put({ tokenId, created: new Date() });
+
+  return sessionToken.toBase64();
+}
+
 function unavailableGatekeeperVendorInfo(id: string): GatekeeperVendorInfo {
   return {
     id,
@@ -339,13 +361,7 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
   }
 
   async #newSessionToken(): Promise<string> {
-    let sessionToken = new Uint8Array(32);
-    crypto.getRandomValues(sessionToken);
-
-    let tokenId = new Uint8Array(await crypto.subtle.digest('SHA-256', sessionToken)).toHex();
-    this.storage.sessions.put({ tokenId, created: new Date() });
-
-    return sessionToken.toBase64();
+    return createSessionToken(this.storage);
   }
 
   async login(passwordHash: Uint8Array): Promise<string | null> {
@@ -360,7 +376,7 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
       return null;
     }
 
-    return this.#newSessionToken();
+    return createSessionToken(this.storage);
   }
 
   async createAccount(username: string, displayName: string, passwordHash: Uint8Array)
@@ -419,7 +435,31 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
         id: email,
       });
     }
-    return this.#newSessionToken();
+    return createSessionToken(this.storage);
+  }
+
+  // Log in via OIDC using a stable account key. Generic verified-email OIDC uses the normalized
+  // email as both key and profile id; Workforce Entra uses an `entra-<tid>-<oid>` key and stores
+  // the normalized UPN only as the profile id. The profile is written only on first sign-in so a
+  // later UPN change cannot overwrite a customized display name or existing sharing identity.
+  async loginOrCreateViaOidc(
+      accountKey: string, profileId: string, allowCreate: boolean
+  ): Promise<string | null> {
+    const normalizedAccountKey = accountKey.trim().toLowerCase();
+    const normalizedProfileId = normalizeVerifiedEmail(profileId);
+    if (!isOidcAccountKey(normalizedAccountKey)) {
+      throw new Error("Invalid OIDC identity.");
+    }
+    if (!this.storage.created.get()) {
+      if (!allowCreate) return null;
+      this.storage.created.put(true);
+      this.storage.profile.put({
+        type: "user",
+        name: normalizedProfileId.split("@")[0],
+        id: normalizedProfileId,
+      });
+    }
+    return createSessionToken(this.storage);
   }
 
   // Whether this account has a password set (false for gatekeeper sign-in accounts).
