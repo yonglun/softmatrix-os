@@ -103,7 +103,13 @@ test("failed readiness leaves current unchanged and rejects release paths outsid
     await installVmRelease({ rootDir: root, releaseDir: first, service, healthcheck: async () => ({ ok: true, checks: [] }) });
     const second = await createRelease(root, "two");
     await assert.rejects(
-        installVmRelease({ rootDir: root, releaseDir: second, service, healthcheck: async () => ({ ok: false, checks: [] }) }),
+        installVmRelease({
+          rootDir: root,
+          releaseDir: second,
+          service,
+          readinessAttempts: 1,
+          healthcheck: async () => ({ ok: false, checks: [] }),
+        }),
         /VM_READINESS_FAILED/);
     assert.equal(await readlink(join(root, "current")), "releases/one");
     const outside = await mkdtemp(join(tmpdir(), "softmatrix-vm-outside-"));
@@ -114,6 +120,29 @@ test("failed readiness leaves current unchanged and rejects release paths outsid
     } finally {
       await rm(outside, { recursive: true, force: true });
     }
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("retries readiness while the restarted service is becoming available", async () => {
+  const root = await mkdtemp(join(tmpdir(), "softmatrix-vm-readiness-retry-test-"));
+  const service = { restart: async () => {} };
+  let attempts = 0;
+  try {
+    const release = await createRelease(root, "retry");
+    const installed = await installVmRelease({
+      rootDir: root,
+      releaseDir: release,
+      service,
+      readinessDelayMs: 0,
+      healthcheck: async () => ({
+        ok: ++attempts >= 3,
+        checks: [{ name: "http", ok: attempts >= 3, status: attempts >= 3 ? 200 : 503 }],
+      }),
+    });
+    assert.equal(installed.releaseId, "retry");
+    assert.equal(attempts, 3);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

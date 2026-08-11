@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-function parseArgs(argv) {
+function parseHealthcheckArgs(argv) {
   const args = { baseUrl: "http://127.0.0.1:8787", timeoutMs: 5000 };
   for (let index = 0; index < argv.length; index++) {
+    if (argv[index] === "--") continue;
     if (argv[index] === "--base-url") args.baseUrl = argv[++index];
     else if (argv[index] === "--timeout-ms") args.timeoutMs = Number(argv[++index]);
     else throw new Error(`unknown argument: ${argv[index]}`);
@@ -33,7 +34,7 @@ export async function healthcheckVm({ baseUrl = "http://127.0.0.1:8787", timeout
 
 if (process.argv[1]?.endsWith("healthcheck.mjs")) {
   try {
-    const result = await healthcheckVm(parseArgs(process.argv.slice(2)));
+    const result = await healthcheckVm(parseHealthcheckArgs(process.argv.slice(2)));
     console.log(JSON.stringify(result, null, 2));
     if (!result.ok) process.exitCode = 1;
   } catch (error) {
@@ -41,3 +42,5 @@ if (process.argv[1]?.endsWith("healthcheck.mjs")) {
     process.exitCode = 1;
   }
 }
+
+export { parseHealthcheckArgs };

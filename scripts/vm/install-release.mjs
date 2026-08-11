@@ -154,10 +154,22 @@ async function restartService(service) {
   execFileSync("systemctl", ["restart", "softmatrix"], { stdio: "inherit" });
 }
 
-async function readiness(healthcheck, baseUrl) {
-  const result = await (healthcheck ?? healthcheckVm)({ baseUrl });
-  if (!result?.ok) throw new VmInstallError("VM_READINESS_FAILED", "VM health check did not pass");
-  return result;
+async function readiness(healthcheck, baseUrl, { attempts = 5, delayMs = 500 } = {}) {
+  const check = healthcheck ?? healthcheckVm;
+  let result;
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    result = await check({ baseUrl });
+    if (result?.ok) return result;
+    if (attempt + 1 < attempts && delayMs > 0) {
+      await new Promise(resolveDelay => setTimeout(resolveDelay, delayMs));
+    }
+  }
+  const detail = result?.checks?.[0];
+  const reason = detail?.error ?? detail?.status ?? "failed";
+  throw new VmInstallError(
+      "VM_READINESS_FAILED",
+      `VM health check did not pass after ${attempts} attempt(s) (${reason})`,
+  );
 }
 
 function ensureRoot(rootDir) {
@@ -172,6 +184,8 @@ export async function installVmRelease({
   service,
   healthcheck,
   baseUrl,
+  readinessAttempts = 5,
+  readinessDelayMs = 500,
 } = {}) {
   if (!releaseDir) throw new VmInstallError("VM_CONFIG_INVALID", "releaseDir is required");
   const root = ensureRoot(rootDir);
@@ -190,7 +204,7 @@ export async function installVmRelease({
     replaceSymlink(root, "current", destination);
     try {
       await restartService(service);
-      await readiness(healthcheck, baseUrl);
+      await readiness(healthcheck, baseUrl, { attempts: readinessAttempts, delayMs: readinessDelayMs });
     } catch (error) {
       if (old) replaceSymlink(root, "current", old.target);
       else removeLink(root, "current");
@@ -213,6 +227,8 @@ export async function rollbackVmRelease({
   service,
   healthcheck,
   baseUrl,
+  readinessAttempts = 5,
+  readinessDelayMs = 500,
 } = {}) {
   const root = ensureRoot(rootDir);
   if (!safeReleaseId(releaseId)) throw new VmInstallError("VM_RELEASE_NOT_FOUND", "invalid release ID");
@@ -226,7 +242,7 @@ export async function rollbackVmRelease({
   replaceSymlink(root, "current", target);
   try {
     await restartService(service);
-    await readiness(healthcheck, baseUrl);
+    await readiness(healthcheck, baseUrl, { attempts: readinessAttempts, delayMs: readinessDelayMs });
   } catch (error) {
     if (old) replaceSymlink(root, "current", old.target);
     else removeLink(root, "current");
