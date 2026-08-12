@@ -131,6 +131,11 @@ test("VM release provisions Miniflare-compatible local KV and R2 services", asyn
     });
 
     const runtimeConfig = await readFile(join(outDir, "runtime", "workerd.capnp"), "utf8");
+    const backendEnvironmentBindings = release.manifest.workers["workshop-backend"].bindings
+      .filter(binding => binding.type === "from_environment")
+      .map(binding => binding.name);
+    assert.ok(backendEnvironmentBindings.includes("OIDC_IDENTITY_MODE"));
+    assert.ok(backendEnvironmentBindings.includes("OIDC_ENTRA_TENANT_ID"));
     assert.match(runtimeConfig, /name = "miniflare:shared"/);
     assert.match(runtimeConfig, /name = "softmatrix-kv-storage"/);
     assert.match(runtimeConfig, /name = "softmatrix-r2-storage"/);

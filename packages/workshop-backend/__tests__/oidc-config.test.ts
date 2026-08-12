@@ -39,6 +39,48 @@ describe("OIDC deployment configuration", () => {
     expect(getPublicOidcConfig({} as Cloudflare.Env)).toBeUndefined();
   });
 
+  it("defaults to verified-email identity mode", () => {
+    const config = getOidcConfig(oidcEnv());
+    expect(config?.identityMode).toBe("verified-email");
+    expect(config && "entraTenantId" in config).toBe(false);
+  });
+
+  it("parses and validates the explicit Entra tenant mode", () => {
+    expect(getOidcConfig(oidcEnv({
+      OIDC_IDENTITY_MODE: "entra-tenant",
+      OIDC_ENTRA_TENANT_ID: "7551a691-532e-4a93-9292-faed619dd82f",
+      OIDC_ALLOWED_EMAIL_DOMAINS: "Example.com",
+    })).identityMode).toBe("entra-tenant");
+    expect(getOidcConfig(oidcEnv({
+      OIDC_IDENTITY_MODE: "entra-tenant",
+      OIDC_ENTRA_TENANT_ID: "7551a691-532e-4a93-9292-faed619dd82f",
+      OIDC_ALLOWED_EMAIL_DOMAINS: "Example.com",
+    })).entraTenantId).toBe("7551a691-532e-4a93-9292-faed619dd82f");
+  });
+
+  it("rejects an unknown identity mode", () => {
+    expect(() => getOidcConfig(oidcEnv({ OIDC_IDENTITY_MODE: "unknown" })))
+      .toThrow("OIDC_IDENTITY_MODE");
+  });
+
+  it("requires the Entra tenant and a non-empty domain allowlist", () => {
+    expect(() => getOidcConfig(oidcEnv({ OIDC_IDENTITY_MODE: "entra-tenant" })))
+      .toThrow("OIDC_ENTRA_TENANT_ID");
+    expect(() => getOidcConfig(oidcEnv({
+      OIDC_IDENTITY_MODE: "entra-tenant",
+      OIDC_ENTRA_TENANT_ID: "7551a691-532e-4a93-9292-faed619dd82f",
+      OIDC_ALLOWED_EMAIL_DOMAINS: " , ",
+    }))).toThrow("OIDC_ALLOWED_EMAIL_DOMAINS");
+  });
+
+  it("requires a GUID-shaped Entra tenant id", () => {
+    expect(() => getOidcConfig(oidcEnv({
+      OIDC_IDENTITY_MODE: "entra-tenant",
+      OIDC_ENTRA_TENANT_ID: "not-a-tenant-guid",
+      OIDC_ALLOWED_EMAIL_DOMAINS: "example.com",
+    }))).toThrow("OIDC_ENTRA_TENANT_ID");
+  });
+
   it("rejects a partial OIDC configuration", () => {
     expect(() => getOidcConfig(oidcEnv({ OIDC_CLIENT_SECRET: undefined })))
       .toThrow("OIDC_ISSUER, OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, and PUBLIC_BASE_URL");

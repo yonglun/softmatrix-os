@@ -37,9 +37,48 @@ test("loads and normalizes a valid VM profile without exposing secrets in diagno
     const config = loadVmConfig(fixture.env);
     validateVmConfig(config);
     assert.deepEqual(config.oidc.allowedEmailDomains, ["example.com", "team.example"]);
+    assert.equal(config.oidc.identityMode, "verified-email");
     assert.equal(config.allowUserByok, false);
     assert.deepEqual(config.orgAiModels, []);
     assert.equal(config.diagnostics.oidcClientSecret, undefined);
+  } finally {
+    await rm(fixture.root, { recursive: true, force: true });
+  }
+});
+
+test("loads the explicit Entra tenant identity mode", async () => {
+  const fixture = await validEnvironment();
+  try {
+    fixture.env.OIDC_IDENTITY_MODE = "entra-tenant";
+    fixture.env.OIDC_ENTRA_TENANT_ID = "7551a691-532e-4a93-9292-faed619dd82f";
+    fixture.env.OIDC_ALLOWED_EMAIL_DOMAINS = "example.com";
+    const config = loadVmConfig(fixture.env);
+    assert.equal(config.oidc.identityMode, "entra-tenant");
+    assert.equal(config.oidc.entraTenantId, "7551a691-532e-4a93-9292-faed619dd82f");
+  } finally {
+    await rm(fixture.root, { recursive: true, force: true });
+  }
+});
+
+test("rejects an incomplete Entra tenant identity mode", async () => {
+  const fixture = await validEnvironment();
+  try {
+    fixture.env.OIDC_IDENTITY_MODE = "entra-tenant";
+    assert.throws(
+        () => loadVmConfig(fixture.env),
+        error => error.code === "VM_CONFIG_INVALID" && error.message.includes("OIDC_ENTRA_TENANT_ID"));
+
+    fixture.env.OIDC_ENTRA_TENANT_ID = "7551a691-532e-4a93-9292-faed619dd82f";
+    fixture.env.OIDC_ALLOWED_EMAIL_DOMAINS = " , ";
+    assert.throws(
+        () => loadVmConfig(fixture.env),
+        error => error.code === "VM_CONFIG_INVALID" && error.message.includes("OIDC_ALLOWED_EMAIL_DOMAINS"));
+
+    fixture.env.OIDC_ENTRA_TENANT_ID = "not-a-tenant-guid";
+    fixture.env.OIDC_ALLOWED_EMAIL_DOMAINS = "example.com";
+    assert.throws(
+        () => loadVmConfig(fixture.env),
+        error => error.code === "VM_CONFIG_INVALID" && error.message.includes("OIDC_ENTRA_TENANT_ID"));
   } finally {
     await rm(fixture.root, { recursive: true, force: true });
   }

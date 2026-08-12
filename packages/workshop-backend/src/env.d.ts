@@ -80,6 +80,8 @@ declare global {
       OIDC_CLIENT_SECRET?: string;
       OIDC_DISPLAY_NAME?: string;
       OIDC_ALLOWED_EMAIL_DOMAINS?: string; // comma-separated exact domains, case-insensitive
+      OIDC_IDENTITY_MODE?: "verified-email" | "entra-tenant";
+      OIDC_ENTRA_TENANT_ID?: string;
 
       // Set to "true" to disable username/password login + signup (gatekeeper sign-in only). Only
       // takes effect when at least one auth gatekeeper is allowlisted (otherwise password auth stays

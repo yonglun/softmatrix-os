@@ -41,7 +41,11 @@ export type OidcConfig = {
   displayName: string;
   allowedEmailDomains: string[];
   redirectUri: string;
+  identityMode: OidcIdentityMode;
+  entraTenantId?: string;
 };
+
+export type OidcIdentityMode = "verified-email" | "entra-tenant";
 
 const DEFAULT_OIDC_DISPLAY_NAME = "SSO";
 const OIDC_PARTIAL_CONFIGURATION_ERROR =
@@ -78,6 +82,10 @@ function normalizedDomains(raw: string | undefined): string[] {
   return [...new Set(raw.split(",").map(domain => domain.trim().toLowerCase()).filter(Boolean))];
 }
 
+function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
 /** Parse the complete private OIDC environment configuration, or return null when disabled. */
 export function getOidcConfig(env: Cloudflare.Env): OidcConfig | null {
   const issuerRaw = envString(env, "OIDC_ISSUER");
@@ -85,11 +93,19 @@ export function getOidcConfig(env: Cloudflare.Env): OidcConfig | null {
   const clientSecret = envString(env, "OIDC_CLIENT_SECRET");
   const displayNameRaw = envString(env, "OIDC_DISPLAY_NAME");
   const allowedDomainsRaw = envString(env, "OIDC_ALLOWED_EMAIL_DOMAINS");
+  const identityModeRaw = envString(env, "OIDC_IDENTITY_MODE");
+  const identityMode = identityModeRaw ?? "verified-email";
+  const entraTenantId = envString(env, "OIDC_ENTRA_TENANT_ID");
   const publicBaseUrlRaw = envString(env, "PUBLIC_BASE_URL");
+
+  if (identityMode !== "verified-email" && identityMode !== "entra-tenant") {
+    throw new Error("OIDC_IDENTITY_MODE must be verified-email or entra-tenant.");
+  }
 
   // PUBLIC_BASE_URL is used by other optional features, so it alone does not enable OIDC. Any
   // OIDC-specific setting, however, opts into atomic validation of the full configuration.
-  const oidcEnabled = [issuerRaw, clientId, clientSecret, displayNameRaw, allowedDomainsRaw]
+  const oidcEnabled = [issuerRaw, clientId, clientSecret, displayNameRaw, allowedDomainsRaw,
+    identityModeRaw, entraTenantId]
     .some(value => value !== undefined);
   if (!oidcEnabled) return null;
   if (!issuerRaw || !clientId || !clientSecret || !publicBaseUrlRaw) {
@@ -103,14 +119,30 @@ export function getOidcConfig(env: Cloudflare.Env): OidcConfig | null {
     throw new Error("OIDC_ISSUER and PUBLIC_BASE_URL must use HTTPS outside local development.");
   }
 
+  const allowedEmailDomains = normalizedDomains(allowedDomainsRaw);
+  if (identityMode === "entra-tenant" && !entraTenantId) {
+    throw new Error("OIDC_ENTRA_TENANT_ID is required in entra-tenant mode.");
+  }
+  if (identityMode === "entra-tenant" && entraTenantId && !isUuid(entraTenantId)) {
+    throw new Error("OIDC_ENTRA_TENANT_ID must be a tenant GUID.");
+  }
+  if (identityMode === "entra-tenant" && allowedEmailDomains.length === 0) {
+    throw new Error("OIDC_ALLOWED_EMAIL_DOMAINS is required in entra-tenant mode.");
+  }
+  if (identityMode === "verified-email" && entraTenantId) {
+    throw new Error("OIDC_ENTRA_TENANT_ID requires OIDC_IDENTITY_MODE=entra-tenant.");
+  }
+
   const redirectUri = new URL("/api/auth/oidc/callback", publicBaseUrl).toString();
   return {
     issuer: issuer.toString().replace(/\/$/, ""),
     clientId,
     clientSecret,
     displayName: displayNameRaw ?? DEFAULT_OIDC_DISPLAY_NAME,
-    allowedEmailDomains: normalizedDomains(allowedDomainsRaw),
+    allowedEmailDomains,
     redirectUri,
+    identityMode,
+    ...(entraTenantId ? { entraTenantId } : {}),
   };
 }
 

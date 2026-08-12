@@ -2,6 +2,7 @@ import * as oauth from "oauth4webapi";
 import type { AuthorizationServer, JWKSCacheInput } from "oauth4webapi";
 import type { OidcLoginErrorCode } from "@gadgets/workshop-shared/api";
 import type { OidcConfig } from "./config.js";
+import { isEmailDomainAllowed } from "./email-identity.js";
 
 export const OIDC_ATTEMPT_TTL_MS = 5 * 60 * 1000;
 
@@ -14,7 +15,8 @@ export type StoredOidcRequest = {
 };
 
 export type VerifiedOidcIdentity = {
-  email: string;
+  accountKey: string;
+  profileId: string;
   subject: string;
 };
 
@@ -78,6 +80,22 @@ function rememberDiscovery(key: string, entry: DiscoveryCacheEntry): void {
 
 function protocolError(code: OidcLoginErrorCode, message?: string): OidcProtocolError {
   return new OidcProtocolError(code, message);
+}
+
+function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+function normalizeUpn(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const normalized = value.trim().toLowerCase();
+  const at = normalized.indexOf("@");
+  if (at <= 0 || at !== normalized.lastIndexOf("@") || at === normalized.length - 1
+      || [...normalized].some(character => /\s/u.test(character)
+        || character.charCodeAt(0) <= 0x1f || character.charCodeAt(0) === 0x7f)) {
+    return null;
+  }
+  return normalized;
 }
 
 async function discover(config: OidcConfig, options?: OidcProtocolOptions): Promise<DiscoveryCacheEntry> {
@@ -213,8 +231,7 @@ export async function exchangeAuthorizationCode(
       [oauth.jwksCache]: entry.jwksCache,
     });
     const claims = oauth.getValidatedIdTokenClaims(processed);
-    if (!claims || typeof claims.sub !== "string" || !claims.sub
-        || typeof claims.email !== "string" || !claims.email.trim()) {
+    if (!claims || typeof claims.sub !== "string" || !claims.sub) {
       throw protocolError("OIDC_TOKEN_INVALID", "OIDC identity claims are incomplete.");
     }
     const nowSeconds = Math.floor(now / 1000);
@@ -222,10 +239,29 @@ export async function exchangeAuthorizationCode(
         || typeof claims.iat !== "number" || claims.iat > nowSeconds + 60) {
       throw protocolError("OIDC_TOKEN_INVALID", "OIDC token timestamps are invalid.");
     }
+    if (config.identityMode === "entra-tenant") {
+      const tenantId = typeof claims.tid === "string" ? claims.tid : "";
+      const objectId = typeof claims.oid === "string" ? claims.oid : "";
+      const upn = normalizeUpn(claims.upn);
+      if (tenantId !== config.entraTenantId || !isUuid(objectId) || !upn
+          || !isEmailDomainAllowed(upn, config.allowedEmailDomains)) {
+        throw protocolError("OIDC_TOKEN_INVALID", "OIDC identity claims are invalid.");
+      }
+      return {
+        accountKey: `entra-${tenantId}-${objectId}`,
+        profileId: upn,
+        subject: claims.sub,
+      };
+    }
+
+    if (typeof claims.email !== "string" || !claims.email.trim()) {
+      throw protocolError("OIDC_TOKEN_INVALID", "OIDC identity claims are incomplete.");
+    }
     if (claims.email_verified !== true) {
       throw protocolError("OIDC_EMAIL_UNVERIFIED", "The OIDC provider did not verify the email.");
     }
-    return { email: claims.email.trim().toLowerCase(), subject: claims.sub };
+    const email = claims.email.trim().toLowerCase();
+    return { accountKey: email, profileId: email, subject: claims.sub };
   } catch (error) {
     if (error instanceof OidcProtocolError) throw error;
     throw protocolError("OIDC_TOKEN_INVALID", "OIDC token validation failed.");

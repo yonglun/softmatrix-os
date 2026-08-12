@@ -116,8 +116,13 @@ to proxy only HTTPS traffic to `127.0.0.1:8787` and preserve WebSocket upgrades.
 When OIDC is enabled (for example, Microsoft Entra ID), register the exact redirect URI
 `https://<your-domain>/api/auth/oidc/callback`. The Nginx template sends
 `X-Forwarded-Proto: https`; the VM runtime consumes that header, and the backend also canonicalizes
-the callback against `PUBLIC_BASE_URL`. After changing OIDC or proxy settings, build and install a
-new release ID instead of reusing an older artifact.
+the callback against `PUBLIC_BASE_URL`. After changing OIDC environment values, rerun the VM config
+check and restart the service. Build and install a new release ID only when code or runtime
+configuration changes; never edit an older artifact in place. For a single Workforce Entra tenant that
+does not emit `email_verified=true`, set `OIDC_IDENTITY_MODE=entra-tenant`, `OIDC_ENTRA_TENANT_ID`, and
+an exact `OIDC_ALLOWED_EMAIL_DOMAINS`; configure the Entra app to emit the `upn` ID-token optional
+claim. The account security key is `tid + oid`, while UPN is the profile/admin identity. External ID
+federation remains an optional multi-tenant alternative documented in `docs/oidc-sso.md`.
 
 The repository includes checked-in proxy templates. For Caddy, set `SOFTMATRIX_DOMAIN` in the
 Caddy service environment, copy `deploy/vm/Caddyfile.example` to the Caddy configuration path,

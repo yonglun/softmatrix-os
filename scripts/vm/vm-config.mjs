@@ -52,6 +52,10 @@ function normalizeDomains(raw) {
   return raw?.split(",").map(domain => domain.trim().toLowerCase()).filter(Boolean) ?? [];
 }
 
+function isUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(value);
+}
+
 function parseUrl(env, name) {
   const raw = requiredString(env, name);
   let url;
@@ -70,7 +74,13 @@ function parseOidc(env) {
   const issuer = optionalString(env, "OIDC_ISSUER");
   const clientId = optionalString(env, "OIDC_CLIENT_ID");
   const clientSecret = optionalString(env, "OIDC_CLIENT_SECRET");
-  if (!issuer && !clientId && !clientSecret) return null;
+  const identityModeRaw = optionalString(env, "OIDC_IDENTITY_MODE");
+  const identityMode = identityModeRaw ?? "verified-email";
+  const entraTenantId = optionalString(env, "OIDC_ENTRA_TENANT_ID");
+  if (identityMode !== "verified-email" && identityMode !== "entra-tenant") {
+    throw new VmConfigError("VM_CONFIG_INVALID", "OIDC_IDENTITY_MODE must be verified-email or entra-tenant");
+  }
+  if (!issuer && !clientId && !clientSecret && !identityModeRaw && !entraTenantId) return null;
   if (!issuer) throw new VmConfigError("VM_CONFIG_INVALID", "OIDC_ISSUER is required when OIDC is configured");
   if (!clientId) throw new VmConfigError("VM_SECRET_MISSING", "OIDC_CLIENT_ID is required");
   if (!clientSecret) throw new VmConfigError("VM_SECRET_MISSING", "OIDC_CLIENT_SECRET is required");
@@ -83,12 +93,27 @@ function parseOidc(env) {
   if (parsedIssuer.protocol !== "https:") {
     throw new VmConfigError("VM_CONFIG_INVALID", "OIDC_ISSUER must use HTTPS");
   }
+  const allowedEmailDomains = normalizeDomains(optionalString(env, "OIDC_ALLOWED_EMAIL_DOMAINS"));
+  if (identityMode === "entra-tenant" && !entraTenantId) {
+    throw new VmConfigError("VM_CONFIG_INVALID", "OIDC_ENTRA_TENANT_ID is required in entra-tenant mode");
+  }
+  if (identityMode === "entra-tenant" && entraTenantId && !isUuid(entraTenantId)) {
+    throw new VmConfigError("VM_CONFIG_INVALID", "OIDC_ENTRA_TENANT_ID must be a tenant GUID");
+  }
+  if (identityMode === "entra-tenant" && allowedEmailDomains.length === 0) {
+    throw new VmConfigError("VM_CONFIG_INVALID", "OIDC_ALLOWED_EMAIL_DOMAINS is required in entra-tenant mode");
+  }
+  if (identityMode === "verified-email" && entraTenantId) {
+    throw new VmConfigError("VM_CONFIG_INVALID", "OIDC_ENTRA_TENANT_ID requires OIDC_IDENTITY_MODE=entra-tenant");
+  }
   return {
     issuer: parsedIssuer.toString().replace(/\/$/, ""),
     clientId,
     clientSecret,
     displayName: optionalString(env, "OIDC_DISPLAY_NAME") ?? "Enterprise SSO",
-    allowedEmailDomains: normalizeDomains(optionalString(env, "OIDC_ALLOWED_EMAIL_DOMAINS")),
+    allowedEmailDomains,
+    identityMode,
+    ...(entraTenantId ? { entraTenantId } : {}),
   };
 }
 
