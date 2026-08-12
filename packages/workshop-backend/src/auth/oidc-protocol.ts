@@ -91,7 +91,8 @@ function normalizeUpn(value: unknown): string | null {
   const normalized = value.trim().toLowerCase();
   const at = normalized.indexOf("@");
   if (at <= 0 || at !== normalized.lastIndexOf("@") || at === normalized.length - 1
-      || /[\u0000-\u001f\u007f\s]/.test(normalized)) {
+      || [...normalized].some(character => /\s/u.test(character)
+        || character.charCodeAt(0) <= 0x1f || character.charCodeAt(0) === 0x7f)) {
     return null;
   }
   return normalized;
