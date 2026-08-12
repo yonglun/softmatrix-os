@@ -73,6 +73,14 @@ describe("OIDC deployment configuration", () => {
     }))).toThrow("OIDC_ALLOWED_EMAIL_DOMAINS");
   });
 
+  it("requires a GUID-shaped Entra tenant id", () => {
+    expect(() => getOidcConfig(oidcEnv({
+      OIDC_IDENTITY_MODE: "entra-tenant",
+      OIDC_ENTRA_TENANT_ID: "not-a-tenant-guid",
+      OIDC_ALLOWED_EMAIL_DOMAINS: "example.com",
+    }))).toThrow("OIDC_ENTRA_TENANT_ID");
+  });
+
   it("rejects a partial OIDC configuration", () => {
     expect(() => getOidcConfig(oidcEnv({ OIDC_CLIENT_SECRET: undefined })))
       .toThrow("OIDC_ISSUER, OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, and PUBLIC_BASE_URL");

@@ -82,6 +82,10 @@ function normalizedDomains(raw: string | undefined): string[] {
   return [...new Set(raw.split(",").map(domain => domain.trim().toLowerCase()).filter(Boolean))];
 }
 
+function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
 /** Parse the complete private OIDC environment configuration, or return null when disabled. */
 export function getOidcConfig(env: Cloudflare.Env): OidcConfig | null {
   const issuerRaw = envString(env, "OIDC_ISSUER");
@@ -118,6 +122,9 @@ export function getOidcConfig(env: Cloudflare.Env): OidcConfig | null {
   const allowedEmailDomains = normalizedDomains(allowedDomainsRaw);
   if (identityMode === "entra-tenant" && !entraTenantId) {
     throw new Error("OIDC_ENTRA_TENANT_ID is required in entra-tenant mode.");
+  }
+  if (identityMode === "entra-tenant" && entraTenantId && !isUuid(entraTenantId)) {
+    throw new Error("OIDC_ENTRA_TENANT_ID must be a tenant GUID.");
   }
   if (identityMode === "entra-tenant" && allowedEmailDomains.length === 0) {
     throw new Error("OIDC_ALLOWED_EMAIL_DOMAINS is required in entra-tenant mode.");

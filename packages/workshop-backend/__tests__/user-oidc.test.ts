@@ -66,4 +66,11 @@ describe("UserDurableObject OIDC identity routing", () => {
       .resolves.toBeNull();
     expect(getCreated()).toBe(false);
   });
+
+  it("rejects a generic OIDC key that does not match its profile email", async () => {
+    const { user } = makeUser();
+
+    await expect(user.loginOrCreateViaOidc("bob@example.com", "alice@example.com", true))
+      .rejects.toThrow("Invalid OIDC identity");
+  });
 });

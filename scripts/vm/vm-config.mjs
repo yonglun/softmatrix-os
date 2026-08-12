@@ -52,6 +52,10 @@ function normalizeDomains(raw) {
   return raw?.split(",").map(domain => domain.trim().toLowerCase()).filter(Boolean) ?? [];
 }
 
+function isUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(value);
+}
+
 function parseUrl(env, name) {
   const raw = requiredString(env, name);
   let url;
@@ -92,6 +96,9 @@ function parseOidc(env) {
   const allowedEmailDomains = normalizeDomains(optionalString(env, "OIDC_ALLOWED_EMAIL_DOMAINS"));
   if (identityMode === "entra-tenant" && !entraTenantId) {
     throw new VmConfigError("VM_CONFIG_INVALID", "OIDC_ENTRA_TENANT_ID is required in entra-tenant mode");
+  }
+  if (identityMode === "entra-tenant" && entraTenantId && !isUuid(entraTenantId)) {
+    throw new VmConfigError("VM_CONFIG_INVALID", "OIDC_ENTRA_TENANT_ID must be a tenant GUID");
   }
   if (identityMode === "entra-tenant" && allowedEmailDomains.length === 0) {
     throw new VmConfigError("VM_CONFIG_INVALID", "OIDC_ALLOWED_EMAIL_DOMAINS is required in entra-tenant mode");

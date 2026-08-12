@@ -68,11 +68,17 @@ test("rejects an incomplete Entra tenant identity mode", async () => {
         () => loadVmConfig(fixture.env),
         error => error.code === "VM_CONFIG_INVALID" && error.message.includes("OIDC_ENTRA_TENANT_ID"));
 
-    fixture.env.OIDC_ENTRA_TENANT_ID = "tenant-id";
+    fixture.env.OIDC_ENTRA_TENANT_ID = "7551a691-532e-4a93-9292-faed619dd82f";
     fixture.env.OIDC_ALLOWED_EMAIL_DOMAINS = " , ";
     assert.throws(
         () => loadVmConfig(fixture.env),
         error => error.code === "VM_CONFIG_INVALID" && error.message.includes("OIDC_ALLOWED_EMAIL_DOMAINS"));
+
+    fixture.env.OIDC_ENTRA_TENANT_ID = "not-a-tenant-guid";
+    fixture.env.OIDC_ALLOWED_EMAIL_DOMAINS = "example.com";
+    assert.throws(
+        () => loadVmConfig(fixture.env),
+        error => error.code === "VM_CONFIG_INVALID" && error.message.includes("OIDC_ENTRA_TENANT_ID"));
   } finally {
     await rm(fixture.root, { recursive: true, force: true });
   }

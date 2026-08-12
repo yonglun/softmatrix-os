@@ -450,6 +450,9 @@ export class UserDurableObject extends DurableObject<Cloudflare.Env> {
     if (!isOidcAccountKey(normalizedAccountKey)) {
       throw new Error("Invalid OIDC identity.");
     }
+    if (!normalizedAccountKey.startsWith("entra-") && normalizedAccountKey !== normalizedProfileId) {
+      throw new Error("Invalid OIDC identity.");
+    }
     if (!this.storage.created.get()) {
       if (!allowCreate) return null;
       this.storage.created.put(true);
